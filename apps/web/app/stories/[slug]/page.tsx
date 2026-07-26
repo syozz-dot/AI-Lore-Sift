@@ -17,6 +17,8 @@ import {
   storyStatusLabels,
 } from "../../../lib/presentation";
 import { getStoryDetail } from "../../../lib/queries";
+import { createMediaProxyUrl } from "../../../lib/media-proxy";
+import { sanitizeSourceHtml } from "../../../lib/source-content";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +52,18 @@ export default async function StoryPage({
     story.factualSummary ??
     (story.contentType === "product" ? story.excerpt : null);
   const displayTitle = story.analysis?.translatedTitle ?? story.title;
+  const showSourceContent =
+    story.sourceAllowsFullText && Boolean(story.sourceContent);
+  const sourceHtml =
+    showSourceContent &&
+    story.sourceContentFormat === "html" &&
+    story.sourceContent
+      ? sanitizeSourceHtml(story.sourceContent)
+      : null;
+  const standaloneMedia =
+    showSourceContent && story.sourceContentFormat === "html"
+      ? []
+      : story.sourceMediaAssets;
 
   return (
     <main className="storyPage">
@@ -204,6 +218,63 @@ export default async function StoryPage({
                     <li key={question}>{question}</li>
                   ))}
                 </ul>
+              </section>
+            ) : null}
+
+            {showSourceContent || standaloneMedia.length ? (
+              <section className="sourceMaterial">
+                <div className="sourceMaterialHeading">
+                  <h2>原文与媒体</h2>
+                  {story.originalUrl ? (
+                    <a
+                      href={story.originalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      打开原始来源
+                      <ArrowUpRight aria-hidden="true" size={15} />
+                    </a>
+                  ) : null}
+                </div>
+                {story.primaryAuthor ? (
+                  <p className="sourceByline">{story.primaryAuthor}</p>
+                ) : null}
+                {standaloneMedia.length ? (
+                  <div className="sourceMediaGrid">
+                    {standaloneMedia.map((asset, index) => {
+                      const imageUrl =
+                        asset.type === "image" ? asset.url : asset.previewUrl;
+                      return imageUrl ? (
+                        <figure key={`${asset.url}-${index}`}>
+                          <img
+                            src={createMediaProxyUrl(imageUrl)}
+                            alt={
+                              asset.alt ?? `${displayTitle} 配图 ${index + 1}`
+                            }
+                            loading="lazy"
+                            decoding="async"
+                            referrerPolicy="no-referrer"
+                          />
+                          {asset.type !== "image" ? (
+                            <figcaption>
+                              {asset.type.toUpperCase()} 预览
+                            </figcaption>
+                          ) : null}
+                        </figure>
+                      ) : null;
+                    })}
+                  </div>
+                ) : null}
+                {showSourceContent && story.sourceContent ? (
+                  sourceHtml ? (
+                    <div
+                      className="sourceRichText"
+                      dangerouslySetInnerHTML={{ __html: sourceHtml }}
+                    />
+                  ) : (
+                    <p className="sourcePlainText">{story.sourceContent}</p>
+                  )
+                ) : null}
               </section>
             ) : null}
           </article>

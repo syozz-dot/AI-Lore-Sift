@@ -14,15 +14,22 @@ import {
   createTechCrunchAiAdapter,
   createTheDecoderAdapter,
   createVentureBeatAiAdapter,
+  createWeChatCuratedAccountsAdapter,
+  createXCuratedAccountsAdapter,
+  DEFAULT_WECHAT_MONITORED_ACCOUNTS,
+  DEFAULT_X_MONITORED_ACCOUNTS,
   googleAiBlogSource,
   hackerNewsAiSource,
   huggingFaceDailyPapersSource,
   huggingFaceModelsSource,
   openAiNewsSource,
   productHuntSource,
+  parseMonitoredAccounts,
   techCrunchAiSource,
   theDecoderSource,
   ventureBeatAiSource,
+  weChatCuratedAccountsSource,
+  xCuratedAccountsSource,
   type SourceAdapter,
   type SourceDefinition,
 } from "@ai-news-navigator/sources";
@@ -33,7 +40,7 @@ export interface ConfiguredSource {
 }
 
 export function createConfiguredSources(): ConfiguredSource[] {
-  return [
+  const configured: ConfiguredSource[] = [
     {
       definition: openAiNewsSource,
       adapter: createOpenAiNewsAdapter(),
@@ -83,4 +90,42 @@ export function createConfiguredSources(): ConfiguredSource[] {
       adapter: createTheDecoderAdapter(),
     },
   ];
+
+  const xBearerToken = process.env.X_BEARER_TOKEN?.trim();
+  if (xBearerToken) {
+    configured.push({
+      definition: xCuratedAccountsSource,
+      adapter: createXCuratedAccountsAdapter({
+        bearerToken: xBearerToken,
+        accounts: parseMonitoredAccounts(
+          process.env.X_MONITORED_ACCOUNTS,
+          DEFAULT_X_MONITORED_ACCOUNTS,
+        ),
+      }),
+    });
+  }
+
+  const weChatFeedUrl = process.env.WECHAT_RSS_URL?.trim();
+  if (weChatFeedUrl) {
+    configured.push({
+      definition: {
+        ...weChatCuratedAccountsSource,
+        feedUrl: weChatFeedUrl,
+      },
+      adapter: createWeChatCuratedAccountsAdapter({
+        feedUrl: weChatFeedUrl,
+        accounts: parseMonitoredAccounts(
+          process.env.WECHAT_MONITORED_ACCOUNTS,
+          DEFAULT_WECHAT_MONITORED_ACCOUNTS,
+        ),
+        ...(process.env.WECHAT_RSS_AUTHORIZATION?.trim()
+          ? {
+              authorization: process.env.WECHAT_RSS_AUTHORIZATION.trim(),
+            }
+          : {}),
+      }),
+    });
+  }
+
+  return configured;
 }

@@ -821,6 +821,121 @@ button {
   font-size: 10px;
 }
 
+.sourceMaterial {
+  padding-top: 12px;
+  border-top: 1px solid var(--line-strong);
+}
+.sourceMaterialHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.sourceMaterialHeading a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-secondary);
+  font-size: 11px;
+  transition: color 150ms ease;
+}
+.sourceMaterialHeading a:hover {
+  color: var(--accent);
+}
+.sourceByline {
+  margin: 12px 0 0;
+  color: var(--ink-tertiary);
+  font-size: 11px;
+}
+.sourceMediaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+.sourceMediaGrid figure,
+.sourceRichText figure {
+  margin: 0;
+}
+.sourceMediaGrid img,
+.sourceRichText img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.sourceMediaGrid figcaption,
+.sourceRichText figcaption {
+  margin-top: 7px;
+  color: var(--ink-tertiary);
+  font-size: 9px;
+}
+.sourcePlainText,
+.sourceRichText {
+  max-width: 760px;
+  margin-top: 24px;
+  color: var(--ink-secondary);
+  font-size: 16px;
+  line-height: 1.85;
+}
+.sourcePlainText {
+  white-space: pre-wrap;
+}
+.sourceRichText > :first-child {
+  margin-top: 0;
+}
+.sourceRichText > :last-child {
+  margin-bottom: 0;
+}
+.sourceRichText p,
+.sourceRichText ul,
+.sourceRichText ol,
+.sourceRichText blockquote,
+.sourceRichText figure,
+.sourceRichText table,
+.sourceRichText pre {
+  margin: 20px 0 0;
+}
+.sourceRichText h2,
+.sourceRichText h3,
+.sourceRichText h4 {
+  margin: 34px 0 0;
+  color: var(--ink);
+  font-size: 18px;
+}
+.sourceRichText a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.sourceRichText blockquote {
+  padding-left: 18px;
+  border-left: 2px solid var(--accent);
+  color: var(--ink-tertiary);
+}
+.sourceRichText pre {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 18px;
+  background: var(--surface);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.sourceRichText table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.sourceRichText th,
+.sourceRichText td {
+  padding: 10px;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
 .errorPage,
 .notFoundPage {
   width: min(100% - 40px, 720px);
@@ -1195,6 +1310,9 @@ button {
   }
   .analysisBody section > p {
     font-size: 16px;
+  }
+  .sourceMediaGrid {
+    grid-template-columns: 1fr;
   }
   .loadingShell {
     grid-template-columns: 1fr;

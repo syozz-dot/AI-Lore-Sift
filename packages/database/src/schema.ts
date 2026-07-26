@@ -60,6 +60,8 @@ export const publicationTimeConfidenceEnum = pgEnum(
   ["exact", "inferred", "unknown"],
 );
 
+export const contentFormatEnum = pgEnum("content_format", ["text", "html"]);
+
 export const itemStatusEnum = pgEnum("item_status", [
   "normalized",
   "processed",
@@ -244,6 +246,22 @@ export const items = pgTable(
     originalTitle: text("original_title"),
     excerpt: text("excerpt"),
     content: text("content"),
+    contentFormat: contentFormatEnum("content_format")
+      .default("text")
+      .notNull(),
+    mediaAssets: jsonb("media_assets")
+      .$type<
+        Array<{
+          type: "image" | "video" | "audio";
+          url: string;
+          previewUrl?: string;
+          alt?: string;
+          width?: number;
+          height?: number;
+        }>
+      >()
+      .default([])
+      .notNull(),
     author: varchar("author", { length: 256 }),
     language: varchar("language", { length: 16 }),
     originalUrl: text("original_url").notNull(),

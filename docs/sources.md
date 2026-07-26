@@ -56,4 +56,50 @@ The generic RSS adapter supports RSS 2.0 and Atom entry shapes. It:
 - strips markup from descriptions used as excerpts;
 - can derive a bounded excerpt from Atom content for release feeds;
 - makes full-content storage an explicit per-source choice;
+- extracts bounded image, video-preview, and audio metadata from RSS content,
+  enclosures, and media thumbnails;
 - fails loudly on HTTP errors so source health can become degraded.
+
+## Optional curated social sources
+
+### X curated accounts
+
+Set `X_BEARER_TOKEN` to register the source. The adapter uses X API v2 recent
+search, only requests posts from a reviewed account list, excludes reposts,
+and expands attached media in the same request. Override the default account
+list with the comma-separated `X_MONITORED_ACCOUNTS` variable.
+
+Posts retain their source text, account attribution, canonical X URL, exact
+publication timestamp, and image or video-preview metadata. The source is not
+registered when the token is absent, so an unconfigured deployment does not
+report a false source-health failure.
+
+### WeChat curated accounts
+
+WeChat collection is intentionally split into two services:
+
+1. A stateful, always-on We-MP-RSS-compatible collector maintains QR login,
+   account subscriptions, and article retrieval.
+2. AI News Navigator consumes the private RSS endpoint through
+   `WECHAT_RSS_URL`.
+
+The collector should subscribe only to reviewed accounts. The optional
+`WECHAT_MONITORED_ACCOUNTS` list adds a second author check when the feed
+exposes author metadata. `WECHAT_RSS_AUTHORIZATION` can carry a private feed
+credential.
+
+The adapter derives a bounded excerpt and media metadata from the feed but does
+not persist WeChat full text because this source has `allowFullText` disabled.
+The excerpt remains available for relevance scoring and Chinese analysis.
+
+## Rich content and media policy
+
+Items record whether stored content is plain text or HTML and keep a separate
+bounded media-asset list. HTML is sanitized on the server before rendering:
+scripts, inline styles, forms, frames, and event handlers are removed; outbound
+links are hardened; and only a conservative editorial tag set remains.
+
+Known X and WeChat image hosts can be served through the signed `/api/media`
+proxy. The proxy validates the host on every redirect, accepts images only,
+enforces a 10 MB response limit, and caches successful responses. Unknown
+hosts remain direct source links rather than becoming an open proxy.

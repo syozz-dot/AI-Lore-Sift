@@ -121,6 +121,27 @@ export class PostgresIngestionRepository implements IngestionRepository {
         "Item conflicted but the existing row could not be found",
       );
     }
+
+    await this.db
+      .update(items)
+      .set({
+        title: item.title,
+        originalTitle: item.originalTitle,
+        excerpt: item.excerpt,
+        content: item.content,
+        contentFormat: item.contentFormat,
+        mediaAssets: item.mediaAssets,
+        contentHash: item.contentHash,
+        author: item.author,
+        language: item.language,
+        sourcePublishedAt: item.sourcePublishedAt,
+        publicationTimeConfidence: item.publicationTimeConfidence,
+        fetchedAt: item.fetchedAt,
+        rawMetadata: item.rawMetadata,
+        updatedAt: item.fetchedAt,
+      })
+      .where(eq(items.id, existing.id));
+
     return { id: existing.id, created: false };
   }
 

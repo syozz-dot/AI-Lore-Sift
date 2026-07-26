@@ -43,4 +43,28 @@ describe("normalizeItem", () => {
     expect(item.sourcePublishedAt).toBeNull();
     expect(item.publicationTimeConfidence).toBe("unknown");
   });
+
+  it("preserves HTML structure and rejects unsafe media URLs", () => {
+    const item = normalizeItem({
+      sourceId: "source-1",
+      fetchedAt: new Date("2026-07-16T08:00:00.000Z"),
+      raw: {
+        contentType: "post",
+        title: "Rich post",
+        url: "https://example.com/post",
+        content: "<p>First</p>\n<p>Second</p>",
+        contentFormat: "html",
+        mediaAssets: [
+          { type: "image", url: "https://images.example.com/cover.jpg" },
+          { type: "image", url: "javascript:alert(1)" },
+        ],
+      },
+    });
+
+    expect(item.content).toBe("<p>First</p>\n<p>Second</p>");
+    expect(item.contentFormat).toBe("html");
+    expect(item.mediaAssets).toEqual([
+      { type: "image", url: "https://images.example.com/cover.jpg" },
+    ]);
+  });
 });

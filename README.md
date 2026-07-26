@@ -51,7 +51,7 @@ docs                 Product and engineering documentation
 
 Requirements:
 
-- Node.js 22 or newer
+- Node.js 22.12 or newer
 - pnpm 11
 - Docker, or an existing PostgreSQL instance
 
@@ -69,7 +69,12 @@ pnpm sources:health
 pnpm dev:web
 ```
 
-Configured sources currently include [OpenAI News](https://openai.com/news/), [Product Hunt](https://www.producthunt.com/), arXiv AI categories, and stable releases from Ollama and vLLM. See [docs/sources.md](docs/sources.md) for source policy and adapter behavior.
+Configured sources include official AI labs, selected technology media,
+Product Hunt, arXiv AI categories, Hugging Face model and paper radar, and
+stable releases from Ollama and vLLM. Curated X accounts and a private
+We-MP-RSS-compatible WeChat feed can be enabled with optional environment
+variables. See [docs/sources.md](docs/sources.md) for source policy, rich-media
+handling, and adapter behavior.
 
 Scheduling is database-driven with exponential failure backoff and per-source leases. See [docs/operations.md](docs/operations.md) for commands, health semantics, and the deployment boundary.
 

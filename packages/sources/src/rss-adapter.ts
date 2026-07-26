@@ -5,6 +5,7 @@ import type {
   RawSourceItem,
   SourceAdapter,
   SourceFetchContext,
+  SourceMediaAsset,
 } from "./types.js";
 
 const DEFAULT_ACCEPT =
@@ -22,6 +23,7 @@ export interface RssSourceAdapterOptions {
   datedConfidence?: "exact" | "inferred";
   timeoutMs?: number;
   userAgent?: string;
+  headers?: Record<string, string>;
   fetchImpl?: typeof fetch;
 }
 
@@ -162,6 +164,71 @@ function authorValue(entry: XmlRecord): string | undefined {
   return textValue(author ?? entry.creator);
 }
 
+function normalizeMediaUrl(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const candidate = decodeHtmlEntities(value.trim());
+  const absolute = candidate.startsWith("//")
+    ? `https:${candidate}`
+    : candidate;
+  try {
+    const url = new URL(absolute);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function mediaFromHtml(value: string | undefined): SourceMediaAsset[] {
+  if (!value) return [];
+  const assets: SourceMediaAsset[] = [];
+  const imagePattern =
+    /<img\b[^>]*\b(?:src|data-src|data-original)=["']([^"']+)["'][^>]*>/gi;
+  for (const match of value.matchAll(imagePattern)) {
+    const url = normalizeMediaUrl(match[1]);
+    if (url) assets.push({ type: "image", url });
+  }
+  return assets;
+}
+
+function mediaFromEntry(entry: XmlRecord): SourceMediaAsset[] {
+  const assets: SourceMediaAsset[] = [];
+  const candidates = [
+    ...asArray(entry.enclosure),
+    ...asArray(entry.thumbnail),
+    ...asArray(entry.content),
+  ];
+
+  for (const candidate of candidates) {
+    if (!isRecord(candidate)) continue;
+    const url = normalizeMediaUrl(
+      textValue(candidate["@url"] ?? candidate.url ?? candidate["@href"]),
+    );
+    if (!url) continue;
+    const declaredType = textValue(candidate["@type"] ?? candidate.type) ?? "";
+    const type = declaredType.startsWith("video/")
+      ? "video"
+      : declaredType.startsWith("audio/")
+        ? "audio"
+        : "image";
+    assets.push({ type, url });
+  }
+
+  return assets;
+}
+
+function deduplicateMediaAssets(
+  assets: SourceMediaAsset[],
+): SourceMediaAsset[] {
+  const seen = new Set<string>();
+  return assets
+    .filter((asset) => {
+      if (seen.has(asset.url)) return false;
+      seen.add(asset.url);
+      return true;
+    })
+    .slice(0, 12);
+}
+
 export class RssSourceAdapter implements SourceAdapter {
   readonly key: string;
 
@@ -179,7 +246,7 @@ export class RssSourceAdapter implements SourceAdapter {
       | "userAgent"
     >
   > &
-    Pick<RssSourceAdapterOptions, "language">;
+    Pick<RssSourceAdapterOptions, "language" | "headers">;
   readonly #fetch: typeof fetch;
   readonly #parser = new XMLParser({
     ignoreAttributes: false,
@@ -214,6 +281,7 @@ export class RssSourceAdapter implements SourceAdapter {
         options.userAgent ??
         "AI-News-Navigator/0.1 (+https://github.com/syozz-dot/ai-news-navigator)",
       ...(options.language ? { language: options.language } : {}),
+      ...(options.headers ? { headers: options.headers } : {}),
     };
     this.#fetch = options.fetchImpl ?? fetch;
   }
@@ -223,6 +291,7 @@ export class RssSourceAdapter implements SourceAdapter {
       headers: {
         accept: DEFAULT_ACCEPT,
         "user-agent": this.#options.userAgent,
+        ...this.#options.headers,
       },
       signal: AbortSignal.timeout(this.#options.timeoutMs),
     });
@@ -270,6 +339,11 @@ export class RssSourceAdapter implements SourceAdapter {
         ? excerptText.slice(0, this.#options.maxExcerptCharacters).trim()
         : undefined;
       const author = authorValue(entry);
+      const mediaAssets = deduplicateMediaAssets([
+        ...mediaFromEntry(entry),
+        ...mediaFromHtml(fullContent),
+        ...mediaFromHtml(summary),
+      ]);
 
       items.push({
         contentType: this.#options.contentType,
@@ -278,8 +352,9 @@ export class RssSourceAdapter implements SourceAdapter {
         ...(externalId ? { externalId } : {}),
         ...(excerpt ? { excerpt } : {}),
         ...(this.#options.includeContent && fullContent
-          ? { content: fullContent }
+          ? { content: fullContent, contentFormat: "html" as const }
           : {}),
+        ...(mediaAssets.length ? { mediaAssets } : {}),
         ...(author ? { author } : {}),
         ...(this.#options.language ? { language: this.#options.language } : {}),
         ...(publishedAt ? { publishedAt } : {}),

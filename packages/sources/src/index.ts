@@ -27,6 +27,17 @@ export {
   ventureBeatAiSource,
 } from "./definitions/curated-rss.js";
 export {
+  DEFAULT_WECHAT_MONITORED_ACCOUNTS,
+  DEFAULT_X_MONITORED_ACCOUNTS,
+  parseMonitoredAccounts,
+} from "./definitions/monitored-accounts.js";
+export {
+  createWeChatCuratedAccountsAdapter,
+  createXCuratedAccountsAdapter,
+  weChatCuratedAccountsSource,
+  xCuratedAccountsSource,
+} from "./definitions/social-sources.js";
+export {
   createHuggingFaceDailyPapersAdapter,
   huggingFaceDailyPapersSource,
 } from "./definitions/hugging-face-daily-papers.js";
@@ -70,13 +81,20 @@ export {
   RssSourceAdapter,
   type RssSourceAdapterOptions,
 } from "./rss-adapter.js";
+export {
+  WeChatRssAdapter,
+  type WeChatRssAdapterOptions,
+} from "./wechat-rss-adapter.js";
+export { XSourceAdapter, type XSourceAdapterOptions } from "./x-adapter.js";
 export type {
+  ContentFormat,
   ContentType,
   PublicationTimeConfidence,
   RawSourceItem,
   SourceAdapter,
   SourceDefinition,
   SourceFetchContext,
+  SourceMediaAsset,
   SourceReliability,
   SourceType,
 } from "./types.js";

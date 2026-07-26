@@ -16,6 +16,17 @@ export type ContentType =
 
 export type PublicationTimeConfidence = "exact" | "inferred" | "unknown";
 
+export type ContentFormat = "text" | "html";
+
+export interface SourceMediaAsset {
+  type: "image" | "video" | "audio";
+  url: string;
+  previewUrl?: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+}
+
 export interface SourceDefinition {
   key: string;
   name: string;
@@ -38,6 +49,8 @@ export interface RawSourceItem {
   url: string;
   excerpt?: string;
   content?: string;
+  contentFormat?: ContentFormat;
+  mediaAssets?: SourceMediaAsset[];
   author?: string;
   language?: string;
   publishedAt?: Date | string | null;

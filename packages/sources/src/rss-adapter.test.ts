@@ -127,4 +127,40 @@ describe("RssSourceAdapter", () => {
       htmlAdapter.fetch({ now: new Date("2026-07-16T04:00:00Z") }),
     ).rejects.toThrow("does not contain an RSS or Atom feed");
   });
+
+  it("preserves allowed HTML content and extracts deduplicated media", async () => {
+    const rss = `<?xml version="1.0"?>
+      <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+        <channel>
+          <item>
+            <title>Rich update</title>
+            <link>https://example.com/rich</link>
+            <content:encoded><![CDATA[
+              <p>Full text</p>
+              <img src="https://images.example.com/diagram.png" alt="Diagram" />
+            ]]></content:encoded>
+            <enclosure url="https://images.example.com/diagram.png" type="image/png" />
+          </item>
+        </channel>
+      </rss>`;
+    const adapter = new RssSourceAdapter({
+      key: "rss:rich",
+      feedUrl: "https://example.com/rss.xml",
+      contentType: "news",
+      includeContent: true,
+      fetchImpl: vi.fn(async () => Promise.resolve(new Response(rss))),
+    });
+
+    const [item] = await adapter.fetch({
+      now: new Date("2026-07-16T04:00:00Z"),
+    });
+
+    expect(item).toMatchObject({
+      contentFormat: "html",
+      mediaAssets: [
+        { type: "image", url: "https://images.example.com/diagram.png" },
+      ],
+    });
+    expect(item?.content).toContain("<p>Full text</p>");
+  });
 });

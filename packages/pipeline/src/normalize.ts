@@ -1,9 +1,11 @@
 import { createHash } from "node:crypto";
 
 import type {
+  ContentFormat,
   ContentType,
   PublicationTimeConfidence,
   RawSourceItem,
+  SourceMediaAsset,
 } from "@ai-news-navigator/sources";
 
 import { canonicalizeUrl } from "./canonical-url.js";
@@ -16,6 +18,8 @@ export interface NormalizedItem {
   originalTitle: string | null;
   excerpt: string | null;
   content: string | null;
+  contentFormat: ContentFormat;
+  mediaAssets: SourceMediaAsset[];
   author: string | null;
   language: string | null;
   originalUrl: string;
@@ -36,6 +40,40 @@ function sha256(value: string): string {
 function normalizeText(value: string | undefined): string | null {
   const normalized = value?.replace(/\s+/g, " ").trim();
   return normalized ? normalized : null;
+}
+
+function normalizeContent(
+  value: string | undefined,
+  format: ContentFormat,
+): string | null {
+  if (format === "html") {
+    const normalized = value?.trim();
+    return normalized ? normalized : null;
+  }
+  return normalizeText(value);
+}
+
+function normalizeMediaAssets(
+  assets: SourceMediaAsset[] | undefined,
+): SourceMediaAsset[] {
+  const seen = new Set<string>();
+  const normalized: SourceMediaAsset[] = [];
+
+  for (const asset of assets ?? []) {
+    let url: URL;
+    try {
+      url = new URL(asset.url);
+    } catch {
+      continue;
+    }
+    if (!["http:", "https:"].includes(url.protocol) || seen.has(url.href)) {
+      continue;
+    }
+    seen.add(url.href);
+    normalized.push({ ...asset, url: url.href });
+  }
+
+  return normalized.slice(0, 12);
 }
 
 function parsePublicationTime(
@@ -63,7 +101,9 @@ export function normalizeItem(input: {
   const canonicalUrl = canonicalizeUrl(input.raw.url);
   const sourcePublishedAt = parsePublicationTime(input.raw.publishedAt);
   const excerpt = normalizeText(input.raw.excerpt);
-  const content = normalizeText(input.raw.content);
+  const contentFormat = input.raw.contentFormat ?? "text";
+  const content = normalizeContent(input.raw.content, contentFormat);
+  const mediaAssets = normalizeMediaAssets(input.raw.mediaAssets);
   const originalTitle = normalizeText(input.raw.originalTitle);
   const author = normalizeText(input.raw.author);
 
@@ -84,6 +124,8 @@ export function normalizeItem(input: {
     originalTitle,
     excerpt,
     content,
+    contentFormat,
+    mediaAssets,
     author,
     language: input.raw.language?.trim().toLowerCase() || null,
     originalUrl: input.raw.url.trim(),

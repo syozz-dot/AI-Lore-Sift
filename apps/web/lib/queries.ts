@@ -128,6 +128,11 @@ export interface StoryEvidenceItem {
 }
 
 export interface StoryDetail extends StoryFeedItem {
+  sourceContent: string | null;
+  sourceContentFormat: typeof items.$inferSelect.contentFormat;
+  sourceMediaAssets: typeof items.$inferSelect.mediaAssets;
+  sourceAllowsFullText: boolean;
+  primaryAuthor: string | null;
   evidence: StoryEvidenceItem[];
   analysis: {
     translatedTitle: string | null;
@@ -675,10 +680,15 @@ export const getStoryDetail = cache(
         confidence: stories.confidence,
         primaryItemId: stories.primaryItemId,
         excerpt: primaryItems.excerpt,
+        sourceContent: primaryItems.content,
+        sourceContentFormat: primaryItems.contentFormat,
+        sourceMediaAssets: primaryItems.mediaAssets,
+        primaryAuthor: primaryItems.author,
         originalUrl: primaryItems.originalUrl,
         contentType: primaryItems.contentType,
         sourceName: sources.name,
         sourceSlug: sources.slug,
+        sourceAllowsFullText: sources.allowFullText,
       })
       .from(stories)
       .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
@@ -759,6 +769,11 @@ export const getStoryDetail = cache(
 
     return {
       ...hydrated,
+      sourceContent: base.sourceContent,
+      sourceContentFormat: base.sourceContentFormat ?? "text",
+      sourceMediaAssets: base.sourceMediaAssets ?? [],
+      sourceAllowsFullText: base.sourceAllowsFullText ?? false,
+      primaryAuthor: base.primaryAuthor,
       evidence: evidenceRows.map((row) => {
         const assessment = assessmentByItem.get(row.id);
         return {
