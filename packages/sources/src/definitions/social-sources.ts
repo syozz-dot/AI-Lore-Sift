@@ -1,6 +1,20 @@
+import { AiHotSocialAdapter } from "../aihot-social-adapter.js";
 import type { SourceDefinition } from "../types.js";
 import { WeChatRssAdapter } from "../wechat-rss-adapter.js";
 import { XSourceAdapter } from "../x-adapter.js";
+
+export const aiHotSocialDiscoverySource = {
+  key: "aihot-social-discovery",
+  name: "AIHOT · X / 公众号精选",
+  type: "social",
+  reliability: "medium",
+  connectorKey: "aihot:selected-social",
+  homepageUrl: "https://aihot.virxact.com/",
+  language: "zh",
+  isFirstParty: false,
+  allowFullText: false,
+  fetchIntervalMinutes: 60,
+} satisfies SourceDefinition;
 
 export const xCuratedAccountsSource = {
   key: "x-curated-ai-accounts",
@@ -38,6 +52,13 @@ export function createXCuratedAccountsAdapter(options: {
     bearerToken: options.bearerToken,
     accounts: options.accounts,
     ...(options.fetchImpl ? { fetchImpl: options.fetchImpl } : {}),
+  });
+}
+
+export function createAiHotSocialDiscoveryAdapter(fetchImpl?: typeof fetch) {
+  return new AiHotSocialAdapter({
+    key: aiHotSocialDiscoverySource.connectorKey,
+    ...(fetchImpl ? { fetchImpl } : {}),
   });
 }
 

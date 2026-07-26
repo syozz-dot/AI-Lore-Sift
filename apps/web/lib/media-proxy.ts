@@ -5,6 +5,7 @@ const DEFAULT_ALLOWED_HOSTS = [
   "video.twimg.com",
   "mmbiz.qpic.cn",
   "mmbiz.qlogo.cn",
+  "wechat2rss.xlab.app",
 ];
 
 function proxySecret(): string | null {

@@ -1,8 +1,10 @@
 import {
+  aiHotSocialDiscoverySource,
   anthropicNewsSource,
   arxivAiSource,
   arsTechnicaAiSource,
   createAnthropicNewsAdapter,
+  createAiHotSocialDiscoveryAdapter,
   createArxivAiAdapter,
   createArsTechnicaAiAdapter,
   createGoogleAiBlogAdapter,
@@ -14,6 +16,7 @@ import {
   createTechCrunchAiAdapter,
   createTheDecoderAdapter,
   createVentureBeatAiAdapter,
+  createWechat2RssAdapters,
   createWeChatCuratedAccountsAdapter,
   createXCuratedAccountsAdapter,
   DEFAULT_WECHAT_MONITORED_ACCOUNTS,
@@ -28,6 +31,7 @@ import {
   techCrunchAiSource,
   theDecoderSource,
   ventureBeatAiSource,
+  wechat2RssSources,
   weChatCuratedAccountsSource,
   xCuratedAccountsSource,
   type SourceAdapter,
@@ -40,6 +44,7 @@ export interface ConfiguredSource {
 }
 
 export function createConfiguredSources(): ConfiguredSource[] {
+  const wechat2RssAdapters = createWechat2RssAdapters();
   const configured: ConfiguredSource[] = [
     {
       definition: openAiNewsSource,
@@ -89,6 +94,14 @@ export function createConfiguredSources(): ConfiguredSource[] {
       definition: theDecoderSource,
       adapter: createTheDecoderAdapter(),
     },
+    {
+      definition: aiHotSocialDiscoverySource,
+      adapter: createAiHotSocialDiscoveryAdapter(),
+    },
+    ...wechat2RssSources.map((definition, index) => ({
+      definition,
+      adapter: wechat2RssAdapters[index]!,
+    })),
   ];
 
   const xBearerToken = process.env.X_BEARER_TOKEN?.trim();

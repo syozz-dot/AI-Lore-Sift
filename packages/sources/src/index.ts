@@ -1,5 +1,9 @@
 export { SourceRegistry } from "./registry.js";
 export {
+  AiHotSocialAdapter,
+  type AiHotSocialAdapterOptions,
+} from "./aihot-social-adapter.js";
+export {
   AnthropicNewsAdapter,
   type AnthropicNewsAdapterOptions,
 } from "./anthropic-news-adapter.js";
@@ -32,11 +36,18 @@ export {
   parseMonitoredAccounts,
 } from "./definitions/monitored-accounts.js";
 export {
+  aiHotSocialDiscoverySource,
+  createAiHotSocialDiscoveryAdapter,
   createWeChatCuratedAccountsAdapter,
   createXCuratedAccountsAdapter,
   weChatCuratedAccountsSource,
   xCuratedAccountsSource,
 } from "./definitions/social-sources.js";
+export {
+  createWechat2RssAdapters,
+  wechat2RssConfigs,
+  wechat2RssSources,
+} from "./definitions/wechat2rss.js";
 export {
   createHuggingFaceDailyPapersAdapter,
   huggingFaceDailyPapersSource,

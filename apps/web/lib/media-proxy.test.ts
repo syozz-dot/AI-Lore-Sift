@@ -32,6 +32,11 @@ describe("media proxy signing", () => {
     expect(
       createMediaProxyUrl("https://untrusted.example/image.jpg", expiresAt),
     ).toBe("https://untrusted.example/image.jpg");
+    expect(
+      isAllowedMediaUrl(
+        "https://wechat2rss.xlab.app/img-proxy/example/image.jpg",
+      ),
+    ).toBe(true);
     expect(isAllowedMediaUrl("http://127.0.0.1/image.jpg")).toBe(false);
   });
 });

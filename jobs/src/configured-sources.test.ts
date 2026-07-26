@@ -36,6 +36,13 @@ describe("configured sources", () => {
       "ars-technica-ai",
       "venturebeat-ai",
       "the-decoder",
+      "aihot-social-discovery",
+      "wechat-jiqizhixin",
+      "wechat-paperweekly",
+      "wechat-aiera",
+      "wechat-qbitai",
+      "wechat-geekpark",
+      "wechat-chaping",
     ]);
   });
 

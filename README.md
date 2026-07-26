@@ -71,10 +71,11 @@ pnpm dev:web
 
 Configured sources include official AI labs, selected technology media,
 Product Hunt, arXiv AI categories, Hugging Face model and paper radar, and
-stable releases from Ollama and vLLM. Curated X accounts and a private
-We-MP-RSS-compatible WeChat feed can be enabled with optional environment
-variables. See [docs/sources.md](docs/sources.md) for source policy, rich-media
-handling, and adapter behavior.
+stable releases from Ollama and vLLM. AIHOT selected social discovery and six
+public Wechat2RSS account feeds provide a no-credential baseline for X and
+WeChat coverage. Official X API collection and a private We-MP-RSS-compatible
+WeChat feed remain optional. See [docs/sources.md](docs/sources.md) for source
+policy, rich-media handling, attribution, and adapter behavior.
 
 Scheduling is database-driven with exponential failure backoff and per-source leases. See [docs/operations.md](docs/operations.md) for commands, health semantics, and the deployment boundary.
 

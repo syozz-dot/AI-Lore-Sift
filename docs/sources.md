@@ -60,6 +60,37 @@ The generic RSS adapter supports RSS 2.0 and Atom entry shapes. It:
   enclosures, and media thumbnails;
 - fails loudly on HTTP errors so source health can become degraded.
 
+## Default curated social discovery
+
+### AIHOT selected X and WeChat items
+
+- API: <https://aihot.virxact.com/api/v1/items>
+- Classification: third-party discovery layer, medium reliability
+- Selection: only AIHOT `selected` items whose source begins with `X:` or
+  `公众号：`
+- Schedule target: every 60 minutes
+- Content policy: store the curated title, summary, original link, original
+  source label, and AIHOT attribution metadata; do not store full article
+  content
+
+The connector uses the original X or WeChat URL as the item URL so exact
+deduplication can still work when the same item arrives from another connector.
+The canonical AIHOT item URL and attribution are retained in raw metadata.
+AIHOT is a discovery dependency rather than an independent factual source, so
+the original account remains visible and claims are not treated as
+multi-source confirmation.
+
+### Public Wechat2RSS feeds
+
+The default configuration subscribes to the public feeds for 机器之心,
+PaperWeekly, 新智元, 量子位, 极客公园, and 差评. Each account has its own
+source-health record and a six-hour schedule target.
+
+The RSS entries preserve the original `mp.weixin.qq.com` article link,
+publication timestamp, bounded excerpt, and image metadata. Full article HTML
+is not stored. Feed images are served through the same signed media-proxy
+policy as other known WeChat image hosts.
+
 ## Optional curated social sources
 
 ### X curated accounts
