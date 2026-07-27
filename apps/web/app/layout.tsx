@@ -3,7 +3,7 @@ import "@fontsource-variable/manrope/index.css";
 import "@fontsource-variable/noto-serif-sc/index.css";
 import type { Metadata } from "next";
 
-import { SiteHeader } from "../components/site-header";
+import { SiteShell } from "../components/site-shell";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -23,12 +23,16 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body>
-        <SiteHeader />
-        {children}
-        <footer className="siteFooter">
-          <span>AI News Navigator</span>
-          <span>事实、判断与机会，保持边界清晰。</span>
-        </footer>
+        <SiteShell
+          footer={
+            <footer className="siteFooter">
+              <span>AI News Navigator</span>
+              <span>事实、判断与机会，保持边界清晰。</span>
+            </footer>
+          }
+        >
+          {children}
+        </SiteShell>
       </body>
     </html>
   );

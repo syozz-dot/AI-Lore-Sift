@@ -27,6 +27,10 @@ export async function GET(request: Request) {
     : 30;
   const searchQuery = normalizeSearchQuery(searchParams.get("q"));
   const topicSlug = searchParams.get("topic") ?? undefined;
+  const requestedOffset = Number(searchParams.get("offset") ?? 0);
+  const offset = Number.isFinite(requestedOffset)
+    ? Math.max(0, Math.floor(requestedOffset))
+    : 0;
 
   try {
     const result = await getStoryFeed(
@@ -34,6 +38,7 @@ export async function GET(request: Request) {
       limit,
       searchQuery,
       topicSlug,
+      offset,
     );
     return NextResponse.json(result);
   } catch (error) {

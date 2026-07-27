@@ -1,18 +1,18 @@
-import {
-  ArrowDown,
-  ArrowRight,
-  MagnifyingGlass,
-  X,
-} from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, MagnifyingGlass, X } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { EmptyFeed } from "../components/empty-feed";
+import { FeedPagination } from "../components/feed-pagination";
+import { InfiniteStoryFeed } from "../components/infinite-story-feed";
 import { StoryRow } from "../components/story-row";
 import { contentTypeLabels, formatCalendarDate } from "../lib/presentation";
 import { getDailyIssue, getStoryFeed, type ContentType } from "../lib/queries";
 import { normalizeSearchQuery } from "../lib/search";
 
 export const dynamic = "force-dynamic";
+
+const FEED_PAGE_SIZE = 15;
 
 const filters: Array<{ label: string; value?: ContentType }> = [
   { label: "全部" },
@@ -37,10 +37,16 @@ function parseContentType(value: string | undefined): ContentType | undefined {
     : undefined;
 }
 
-function feedHref(contentType?: ContentType, searchQuery?: string) {
+function parsePage(value: string | undefined) {
+  const page = Number(value);
+  return Number.isFinite(page) && page >= 1 ? Math.floor(page) : 1;
+}
+
+function feedHref(contentType?: ContentType, searchQuery?: string, page = 1) {
   const params = new URLSearchParams();
   if (contentType) params.set("type", contentType);
   if (searchQuery) params.set("q", searchQuery);
+  if (contentType && page > 1) params.set("page", String(page));
   const query = params.toString();
   return query ? `/?${query}` : "/";
 }
@@ -48,17 +54,23 @@ function feedHref(contentType?: ContentType, searchQuery?: string) {
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string; q?: string }>;
+  searchParams: Promise<{ type?: string; q?: string; page?: string }>;
 }) {
   if (!process.env.DATABASE_URL) return <DatabaseSetupState />;
 
-  const { type, q } = await searchParams;
+  const { type, q, page } = await searchParams;
   const activeType = parseContentType(type);
   const searchQuery = normalizeSearchQuery(q);
+  const requestedPage = activeType ? parsePage(page) : 1;
+  const offset = activeType ? (requestedPage - 1) * FEED_PAGE_SIZE : 0;
   const [{ items, total }, dailyIssue] = await Promise.all([
-    getStoryFeed(activeType, 30, searchQuery),
+    getStoryFeed(activeType, FEED_PAGE_SIZE, searchQuery, undefined, offset),
     getDailyIssue(),
   ]);
+  const totalPages = Math.max(1, Math.ceil(total / FEED_PAGE_SIZE));
+  if (activeType && requestedPage > totalPages) {
+    redirect(feedHref(activeType, searchQuery, totalPages));
+  }
   const focusStory = dailyIssue.items[0];
   const focusSummary =
     focusStory?.factualSummary ??
@@ -242,18 +254,35 @@ export default async function Home({
               clearHref={feedHref(activeType)}
             />
           ) : (
-            <div className="storyList">
-              {items.map((story, index) => (
-                <StoryRow story={story} index={index} key={story.id} />
-              ))}
-            </div>
+            <>
+              {activeType ? (
+                <div className="storyList">
+                  {items.map((story, index) => (
+                    <StoryRow
+                      story={story}
+                      index={offset + index}
+                      key={story.id}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <InfiniteStoryFeed
+                  key={searchQuery ?? "all-stories"}
+                  initialItems={items}
+                  total={total}
+                  searchQuery={searchQuery}
+                />
+              )}
+            </>
           )}
 
-          {total > items.length ? (
-            <div className="feedLimit">
-              <ArrowDown aria-hidden="true" size={17} />
-              当前展示相关度最高的 {items.length} 条，共 {total} 条
-            </div>
+          {activeType ? (
+            <FeedPagination
+              contentType={activeType}
+              currentPage={requestedPage}
+              totalPages={totalPages}
+              searchQuery={searchQuery}
+            />
           ) : null}
         </section>
       </div>

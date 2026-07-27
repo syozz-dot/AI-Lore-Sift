@@ -266,6 +266,7 @@ export const getStoryFeed = cache(
     limit = 30,
     rawSearchQuery?: string,
     topicSlug?: string,
+    offset = 0,
   ) => {
     const { db } = getDatabaseConnection();
     const primaryItems = alias(items, "primary_items");
@@ -355,7 +356,8 @@ export const getStoryFeed = cache(
         .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
         .where(where)
         .orderBy(...sortOrder)
-        .limit(limit),
+        .limit(limit)
+        .offset(Math.max(0, offset)),
       db
         .select({ count: count() })
         .from(stories)
