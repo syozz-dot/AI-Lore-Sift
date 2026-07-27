@@ -1856,6 +1856,29 @@ button {
   gap: 10px;
 }
 
+.distillDeleteControl {
+  position: relative;
+}
+
+.distillDeleteControl > span {
+  position: absolute;
+  top: calc(100% + 7px);
+  right: 0;
+  width: max-content;
+  max-width: 240px;
+  color: var(--danger);
+  font-size: 11px;
+}
+
+.distillDeleteButton {
+  color: var(--ink-secondary);
+}
+
+.distillDeleteButton:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
 .knowledgeSaveControl {
   display: grid;
   gap: 7px;

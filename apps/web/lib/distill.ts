@@ -180,6 +180,17 @@ export async function removeDistillFromKnowledge(ownerId: string, id: string) {
     );
 }
 
+export async function deleteDistillDocument(ownerId: string, id: string) {
+  const { db } = getDatabaseConnection();
+  const [deleted] = await db
+    .delete(distillDocuments)
+    .where(
+      and(eq(distillDocuments.id, id), eq(distillDocuments.ownerId, ownerId)),
+    )
+    .returning({ id: distillDocuments.id });
+  return Boolean(deleted);
+}
+
 export async function listKnowledgeEntries(ownerId: string, limit = 40) {
   const { db } = getDatabaseConnection();
   return db

@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { DistillDeleteButton } from "../../../components/distill-delete-button";
 import { DistillMarkdownButton } from "../../../components/distill-markdown-button";
 import { KnowledgeSaveButton } from "../../../components/knowledge-save-button";
 import { getDistillSession } from "../../../lib/distill-auth";
@@ -152,6 +153,7 @@ export default async function DistillResultPage({
                 createdAt: document.createdAt.toISOString(),
               }}
             />
+            <DistillDeleteButton documentId={document.id} />
             {document.sourceUrl ? (
               <a
                 className="distillUtilityButton"
@@ -233,14 +235,16 @@ export default async function DistillResultPage({
               </section>
             ) : null}
 
-            <section>
-              <h2>继续追问</h2>
-              <ul className="distillQuestions">
-                {analysis.followUpQuestions.map((question) => (
-                  <li key={question}>{question}</li>
-                ))}
-              </ul>
-            </section>
+            {analysis.followUpQuestions.length ? (
+              <section>
+                <h2>继续追问</h2>
+                <ul className="distillQuestions">
+                  {analysis.followUpQuestions.map((question) => (
+                    <li key={question}>{question}</li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
           </article>
 
           <aside className="distillEvidenceRail" aria-label="证据与来源">
