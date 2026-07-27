@@ -18,6 +18,12 @@ AI News Navigator removes informational water from AI news, papers, product laun
 
 Success means a user can understand the day's most important AI developments and their product impact within ten minutes.
 
+The broader product loop is discovery, understanding, and knowledge
+conversion. The public intelligence feed handles discovery. The private
+Distill workspace lets the owner actively import a page or long text, decide
+whether it is worth reading, preserve its claims and evidence, and save the
+result as reusable knowledge.
+
 ## Positioning
 
 AI News Navigator does not stop at what happened; it explains why it matters.
@@ -37,6 +43,9 @@ The product must not become an information waterfall optimized for volume, an ac
 3. Explain importance, not just events. Product and business implications are a core part of the reading experience.
 4. Keep evidence attached. Clearly separate facts, deterministic signals, and generated analysis, and keep conclusions traceable to their sources.
 5. Earn trust through restraint. Prefer clear hierarchy, precise language, and explicit uncertainty over visual noise or exaggerated claims.
+6. Private first, commercial-ready. Platform imports begin as owner-only
+   capabilities, while ownership, usage, provider, and cost fields remain
+   explicit so a future paid account system does not require a data rewrite.
 
 ## Content Taxonomy
 

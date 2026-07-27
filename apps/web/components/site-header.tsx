@@ -1,4 +1,10 @@
-import { GithubLogo, Newspaper, Tag } from "@phosphor-icons/react/dist/ssr";
+import {
+  Books,
+  Drop,
+  GithubLogo,
+  Newspaper,
+  Tag,
+} from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
 import { FavoritesHeaderLink } from "./favorites-header-link";
@@ -15,6 +21,22 @@ export function SiteHeader() {
           <span className="brandName">AI News Navigator</span>
         </Link>
         <div className="headerActions">
+          <Link
+            className="iconButton distillHeaderLink"
+            href="/distill"
+            aria-label="打开私人脱水工作台"
+            title="脱水工作台"
+          >
+            <Drop aria-hidden="true" size={19} weight="regular" />
+          </Link>
+          <Link
+            className="iconButton knowledgeHeaderLink"
+            href="/knowledge"
+            aria-label="打开私人知识库"
+            title="知识库"
+          >
+            <Books aria-hidden="true" size={19} weight="regular" />
+          </Link>
           <Link
             className="iconButton dailyHeaderLink"
             href="/daily"

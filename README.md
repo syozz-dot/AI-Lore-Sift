@@ -8,6 +8,12 @@ It is designed to answer three questions:
 2. Why does it matter?
 3. What product or business opportunity could follow?
 
+The private Distill workspace adds a user-directed knowledge flow: paste a web
+page or long text, receive a reading verdict and evidence-anchored Chinese
+distillation, then save the result to the knowledge library. It is private by
+default and keeps owner, usage, model, and cost fields ready for a later account
+and billing layer.
+
 ## Project status
 
 V2 foundation work is in progress. PostgreSQL-backed ingestion covers official news, arXiv AI papers, and selected first-party GitHub releases. Explainable relevance scoring, conservative Story clustering, and the first public reading interface are now available.
@@ -82,6 +88,11 @@ Scheduling is database-driven with exponential failure backoff and per-source le
 Relevant items are grouped with a conservative, versioned clustering baseline. See [docs/intelligence.md](docs/intelligence.md) for scoring signals, merge guards, and current limitations.
 
 The web app reads only persisted PostgreSQL data. It does not inject sample news when the database is missing or empty. The Story feed is available at `/`, Story details at `/stories/[slug]`, and JSON endpoints under `/api/stories` and `/api/health/sources`.
+
+The private workspace lives at `/distill`, and saved knowledge lives at
+`/knowledge`. Configure `DISTILL_ACCESS_KEY` and `DISTILL_SESSION_SECRET` before
+using it. Platform video imports are intentionally adapter boundaries rather
+than public scraping endpoints in the first release.
 
 Production web deployments run committed Drizzle migrations before the Next.js build. When available, migrations use `DATABASE_URL_UNPOOLED`; application requests continue to use the pooled `DATABASE_URL`.
 

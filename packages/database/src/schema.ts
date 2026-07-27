@@ -99,6 +99,35 @@ export const reportTypeEnum = pgEnum("report_type", [
   "monthly",
 ]);
 
+export const distillSourceTypeEnum = pgEnum("distill_source_type", [
+  "url",
+  "text",
+  "file",
+  "youtube",
+  "douyin",
+  "wechat_channels",
+  "other",
+]);
+
+export const distillStatusEnum = pgEnum("distill_status", [
+  "processing",
+  "ready",
+  "failed",
+]);
+
+export interface DistillKeyPoint {
+  title: string;
+  detail: string;
+  evidenceParagraphs: number[];
+}
+
+export interface DistillClaim {
+  claim: string;
+  type: "fact" | "author_view" | "inference";
+  evidenceParagraphs: number[];
+  confidence: "high" | "medium" | "low";
+}
+
 export interface ReportSnapshotStory {
   id: string;
   slug: string;
@@ -519,6 +548,115 @@ export const reports = pgTable(
   ],
 );
 
+export const distillDocuments = pgTable(
+  "distill_documents",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ownerId: varchar("owner_id", { length: 128 }).notNull(),
+    sourceType: distillSourceTypeEnum("source_type").notNull(),
+    sourceUrl: text("source_url"),
+    sourceTitle: text("source_title"),
+    sourceAuthor: varchar("source_author", { length: 256 }),
+    rawText: text("raw_text").notNull(),
+    inputCharacters: integer("input_characters").notNull(),
+    status: distillStatusEnum("status").default("processing").notNull(),
+    errorMessage: text("error_message"),
+    accessMode: varchar("access_mode", { length: 32 })
+      .default("private")
+      .notNull(),
+    billableUnits: integer("billable_units").default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("distill_documents_owner_created_idx").on(
+      table.ownerId,
+      table.createdAt,
+    ),
+    index("distill_documents_owner_status_idx").on(table.ownerId, table.status),
+  ],
+);
+
+export const distillAnalyses = pgTable(
+  "distill_analyses",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => distillDocuments.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    verdict: varchar("verdict", { length: 16 }).notNull(),
+    verdictReason: text("verdict_reason").notNull(),
+    estimatedReadingMinutes: integer("estimated_reading_minutes")
+      .default(1)
+      .notNull(),
+    summary: text("summary").notNull(),
+    keyPoints: jsonb("key_points")
+      .$type<DistillKeyPoint[]>()
+      .default([])
+      .notNull(),
+    claims: jsonb("claims").$type<DistillClaim[]>().default([]).notNull(),
+    transferableInsights: jsonb("transferable_insights")
+      .$type<string[]>()
+      .default([])
+      .notNull(),
+    cautions: jsonb("cautions").$type<string[]>().default([]).notNull(),
+    followUpQuestions: jsonb("follow_up_questions")
+      .$type<string[]>()
+      .default([])
+      .notNull(),
+    provider: varchar("provider", { length: 64 }).notNull(),
+    model: varchar("model", { length: 128 }).notNull(),
+    promptVersion: varchar("prompt_version", { length: 64 }).notNull(),
+    outputTokens: integer("output_tokens"),
+    costMicros: integer("cost_micros"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("distill_analyses_document_unique").on(table.documentId),
+    index("distill_analyses_created_idx").on(table.createdAt),
+  ],
+);
+
+export const knowledgeEntries = pgTable(
+  "knowledge_entries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ownerId: varchar("owner_id", { length: 128 }).notNull(),
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => distillDocuments.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    summary: text("summary").notNull(),
+    tags: text("tags").array().default([]).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("knowledge_entries_owner_document_unique").on(
+      table.ownerId,
+      table.documentId,
+    ),
+    index("knowledge_entries_owner_created_idx").on(
+      table.ownerId,
+      table.createdAt,
+    ),
+  ],
+);
+
 export type Source = typeof sources.$inferSelect;
 export type NewSource = typeof sources.$inferInsert;
 export type SourceRun = typeof sourceRuns.$inferSelect;
@@ -535,3 +673,9 @@ export type Topic = typeof topics.$inferSelect;
 export type NewTopic = typeof topics.$inferInsert;
 export type Report = typeof reports.$inferSelect;
 export type NewReport = typeof reports.$inferInsert;
+export type DistillDocument = typeof distillDocuments.$inferSelect;
+export type NewDistillDocument = typeof distillDocuments.$inferInsert;
+export type DistillAnalysis = typeof distillAnalyses.$inferSelect;
+export type NewDistillAnalysis = typeof distillAnalyses.$inferInsert;
+export type KnowledgeEntry = typeof knowledgeEntries.$inferSelect;
+export type NewKnowledgeEntry = typeof knowledgeEntries.$inferInsert;

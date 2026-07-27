@@ -1322,6 +1322,1138 @@ button {
   }
 }
 
+/* Private distill workspace */
+
+.distillAccessPage {
+  width: min(calc(100% - 40px), 1440px);
+  min-height: calc(100dvh - 68px);
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  padding: 64px 0;
+}
+
+.distillAccessPage > section {
+  width: min(100%, 620px);
+  padding: 44px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+}
+
+.distillAccessPage > section > svg,
+.distillNotConfigured strong {
+  color: var(--accent);
+}
+
+.distillAccessLabel {
+  margin: 24px 0 0;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.distillAccessPage h1 {
+  margin: 12px 0 0;
+  font-family: var(--font-serif);
+  font-size: clamp(34px, 5vw, 52px);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+}
+
+.distillAccessDescription {
+  max-width: 48ch;
+  margin: 20px 0 0;
+  color: var(--ink-secondary);
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.distillAccessForm {
+  margin-top: 34px;
+}
+
+.distillAccessForm label > span {
+  display: block;
+  margin-bottom: 9px;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.distillAccessForm label > div {
+  min-height: 48px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line-strong);
+  background: var(--canvas);
+  color: var(--ink-secondary);
+}
+
+.distillAccessForm input {
+  width: 100%;
+  height: 46px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+}
+
+.distillAccessForm label > div:focus-within {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.distillAccessForm > p,
+.distillComposerError {
+  margin: 10px 0 0;
+  color: var(--danger);
+  font-size: 12px;
+}
+
+.distillAccessForm button,
+.distillComposer button {
+  min-height: 46px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid var(--brand-pine);
+  border-radius: 0;
+  background: var(--brand-pine);
+  color: var(--light-ink);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.distillAccessForm button {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.distillAccessForm button:active,
+.distillComposer button:active,
+.knowledgeSaveControl button:active,
+.distillUtilityButton:active {
+  transform: translateY(1px);
+}
+
+.distillAccessForm button:disabled,
+.distillComposer button:disabled,
+.knowledgeSaveControl button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.distillNotConfigured {
+  margin-top: 32px;
+  padding: 20px;
+  display: grid;
+  gap: 8px;
+  border-left: 2px solid var(--accent);
+  background: var(--canvas);
+}
+
+.distillNotConfigured span {
+  color: var(--ink-secondary);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.distillWorkspace {
+  width: min(calc(100% - 64px), 1440px);
+  margin: 0 auto;
+}
+
+.distillHero {
+  min-height: min(660px, calc(100dvh - 68px));
+  padding: 76px 0 64px;
+  display: grid;
+  grid-template-columns: minmax(280px, 4fr) minmax(520px, 7fr);
+  align-items: center;
+  gap: 8vw;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.distillHeroCopy > p:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.distillHeroCopy h1 {
+  max-width: 620px;
+  margin: 18px 0 0;
+  font-family: var(--font-serif);
+  font-size: clamp(43px, 5.3vw, 72px);
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  line-height: 1.08;
+}
+
+.distillHeroCopy > p:last-child {
+  max-width: 500px;
+  margin: 26px 0 0;
+  color: var(--ink-secondary);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.distillComposer > label {
+  display: block;
+  margin-bottom: 11px;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.distillInputFrame {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+}
+
+.distillInputFrame:focus-within {
+  border-color: var(--accent);
+}
+
+.distillInputFrame textarea {
+  width: 100%;
+  min-height: 230px;
+  resize: vertical;
+  padding: 22px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.distillInputFrame textarea::placeholder {
+  color: var(--ink-tertiary);
+  opacity: 1;
+}
+
+.distillComposerFooter {
+  min-height: 68px;
+  padding: 10px 12px 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.distillComposerFooter > div {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.distillComposerFooter > div > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-secondary);
+  font-size: 11px;
+}
+
+.distillComposerHelper {
+  margin: 12px 0 0;
+  color: var(--ink-tertiary);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.distillPrinciples {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.distillPrinciples > div {
+  min-height: 148px;
+  padding: 28px 28px 28px 0;
+}
+
+.distillPrinciples > div:not(:first-child) {
+  padding-left: 28px;
+  border-left: 1px solid var(--line);
+}
+
+.distillPrinciples strong {
+  display: block;
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.distillPrinciples span {
+  display: block;
+  margin-top: 10px;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.distillHistory {
+  padding: 72px 0 24px;
+}
+
+.distillSectionHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.distillSectionHeading p {
+  margin: 0 0 8px;
+  color: var(--ink-tertiary);
+  font-size: 11px;
+}
+
+.distillSectionHeading h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.distillSectionHeading > a,
+.knowledgeEmpty > a,
+.distillResultState > a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.distillHistoryList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 52px;
+}
+
+.distillHistoryList > article {
+  min-width: 0;
+  padding: 28px 0;
+  display: grid;
+  grid-template-columns: 124px minmax(0, 1fr);
+  gap: 10px 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.distillHistoryState {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.distillHistoryList article > a {
+  min-width: 0;
+}
+
+.distillHistoryList h3 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.45;
+}
+
+.distillHistoryList article > a:hover h3 {
+  color: var(--accent);
+}
+
+.distillHistoryList article > a p {
+  display: -webkit-box;
+  margin: 10px 0 0;
+  overflow: hidden;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  line-height: 1.7;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.distillHistoryMeta {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 10px;
+}
+
+.distillHistoryEmpty,
+.knowledgeEmpty {
+  min-height: 330px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.distillHistoryEmpty svg,
+.knowledgeEmpty svg {
+  color: var(--accent);
+}
+
+.distillHistoryEmpty h3,
+.knowledgeEmpty h2 {
+  margin: 18px 0 0;
+  font-family: var(--font-serif);
+  font-size: 25px;
+  font-weight: 600;
+}
+
+.distillHistoryEmpty p,
+.knowledgeEmpty p {
+  margin: 10px 0 0;
+  color: var(--ink-secondary);
+  line-height: 1.7;
+}
+
+.distillResultState {
+  width: min(calc(100% - 40px), 760px);
+  min-height: calc(100dvh - 68px);
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.distillResultState > svg,
+.distillResultState > p {
+  color: var(--accent);
+}
+
+.distillResultState > p {
+  margin: 20px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.distillResultState h1 {
+  max-width: 700px;
+  margin: 12px 0 0;
+  font-family: var(--font-serif);
+  font-size: clamp(36px, 6vw, 60px);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+}
+
+.distillResultState > span {
+  max-width: 580px;
+  margin-top: 20px;
+  color: var(--ink-secondary);
+  line-height: 1.7;
+}
+
+.distillResultPage {
+  min-height: 80dvh;
+}
+
+.distillResultShell {
+  width: min(calc(100% - 64px), 1320px);
+  margin: 0 auto;
+}
+
+.distillResultBack {
+  padding-top: 30px;
+}
+
+.distillResultBack a,
+.knowledgeHero > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-secondary);
+  font-size: 12px;
+}
+
+.distillResultHero {
+  max-width: 1080px;
+  padding: 64px 0 48px;
+}
+
+.distillResultMeta {
+  display: flex;
+  gap: 20px;
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 10px;
+}
+
+.distillResultHero h1 {
+  max-width: 1060px;
+  margin: 26px 0 0;
+  font-family: var(--font-serif);
+  font-size: clamp(42px, 6.1vw, 80px);
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+
+.distillOriginalTitle {
+  margin: 18px 0 0;
+  color: var(--ink-tertiary);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.distillVerdict {
+  max-width: 860px;
+  margin-top: 38px;
+  padding: 24px 0;
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 28px;
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.distillVerdict strong {
+  color: var(--accent);
+  font-family: var(--font-serif);
+  font-size: 20px;
+}
+
+.distillVerdict p {
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.distillResultActions {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.knowledgeSaveControl {
+  display: grid;
+  gap: 7px;
+}
+
+.knowledgeSaveControl button,
+.distillUtilityButton {
+  min-height: 44px;
+  padding: 0 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.knowledgeSaveControl button[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.knowledgeSaveControl > span {
+  color: var(--danger);
+  font-size: 10px;
+}
+
+.knowledgeSaveControl button:hover,
+.distillUtilityButton:hover {
+  background: var(--surface);
+}
+
+.distillResultMetrics {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.distillResultMetrics > div {
+  padding: 22px 0;
+}
+
+.distillResultMetrics > div:not(:first-child) {
+  padding-left: 26px;
+  border-left: 1px solid var(--line);
+}
+
+.distillResultMetrics dt {
+  color: var(--ink-tertiary);
+  font-size: 10px;
+}
+
+.distillResultMetrics dd {
+  margin: 8px 0 0;
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 17px;
+}
+
+.distillResultLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 8fr) minmax(300px, 4fr);
+  gap: 72px;
+  padding-top: 72px;
+}
+
+.distillResultBody {
+  min-width: 0;
+}
+
+.distillResultBody > section {
+  padding-bottom: 68px;
+}
+
+.distillResultBody h2 {
+  margin: 0;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 720;
+}
+
+.distillLeadSummary {
+  max-width: 760px;
+  margin: 20px 0 0;
+  font-size: clamp(18px, 1.9vw, 23px);
+  line-height: 1.9;
+  letter-spacing: -0.015em;
+}
+
+.distillKeyPoints {
+  max-width: 800px;
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--line-strong);
+}
+
+.distillKeyPoints > article {
+  padding: 24px 24px 24px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.distillKeyPoints > article:nth-child(even) {
+  padding-right: 0;
+  padding-left: 24px;
+  border-left: 1px solid var(--line);
+}
+
+.distillKeyPoints h3 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.distillKeyPoints p {
+  margin: 12px 0 0;
+  color: var(--ink-secondary);
+  line-height: 1.75;
+}
+
+.distillKeyPoints span {
+  display: block;
+  margin-top: 14px;
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 9px;
+}
+
+.distillTakeaways,
+.distillCautions,
+.distillQuestions {
+  max-width: 760px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.distillTakeaways {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.distillTakeaways li {
+  padding: 22px;
+  background: var(--surface);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.distillCautions li {
+  padding: 14px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-secondary);
+  line-height: 1.7;
+}
+
+.distillCautions svg {
+  flex: 0 0 auto;
+  margin-top: 4px;
+  color: var(--danger);
+}
+
+.distillQuestions {
+  counter-reset: distill-question;
+}
+
+.distillQuestions li {
+  position: relative;
+  padding: 16px 0 16px 42px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-serif);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.distillQuestions li::before {
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 10px;
+  counter-increment: distill-question;
+  content: counter(distill-question, decimal-leading-zero);
+}
+
+.distillEvidenceRail {
+  min-width: 0;
+  padding-left: 32px;
+  border-left: 1px solid var(--line);
+}
+
+.distillEvidenceRail > section {
+  padding-bottom: 34px;
+  margin-bottom: 34px;
+  border-bottom: 1px solid var(--line);
+}
+
+.distillRailHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.distillRailHeading h2 {
+  margin: 0;
+  font-size: 13px;
+}
+
+.distillRailHeading > span {
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 9px;
+}
+
+.distillClaimList {
+  margin-top: 16px;
+}
+
+.distillClaimList > article {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.distillClaimList > article:last-child {
+  border-bottom: 0;
+}
+
+.distillClaimList article > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--accent);
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.distillClaimList p {
+  margin: 9px 0 0;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.distillClaimList small {
+  display: block;
+  margin-top: 9px;
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 9px;
+}
+
+.distillParagraphs {
+  margin-top: 16px;
+}
+
+.distillParagraphs blockquote {
+  margin: 0;
+  padding: 16px 0;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.distillParagraphs blockquote > span {
+  color: var(--accent);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 9px;
+}
+
+.distillParagraphs p {
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.distillProvenance p {
+  margin: 14px 0 0;
+  color: var(--ink-secondary);
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.distillProvenance > span {
+  display: block;
+  margin-top: 10px;
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 9px;
+}
+
+.knowledgePage {
+  width: min(calc(100% - 64px), 1320px);
+  min-height: 80dvh;
+  margin: 0 auto;
+}
+
+.knowledgeHero {
+  padding: 30px 0 60px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.knowledgeHero > div {
+  max-width: 940px;
+  margin-top: 72px;
+}
+
+.knowledgeHero > div > svg,
+.knowledgeHero > div > p {
+  color: var(--accent);
+}
+
+.knowledgeHero > div > p {
+  margin: 20px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.knowledgeHero h1 {
+  margin: 14px 0 0;
+  font-family: var(--font-serif);
+  font-size: clamp(42px, 6vw, 72px);
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 1.1;
+}
+
+.knowledgeHero > div > span {
+  max-width: 650px;
+  display: block;
+  margin-top: 24px;
+  color: var(--ink-secondary);
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.knowledgeCollection > article {
+  min-height: 180px;
+  padding: 30px 0;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 48px;
+  gap: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.knowledgeIndex {
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 10px;
+}
+
+.knowledgeCollection article > div > p {
+  margin: 0;
+  display: flex;
+  gap: 16px;
+  color: var(--ink-tertiary);
+  font-size: 10px;
+}
+
+.knowledgeCollection article > div > a {
+  display: block;
+  max-width: 900px;
+  margin-top: 14px;
+}
+
+.knowledgeCollection h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.knowledgeCollection article > div > a > span {
+  display: -webkit-box;
+  margin-top: 12px;
+  overflow: hidden;
+  color: var(--ink-secondary);
+  line-height: 1.75;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.knowledgeOpen {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+}
+
+@media (max-width: 1023px) {
+  .distillHero {
+    min-height: auto;
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  .distillPrinciples {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .distillPrinciples > div:nth-child(3) {
+    padding-left: 0;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .distillPrinciples > div:nth-child(4) {
+    border-top: 1px solid var(--line);
+  }
+
+  .distillHistoryList {
+    grid-template-columns: 1fr;
+  }
+
+  .distillResultLayout {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .distillEvidenceRail {
+    padding-left: 0;
+    border-top: 1px solid var(--line-strong);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .headerActions {
+    gap: 8px;
+  }
+
+  .dailyHeaderLink,
+  .topicsHeaderLink,
+  .knowledgeHeaderLink,
+  .githubIconLink {
+    display: none;
+  }
+
+  .distillAccessPage,
+  .distillWorkspace,
+  .distillResultShell,
+  .knowledgePage {
+    width: calc(100% - 28px);
+  }
+
+  .distillAccessPage {
+    min-height: calc(100dvh - 60px);
+    padding: 30px 0;
+  }
+
+  .distillAccessPage > section {
+    padding: 26px 20px;
+  }
+
+  .distillHero {
+    padding: 48px 0;
+    gap: 36px;
+  }
+
+  .distillHeroCopy h1 {
+    font-size: 42px;
+  }
+
+  .distillInputFrame textarea {
+    min-height: 190px;
+    padding: 17px;
+  }
+
+  .distillComposerFooter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .distillComposerFooter button {
+    width: 100%;
+  }
+
+  .distillPrinciples {
+    grid-template-columns: 1fr;
+  }
+
+  .distillPrinciples > div,
+  .distillPrinciples > div:not(:first-child),
+  .distillPrinciples > div:nth-child(3) {
+    min-height: auto;
+    padding: 22px 0;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .distillPrinciples > div:first-child {
+    border-top: 0;
+  }
+
+  .distillHistory {
+    padding-top: 48px;
+  }
+
+  .distillSectionHeading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .distillHistoryList > article {
+    grid-template-columns: 1fr;
+  }
+
+  .distillHistoryMeta {
+    grid-column: auto;
+  }
+
+  .distillResultHero {
+    padding: 42px 0 36px;
+  }
+
+  .distillResultHero h1 {
+    font-size: 38px;
+  }
+
+  .distillVerdict {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .distillResultMetrics {
+    grid-template-columns: 1fr;
+  }
+
+  .distillResultMetrics > div,
+  .distillResultMetrics > div:not(:first-child) {
+    padding: 17px 0;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .distillResultMetrics > div:first-child {
+    border-top: 0;
+  }
+
+  .distillResultLayout {
+    padding-top: 48px;
+  }
+
+  .distillKeyPoints,
+  .distillTakeaways {
+    grid-template-columns: 1fr;
+  }
+
+  .distillKeyPoints > article,
+  .distillKeyPoints > article:nth-child(even) {
+    padding: 22px 0;
+    border-left: 0;
+  }
+
+  .knowledgeHero {
+    padding-bottom: 44px;
+  }
+
+  .knowledgeHero > div {
+    margin-top: 48px;
+  }
+
+  .knowledgeHero h1 {
+    font-size: 40px;
+  }
+
+  .knowledgeCollection > article {
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .knowledgeOpen {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 380px) {
+  .brandName {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
