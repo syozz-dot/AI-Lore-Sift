@@ -6,6 +6,9 @@ import sanitizeHtml from "sanitize-html";
 const MAX_SOURCE_BYTES = 2_500_000;
 const MAX_SOURCE_CHARACTERS = 80_000;
 const MAX_REDIRECTS = 4;
+const DEFAULT_READER_BASE_URL = "https://r.jina.ai";
+const WECHAT_READ_ERROR =
+  "微信公众号限制了本次正文读取。系统已尝试专用通道，请稍后重试；若仍失败，再直接粘贴正文。";
 
 export interface PreparedDistillSource {
   sourceType: "url" | "text";
@@ -134,6 +137,121 @@ async function fetchPublicHtml(inputUrl: string) {
   throw new Error("网页跳转次数过多。");
 }
 
+function isWechatArticleUrl(url: URL) {
+  return url.hostname.toLowerCase() === "mp.weixin.qq.com";
+}
+
+function readerEndpoint(inputUrl: string) {
+  const baseUrl = (
+    process.env.DISTILL_READER_BASE_URL ?? DEFAULT_READER_BASE_URL
+  ).replace(/\/+$/, "");
+  const endpoint = new URL(`${baseUrl}/${inputUrl}`);
+  if (endpoint.protocol !== "https:") {
+    throw new Error("正文读取服务必须使用 HTTPS。");
+  }
+  return endpoint;
+}
+
+interface ReaderDocument {
+  title: string | null;
+  author: string | null;
+  content: string;
+}
+
+function stringValue(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+export function parseReaderDocument(payload: unknown): ReaderDocument {
+  if (!payload || typeof payload !== "object") {
+    throw new Error("正文读取服务返回了无效内容。");
+  }
+
+  const root = payload as Record<string, unknown>;
+  const nested =
+    root.data && typeof root.data === "object"
+      ? (root.data as Record<string, unknown>)
+      : root;
+  const content =
+    stringValue(nested.content) ??
+    stringValue(nested.markdown) ??
+    stringValue(root.content);
+
+  if (!content) throw new Error("正文读取服务没有返回文章内容。");
+
+  return {
+    title: stringValue(nested.title) ?? stringValue(root.title),
+    author:
+      stringValue(nested.author) ??
+      stringValue(nested.byline) ??
+      stringValue(root.author),
+    content,
+  };
+}
+
+function normalizeReaderText(markdown: string) {
+  const withoutMarkdownMedia = markdown
+    .replace(/!\[[^\]]*]\([^)\n]+\)/g, " ")
+    .replace(/\[([^\]]+)]\([^)\n]+\)/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/^>\s?/gm, "")
+    .replace(/^\s*[-*+]\s+/gm, "• ")
+    .replace(/```[\s\S]*?```/g, (block) =>
+      block.replace(/^```[^\n]*\n?/, "").replace(/```$/, ""),
+    );
+
+  return sanitizeHtml(withoutMarkdownMedia, {
+    allowedTags: [],
+    allowedAttributes: {},
+  })
+    .replace(/\r/g, "")
+    .replace(/[ \t]+/g, " ")
+    .replace(/ *\n */g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim()
+    .slice(0, MAX_SOURCE_CHARACTERS);
+}
+
+async function fetchReaderDocument(inputUrl: string) {
+  const endpoint = readerEndpoint(inputUrl);
+  await assertPublicUrl(endpoint);
+  const authorization = process.env.JINA_API_KEY?.trim();
+  const response = await fetch(endpoint, {
+    redirect: "error",
+    headers: {
+      Accept: "application/json",
+      ...(authorization
+        ? { Authorization: `Bearer ${authorization}` }
+        : {}),
+    },
+    signal: AbortSignal.timeout(22_000),
+  });
+
+  if (!response.ok) {
+    throw new Error(`正文读取服务失败，状态码 ${response.status}。`);
+  }
+
+  const body = await readLimitedText(response);
+  const contentType =
+    response.headers.get("content-type")?.toLowerCase() ?? "";
+  if (!contentType.includes("application/json")) {
+    return {
+      title: null,
+      author: null,
+      content: body,
+    } satisfies ReaderDocument;
+  }
+
+  try {
+    return parseReaderDocument(JSON.parse(body));
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error("正文读取服务返回了无法解析的内容。");
+    }
+    throw error;
+  }
+}
+
 function firstMetaContent(html: string, keys: string[]) {
   for (const key of keys) {
     const patterns = [
@@ -175,6 +293,9 @@ function extractReadableText(html: string) {
     )
     .replace(/<!--[\s\S]*?-->/g, " ");
   const primary =
+    withoutNoise.match(
+      /<[^>]+(?:id=["']js_content["']|class=["'][^"']*rich_media_content[^"']*["'])[^>]*>([\s\S]*?)<\/(?:div|section|article)>/i,
+    )?.[1] ??
     withoutNoise.match(/<article\b[^>]*>([\s\S]*?)<\/article>/i)?.[1] ??
     withoutNoise.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] ??
     withoutNoise.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i)?.[1] ??
@@ -238,6 +359,48 @@ function looksLikeSingleUrl(value: string) {
   }
 }
 
+function looksLikeWechatChallenge(html: string, rawText: string) {
+  const challengeSignals = [
+    "环境异常",
+    "访问过于频繁",
+    "请在微信客户端打开",
+    "完成验证",
+    "verify",
+    "security verification",
+  ];
+  const normalized = `${html.slice(0, 40_000)} ${rawText}`.toLowerCase();
+  return (
+    (!html.includes('id="js_content"') &&
+      !html.includes("rich_media_content")) ||
+    challengeSignals.some((signal) =>
+      normalized.includes(signal.toLowerCase()),
+    )
+  );
+}
+
+function finalizeUrlSource(options: {
+  sourceUrl: string;
+  sourceTitle: string | null;
+  sourceAuthor: string | null;
+  rawText: string;
+}) {
+  const paragraphs = splitDistillParagraphs(options.rawText);
+  if (options.rawText.length < 120 || paragraphs.length === 0) {
+    throw new Error(
+      "未能从该网页提取足够正文。可以复制正文后直接粘贴，或稍后重试。",
+    );
+  }
+
+  return {
+    sourceType: "url",
+    sourceUrl: options.sourceUrl,
+    sourceTitle: options.sourceTitle,
+    sourceAuthor: options.sourceAuthor,
+    rawText: options.rawText,
+    paragraphs,
+  } satisfies PreparedDistillSource;
+}
+
 export async function prepareDistillSource(
   input: string,
 ): Promise<PreparedDistillSource> {
@@ -260,24 +423,53 @@ export async function prepareDistillSource(
     };
   }
 
+  const sourceUrl = new URL(normalizedInput);
+  await assertPublicUrl(sourceUrl);
+
+  if (isWechatArticleUrl(sourceUrl)) {
+    try {
+      const readerDocument = await fetchReaderDocument(sourceUrl.toString());
+      return finalizeUrlSource({
+        sourceUrl: sourceUrl.toString(),
+        sourceTitle: readerDocument.title,
+        sourceAuthor: readerDocument.author,
+        rawText: normalizeReaderText(readerDocument.content),
+      });
+    } catch {
+      try {
+        const { html, finalUrl, contentType } =
+          await fetchPublicHtml(sourceUrl.toString());
+        const rawText = contentType.includes("text/plain")
+          ? html.slice(0, MAX_SOURCE_CHARACTERS).trim()
+          : extractReadableText(html);
+        if (looksLikeWechatChallenge(html, rawText)) {
+          throw new Error(WECHAT_READ_ERROR);
+        }
+        return finalizeUrlSource({
+          sourceUrl: finalUrl,
+          sourceTitle: extractTitle(html),
+          sourceAuthor: firstMetaContent(html, [
+            "author",
+            "article:author",
+            "byl",
+          ]),
+          rawText,
+        });
+      } catch {
+        throw new Error(WECHAT_READ_ERROR);
+      }
+    }
+  }
+
   const { html, finalUrl, contentType } =
     await fetchPublicHtml(normalizedInput);
   const rawText = contentType.includes("text/plain")
     ? html.slice(0, MAX_SOURCE_CHARACTERS).trim()
     : extractReadableText(html);
-  const paragraphs = splitDistillParagraphs(rawText);
-  if (rawText.length < 120 || paragraphs.length === 0) {
-    throw new Error(
-      "未能从该网页提取足够正文。可以复制正文后直接粘贴，或稍后使用平台专用适配器。",
-    );
-  }
-
-  return {
-    sourceType: "url",
+  return finalizeUrlSource({
     sourceUrl: finalUrl,
     sourceTitle: extractTitle(html),
     sourceAuthor: firstMetaContent(html, ["author", "article:author", "byl"]),
     rawText,
-    paragraphs,
-  };
+  });
 }
