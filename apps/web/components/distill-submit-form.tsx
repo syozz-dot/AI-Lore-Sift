@@ -1,15 +1,38 @@
 "use client";
 
-import { ArrowRight, LinkSimple, TextAlignLeft } from "@phosphor-icons/react";
+import {
+  ArrowUp,
+  CheckCircle,
+  CircleNotch,
+  FileMagnifyingGlass,
+  LinkSimple,
+  Sparkle,
+  TextAlignLeft,
+  WarningCircle,
+} from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import type { FormEvent } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { FormEvent, KeyboardEvent } from "react";
 
 export function DistillSubmitForm() {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [activeStage, setActiveStage] = useState(0);
+
+  useEffect(() => {
+    if (!submitting) {
+      setActiveStage(0);
+      return;
+    }
+    const timers = [
+      window.setTimeout(() => setActiveStage(1), 900),
+      window.setTimeout(() => setActiveStage(2), 2_800),
+    ];
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [submitting]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,21 +61,141 @@ export function DistillSubmitForm() {
     }
   }
 
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey &&
+      !event.nativeEvent.isComposing
+    ) {
+      event.preventDefault();
+      if (!submitting && input.trim()) formRef.current?.requestSubmit();
+    }
+  }
+
+  const hasThread = submitting || Boolean(error);
+  const steps = [
+    {
+      icon: FileMagnifyingGlass,
+      title: "读取并清洗正文",
+      detail: "识别网页主体，去除导航、脚本和重复内容。",
+    },
+    {
+      icon: Sparkle,
+      title: "判断信息密度",
+      detail: "区分事实、作者观点与推断，确定是否值得细读。",
+    },
+    {
+      icon: TextAlignLeft,
+      title: "组织知识文档",
+      detail: "生成导读、核心论点、证据边界和可保存知识。",
+    },
+  ];
+
   return (
-    <form className="distillComposer" onSubmit={submit}>
-      <label htmlFor="distill-input">网页链接或正文</label>
-      <div className="distillInputFrame">
+    <div className={`distillNewConversation${hasThread ? " hasThread" : ""}`}>
+      <section className="distillConversationBody" aria-live="polite">
+        {hasThread ? (
+          <div className="distillProcessingThread">
+            <article className="distillConversationUser">
+              <small>你</small>
+              <p>{input}</p>
+            </article>
+            <article className="distillConversationAssistant">
+              <div className="distillAssistantIdentity">
+                {error ? (
+                  <WarningCircle aria-hidden="true" size={18} />
+                ) : (
+                  <CircleNotch
+                    aria-hidden="true"
+                    className="isSpinning"
+                    size={18}
+                  />
+                )}
+                <div>
+                  <strong>脱水助手</strong>
+                  <span>{error ? "处理未完成" : "正在处理这份材料"}</span>
+                </div>
+              </div>
+              {error ? (
+                <div className="distillConversationError" role="alert">
+                  <p>{error}</p>
+                  <span>你可以修改输入后重新发送。</span>
+                </div>
+              ) : (
+                <ol className="distillLiveSteps">
+                  {steps.map((step, index) => {
+                    const Icon = step.icon;
+                    const complete = activeStage > index;
+                    const active = activeStage === index;
+                    return (
+                      <li
+                        key={step.title}
+                        className={
+                          complete ? "isComplete" : active ? "isActive" : ""
+                        }
+                      >
+                        <Icon aria-hidden="true" size={17} />
+                        <span>
+                          <strong>{step.title}</strong>
+                          <small>{step.detail}</small>
+                        </span>
+                        {complete ? (
+                          <CheckCircle
+                            aria-hidden="true"
+                            size={16}
+                            weight="fill"
+                          />
+                        ) : (
+                          <i aria-hidden="true" />
+                        )}
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
+            </article>
+          </div>
+        ) : (
+          <div className="distillConversationEmpty">
+            <div className="distillAssistantMark" aria-hidden="true">
+              <Sparkle size={22} />
+            </div>
+            <p>一次只处理一份材料</p>
+            <h2>今天想读懂什么？</h2>
+            <span>
+              粘贴网页链接或正文。我会先判断值不值得读，再把真正有用的部分整理成可追问、可保存的知识文档。
+            </span>
+            <div
+              className="distillConversationPrompts"
+              aria-label="适合处理的内容"
+            >
+              <span>长文与访谈</span>
+              <span>论文与技术博客</span>
+              <span>产品与行业分析</span>
+            </div>
+          </div>
+        )}
+      </section>
+
+      <form
+        ref={formRef}
+        className="distillConversationComposer"
+        onSubmit={submit}
+      >
+        <label htmlFor="distill-input">网页链接或正文</label>
         <textarea
           id="distill-input"
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder="粘贴一篇网页链接，或直接粘贴需要脱水的正文"
-          rows={7}
+          onKeyDown={handleKeyDown}
+          placeholder="粘贴网页链接或正文，按 Enter 开始脱水"
+          rows={4}
           minLength={8}
           maxLength={100_000}
+          disabled={submitting}
           required
         />
-        <div className="distillComposerFooter">
+        <footer>
           <div aria-label="当前支持的输入">
             <span>
               <LinkSimple aria-hidden="true" size={15} />
@@ -63,20 +206,13 @@ export function DistillSubmitForm() {
               正文
             </span>
           </div>
+          <small>Enter 发送 · Shift + Enter 换行</small>
           <button type="submit" disabled={submitting || !input.trim()}>
-            {submitting ? "正在读取与脱水" : "开始脱水"}
-            <ArrowRight aria-hidden="true" size={17} />
+            <ArrowUp aria-hidden="true" size={17} weight="bold" />
+            <span>{submitting ? "处理中" : "发送"}</span>
           </button>
-        </div>
-      </div>
-      <p className="distillComposerHelper">
-        当前为私人能力。平台视频、音频与文件将通过独立适配器接入，不会影响现有知识结构。
-      </p>
-      {error ? (
-        <p className="distillComposerError" role="alert">
-          {error}
-        </p>
-      ) : null}
-    </form>
+        </footer>
+      </form>
+    </div>
   );
 }

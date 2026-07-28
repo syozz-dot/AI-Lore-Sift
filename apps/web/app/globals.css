@@ -2490,6 +2490,436 @@ button {
   line-height: 1.65;
 }
 
+.distillNewTaskCanvas {
+  min-height: calc(100dvh - 68px);
+  padding: 28px 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.distillConversationHeader {
+  min-height: 70px;
+  padding: 0 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.distillConversationHeader p,
+.distillConversationHeader h1 {
+  margin: 0;
+}
+
+.distillConversationHeader p {
+  margin-bottom: 5px;
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.distillConversationHeader h1 {
+  font-family: var(--font-serif);
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.distillConversationHeader > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-tertiary);
+  font-size: 10px;
+}
+
+.distillNewConversation {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(390px, 1fr) auto;
+}
+
+.distillConversationBody {
+  min-height: 0;
+  padding: 40px 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.distillConversationEmpty {
+  width: min(100%, 680px);
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.distillAssistantMark {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  color: var(--accent);
+}
+
+.distillConversationEmpty > p {
+  margin: 22px 0 0;
+  color: var(--accent);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.distillConversationEmpty h2 {
+  margin: 12px 0 0;
+  font-family: var(--font-serif);
+  font-size: clamp(38px, 4vw, 54px);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 1.08;
+}
+
+.distillConversationEmpty > span {
+  max-width: 620px;
+  margin-top: 20px;
+  color: var(--ink-secondary);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.distillConversationPrompts {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.distillConversationPrompts span {
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  color: var(--ink-tertiary);
+  font-size: 9px;
+}
+
+.distillProcessingThread {
+  width: min(100%, 900px);
+  display: grid;
+  gap: 28px;
+}
+
+.distillConversationUser {
+  width: min(76%, 690px);
+  margin-left: auto;
+  display: grid;
+  justify-items: end;
+  gap: 7px;
+}
+
+.distillConversationUser small {
+  color: var(--ink-tertiary);
+  font-size: 9px;
+}
+
+.distillConversationUser p {
+  max-width: 100%;
+  margin: 0;
+  padding: 14px 17px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.distillConversationAssistant {
+  width: min(86%, 760px);
+  padding-left: 18px;
+  border-left: 2px solid var(--accent);
+}
+
+.distillAssistantIdentity {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.distillAssistantIdentity > svg {
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+
+.distillAssistantIdentity strong,
+.distillAssistantIdentity span {
+  display: block;
+}
+
+.distillAssistantIdentity strong {
+  font-size: 11px;
+}
+
+.distillAssistantIdentity span {
+  margin-top: 3px;
+  color: var(--ink-tertiary);
+  font-size: 9px;
+}
+
+.distillLiveSteps {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.distillLiveSteps li {
+  min-height: 64px;
+  padding: 13px 0;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-tertiary);
+  opacity: 0.48;
+}
+
+.distillLiveSteps li.isActive,
+.distillLiveSteps li.isComplete {
+  color: var(--ink);
+  opacity: 1;
+}
+
+.distillLiveSteps li.isActive > svg:first-child,
+.distillLiveSteps li.isComplete > svg:first-child,
+.distillLiveSteps li > svg:last-child {
+  color: var(--accent);
+}
+
+.distillLiveSteps li span,
+.distillLiveSteps li strong,
+.distillLiveSteps li small {
+  display: block;
+}
+
+.distillLiveSteps li strong {
+  font-size: 10px;
+}
+
+.distillLiveSteps li small {
+  margin-top: 5px;
+  color: var(--ink-tertiary);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.distillLiveSteps li i {
+  width: 7px;
+  height: 7px;
+  justify-self: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.distillLiveSteps li.isActive i {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.distillConversationError {
+  margin-top: 18px;
+  padding: 15px 17px;
+  border: 1px solid color-mix(in srgb, #b24b3f 48%, var(--line));
+  background: color-mix(in srgb, #b24b3f 7%, var(--surface));
+}
+
+.distillConversationError p,
+.distillConversationError span {
+  margin: 0;
+  display: block;
+}
+
+.distillConversationError p {
+  color: #b24b3f;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.distillConversationError span {
+  margin-top: 6px;
+  color: var(--ink-secondary);
+  font-size: 9px;
+}
+
+.distillConversationComposer {
+  position: sticky;
+  bottom: 18px;
+  z-index: 3;
+  width: min(100%, 900px);
+  margin: 0 auto;
+  border: 1px solid var(--line-strong);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--ink) 10%, transparent);
+  backdrop-filter: blur(16px);
+}
+
+.distillConversationComposer > label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.distillConversationComposer textarea {
+  width: 100%;
+  min-height: 102px;
+  padding: 18px 20px 10px;
+  display: block;
+  resize: vertical;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.distillConversationComposer textarea::placeholder {
+  color: var(--ink-tertiary);
+}
+
+.distillConversationComposer textarea:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.distillConversationComposer footer {
+  min-height: 50px;
+  padding: 8px 10px 8px 18px;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.distillConversationComposer footer > div {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.distillConversationComposer footer > div span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-tertiary);
+  font-size: 9px;
+}
+
+.distillConversationComposer footer > small {
+  color: var(--ink-tertiary);
+  font-size: 8px;
+}
+
+.distillConversationComposer button {
+  min-width: 90px;
+  height: 36px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  background: var(--accent);
+  color: var(--accent-ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.distillConversationComposer button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
+.distillTaskStateCanvas {
+  min-height: calc(100dvh - 68px);
+  padding-top: 28px;
+}
+
+.distillTaskState {
+  min-height: 520px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.distillTaskState > svg {
+  color: var(--accent);
+}
+
+.distillTaskState p,
+.distillTaskState h2,
+.distillTaskState span {
+  margin: 0;
+}
+
+.distillTaskState p {
+  margin-top: 17px;
+  color: var(--accent);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 9px;
+}
+
+.distillTaskState h2 {
+  max-width: 620px;
+  margin-top: 12px;
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.distillTaskState span {
+  max-width: 520px;
+  margin-top: 15px;
+  color: var(--ink-secondary);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.distillTaskState a {
+  margin-top: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.isSpinning {
+  animation: distillSpin 0.9s linear infinite;
+}
+
+@keyframes distillSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .distillAgentResult .distillAgentCanvas {
   padding-top: 28px;
 }
@@ -3189,6 +3619,86 @@ button {
   .distillAgentCanvas {
     width: calc(100% - 28px);
     padding: 40px 0 72px;
+  }
+
+  .distillNewTaskCanvas {
+    min-height: calc(100dvh - 60px);
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+
+  .distillConversationHeader {
+    min-height: 62px;
+    padding-bottom: 14px;
+  }
+
+  .distillConversationHeader h1 {
+    font-size: 22px;
+  }
+
+  .distillNewConversation {
+    grid-template-rows: minmax(350px, 1fr) auto;
+  }
+
+  .distillConversationBody {
+    padding: 30px 0 20px;
+  }
+
+  .distillConversationEmpty h2 {
+    font-size: 34px;
+  }
+
+  .distillConversationEmpty > span {
+    font-size: 12px;
+  }
+
+  .distillConversationPrompts {
+    gap: 6px;
+  }
+
+  .distillConversationUser,
+  .distillConversationAssistant {
+    width: 100%;
+  }
+
+  .distillConversationComposer {
+    bottom: 10px;
+  }
+
+  .distillConversationComposer textarea {
+    min-height: 92px;
+    padding: 15px 15px 8px;
+  }
+
+  .distillConversationComposer footer {
+    padding-left: 13px;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+  }
+
+  .distillConversationComposer footer > small {
+    display: none;
+  }
+
+  .distillConversationComposer button {
+    min-width: 44px;
+    padding: 0 10px;
+  }
+
+  .distillConversationComposer button span {
+    display: none;
+  }
+
+  .distillTaskStateCanvas {
+    padding-top: 18px;
+  }
+
+  .distillTaskState {
+    min-height: 430px;
+  }
+
+  .distillTaskState h2 {
+    font-size: 28px;
   }
 
   .distillAgentIntro h1 {

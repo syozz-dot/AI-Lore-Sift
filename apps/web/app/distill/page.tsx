@@ -1,9 +1,4 @@
-import {
-  Brain,
-  FileMagnifyingGlass,
-  LockSimple,
-  Sparkle,
-} from "@phosphor-icons/react/dist/ssr";
+import { LockSimple } from "@phosphor-icons/react/dist/ssr";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -29,42 +24,18 @@ export default async function DistillPage() {
   return (
     <main className="distillAgentWorkspace">
       <DistillTaskList documents={documents} />
-      <div className="distillAgentCanvas">
-        <section className="distillAgentIntro" aria-labelledby="distill-title">
-          <p>
-            <LockSimple aria-hidden="true" size={14} />
-            私人知识工作台
-          </p>
-          <h1 id="distill-title">丢一篇内容进来，留下真正有用的部分。</h1>
+      <div className="distillAgentCanvas distillNewTaskCanvas">
+        <header className="distillConversationHeader">
+          <div>
+            <p>新建任务</p>
+            <h1 id="distill-title">脱水助手</h1>
+          </div>
           <span>
-            先替你做读前判断，再把论点、证据和可复用知识整理成一份稳定文档。
-            处理完成后还可以围绕原文继续追问。
+            <LockSimple aria-hidden="true" size={14} />
+            仅你可见
           </span>
-        </section>
+        </header>
         <DistillSubmitForm />
-        <section className="distillAgentCapabilities" aria-label="脱水能力">
-          <article>
-            <FileMagnifyingGlass aria-hidden="true" size={21} />
-            <div>
-              <strong>判断值不值得读</strong>
-              <span>给出阅读建议与理由，避免为了摘要而摘要。</span>
-            </div>
-          </article>
-          <article>
-            <Brain aria-hidden="true" size={21} />
-            <div>
-              <strong>形成稳定知识文档</strong>
-              <span>导读、核心要点、证据边界与原文锚点一次整理。</span>
-            </div>
-          </article>
-          <article>
-            <Sparkle aria-hidden="true" size={21} />
-            <div>
-              <strong>继续追问与沉淀</strong>
-              <span>围绕当前材料连续追问，单独保存真正值得带走的判断。</span>
-            </div>
-          </article>
-        </section>
       </div>
     </main>
   );

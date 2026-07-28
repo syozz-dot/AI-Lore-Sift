@@ -77,26 +77,39 @@ export default async function DistillResultPage({
 
   if (document.status !== "ready" || !document.analysis) {
     return (
-      <main className="distillResultState">
-        {document.status === "failed" ? (
-          <WarningCircle aria-hidden="true" size={30} />
-        ) : (
-          <FileText aria-hidden="true" size={30} />
-        )}
-        <p>{document.status === "failed" ? "本次处理失败" : "正在处理"}</p>
-        <h1>
-          {document.status === "failed"
-            ? "没有生成可用的脱水内容。"
-            : "正在建立原文与证据的对应关系。"}
-        </h1>
-        <span>
-          {document.errorMessage ||
-            "完成后会自动出现在最近脱水中，请稍后刷新。"}
-        </span>
-        <Link href="/distill">
-          <ArrowLeft aria-hidden="true" size={16} />
-          返回脱水工作台
-        </Link>
+      <main className="distillAgentWorkspace">
+        <DistillTaskList documents={documents} currentId={id} />
+        <div className="distillAgentCanvas distillTaskStateCanvas">
+          <header className="distillConversationHeader">
+            <div>
+              <p>任务状态</p>
+              <h1>
+                {document.status === "failed" ? "处理未完成" : "正在脱水"}
+              </h1>
+            </div>
+          </header>
+          <section className="distillTaskState">
+            {document.status === "failed" ? (
+              <WarningCircle aria-hidden="true" size={28} />
+            ) : (
+              <FileText aria-hidden="true" size={28} />
+            )}
+            <p>{document.status === "failed" ? "本次处理失败" : "正在处理"}</p>
+            <h2>
+              {document.status === "failed"
+                ? "没有生成可用的脱水内容。"
+                : "正在建立原文与证据的对应关系。"}
+            </h2>
+            <span>
+              {document.errorMessage ||
+                "完成后会自动出现在任务记录中，请稍后刷新。"}
+            </span>
+            <Link href="/distill">
+              <ArrowLeft aria-hidden="true" size={16} />
+              新建任务
+            </Link>
+          </section>
+        </div>
       </main>
     );
   }
