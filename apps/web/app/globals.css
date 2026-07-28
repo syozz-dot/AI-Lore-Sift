@@ -3135,7 +3135,7 @@ button {
   width: 100%;
   max-width: none;
   margin: 0;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   border-top: 1px solid var(--line-strong);
   border-left: 1px solid var(--line);
 }
@@ -3143,7 +3143,7 @@ button {
 .distillKeyPoints > article,
 .distillKeyPoints > article:nth-child(even) {
   min-width: 0;
-  padding: 25px 26px;
+  padding: 24px 28px;
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   border-left: 0;
@@ -3180,7 +3180,7 @@ button {
   max-width: none;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   border-top: 1px solid var(--line-strong);
   border-left: 1px solid var(--line);
 }
