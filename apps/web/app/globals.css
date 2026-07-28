@@ -2925,6 +2925,7 @@ button {
 }
 
 .distillAgentResult .distillAgentCanvas {
+  width: min(calc(100% - 48px), 1280px);
   padding-top: 28px;
 }
 
@@ -3034,13 +3035,16 @@ button {
 }
 
 .distillResultDocument {
+  overflow: clip;
   border: 1px solid var(--line-strong);
   background: var(--surface);
 }
 
 .distillResultDocument .distillResultHero {
   max-width: none;
-  padding: 52px 54px 42px;
+  padding: 56px 48px 44px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--accent) 3%, var(--surface));
 }
 
 .distillResultDocument .distillResultHero h1 {
@@ -3049,30 +3053,112 @@ button {
 }
 
 .distillResultDocument .distillResultMetrics {
-  padding: 0 54px;
+  padding: 0 48px;
 }
 
 .distillResultDocument .distillResultLayout {
-  padding: 60px 54px 0;
+  padding: 0 48px;
   display: block;
 }
 
-.distillSectionEyebrow {
-  margin: 0 0 9px;
+.distillResultDocument .distillResultBody {
+  width: 100%;
+  max-width: none;
+}
+
+.distillResultBody > .distillResultModule {
+  padding: 48px 0;
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 36px;
+  border-bottom: 1px solid var(--line);
+}
+
+.distillResultBody > .distillResultModule:not(:first-child) {
+  padding-top: 48px;
+  border-top: 0;
+}
+
+.distillModuleHeading {
+  min-width: 0;
+}
+
+.distillModuleHeading > span {
+  display: block;
+  margin-bottom: 36px;
   color: var(--ink-tertiary);
   font-family: "JetBrains Mono Variable", monospace;
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 0.16em;
 }
 
-.distillResultBody .distillSectionEyebrow + h2 {
+.distillModuleHeading h2 {
+  margin: 0;
   color: var(--ink);
   font-family: var(--font-serif);
-  font-size: 27px;
+  font-size: 24px;
   font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.distillModuleHeading p {
+  max-width: 140px;
+  margin: 10px 0 0;
+  color: var(--ink-tertiary);
+  font-size: 10px;
+  line-height: 1.65;
+}
+
+.distillModuleContent {
+  min-width: 0;
+}
+
+.distillLeadModule {
+  align-items: center;
+  min-height: 250px;
+}
+
+.distillLeadModule .distillModuleHeading > span {
+  margin-bottom: 26px;
+}
+
+.distillLeadModule .distillLeadSummary {
+  max-width: 1000px;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(22px, 2.15vw, 30px);
+  line-height: 1.68;
+  letter-spacing: -0.025em;
+}
+
+.distillKeyPoints {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--line-strong);
+  border-left: 1px solid var(--line);
+}
+
+.distillKeyPoints > article,
+.distillKeyPoints > article:nth-child(even) {
+  min-width: 0;
+  padding: 25px 26px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-left: 0;
+  background: color-mix(in srgb, var(--accent) 2%, var(--surface));
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.distillKeyPoints > article:hover {
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
 }
 
 .distillKeyPoints > article > span {
+  margin: 0;
   color: var(--accent);
   font-family: "JetBrains Mono Variable", monospace;
   font-size: 9px;
@@ -3080,19 +3166,19 @@ button {
 
 .distillKeyPoints > article > h3 {
   margin-top: 12px;
+  font-size: clamp(18px, 1.55vw, 22px);
+  line-height: 1.42;
 }
 
-.distillKeyPoints > article > small {
-  display: block;
-  margin-top: 14px;
-  color: var(--ink-tertiary);
-  font-family: "JetBrains Mono Variable", monospace;
-  font-size: 9px;
+.distillKeyPoints > article > p {
+  font-size: 12px;
+  line-height: 1.78;
 }
 
 .distillTakeawayCards {
-  max-width: 800px;
-  margin-top: 24px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   border-top: 1px solid var(--line-strong);
@@ -3101,10 +3187,17 @@ button {
 
 .distillTakeawayCards > article {
   min-width: 0;
-  padding: 24px;
+  padding: 26px;
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   background: color-mix(in srgb, var(--accent) 4%, var(--surface));
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.distillTakeawayCards > article:hover {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
 }
 
 .distillTakeawayCards > article > span {
@@ -3116,7 +3209,7 @@ button {
 .distillTakeawayCards h3 {
   margin: 14px 0 0;
   font-family: var(--font-serif);
-  font-size: 18px;
+  font-size: clamp(18px, 1.5vw, 21px);
   font-weight: 600;
   line-height: 1.45;
 }
@@ -3126,6 +3219,23 @@ button {
   color: var(--ink-secondary);
   font-size: 12px;
   line-height: 1.75;
+}
+
+.distillCautions {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.distillCautions li {
+  min-height: 88px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--danger) 3%, var(--surface));
+  line-height: 1.72;
 }
 
 .knowledgeCardActions {
@@ -3160,77 +3270,129 @@ button {
 }
 
 .distillFollowUp {
-  margin: 0 54px 54px;
-  padding: 30px;
+  margin: 8px 48px 48px;
+  padding: 34px;
   border: 1px solid var(--line-strong);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--accent) 4%, var(--surface));
 }
 
 .distillFollowUp > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+.distillFollowUpTitle {
   display: flex;
   align-items: flex-start;
   gap: 12px;
 }
 
-.distillFollowUp > header svg {
+.distillFollowUp > header svg,
+.distillFollowUpTitle > svg {
   color: var(--accent);
 }
 
-.distillFollowUp > header p,
-.distillFollowUp > header h2 {
+.distillFollowUpTitle p,
+.distillFollowUpTitle h2 {
   margin: 0;
 }
 
-.distillFollowUp > header p {
+.distillFollowUpTitle p {
   color: var(--ink-tertiary);
   font-size: 9px;
 }
 
-.distillFollowUp > header h2 {
+.distillFollowUpTitle h2 {
   margin-top: 4px;
   font-family: var(--font-serif);
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 600;
 }
 
+.distillFollowUp > header > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-tertiary);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
 .distillSuggestedQuestions {
-  margin-top: 22px;
-  display: grid;
-  gap: 8px;
+  margin-top: 28px;
 }
 
 .distillSuggestedQuestions p {
-  margin: 0 0 3px;
+  margin: 0 0 10px;
   color: var(--ink-secondary);
   font-size: 11px;
 }
 
+.distillSuggestedQuestions > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+
 .distillSuggestedQuestions button {
-  min-height: 48px;
-  padding: 11px 14px;
-  border: 1px solid var(--line);
-  background: transparent;
+  min-height: 74px;
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
   color: var(--ink);
   cursor: pointer;
   font: inherit;
   font-size: 12px;
   line-height: 1.55;
   text-align: left;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
 .distillSuggestedQuestions button:hover {
-  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
   color: var(--accent);
 }
 
+.distillSuggestedQuestions button > span {
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 8px;
+}
+
+.distillSuggestedQuestions button > strong {
+  font-weight: 580;
+}
+
+.distillSuggestedQuestions button > svg {
+  justify-self: end;
+  transition: transform 180ms ease;
+}
+
+.distillSuggestedQuestions button:hover > svg {
+  transform: translateX(3px);
+}
+
 .distillMessageList {
-  margin-top: 24px;
+  margin-top: 30px;
+  padding-top: 26px;
   display: grid;
-  gap: 16px;
+  gap: 20px;
+  border-top: 1px solid var(--line);
 }
 
 .distillMessageList article {
-  max-width: 82%;
+  max-width: min(84%, 880px);
 }
 
 .distillMessageList article.isUser {
@@ -3239,7 +3401,7 @@ button {
 }
 
 .distillMessageList article.isAssistant {
-  padding-left: 14px;
+  padding: 2px 0 2px 16px;
   border-left: 2px solid var(--accent);
 }
 
@@ -3257,8 +3419,8 @@ button {
 .distillMessageBody p,
 .distillMessageBody ol {
   margin: 6px 0 0;
-  font-size: 13px;
-  line-height: 1.75;
+  font-size: 14px;
+  line-height: 1.82;
 }
 
 .distillMessageBody ol {
@@ -3280,8 +3442,10 @@ button {
 
 .distillFollowUp form {
   position: relative;
-  margin-top: 24px;
+  margin-top: 30px;
   border: 1px solid var(--line-strong);
+  background: var(--surface);
+  box-shadow: 0 18px 44px color-mix(in srgb, var(--ink) 7%, transparent);
 }
 
 .distillFollowUp form > label {
@@ -3294,8 +3458,8 @@ button {
 
 .distillFollowUp textarea {
   width: 100%;
-  min-height: 96px;
-  padding: 15px 108px 15px 15px;
+  min-height: 88px;
+  padding: 17px 126px 17px 17px;
   resize: vertical;
   border: 0;
   outline: 0;
@@ -3310,13 +3474,15 @@ button {
   position: absolute;
   right: 12px;
   bottom: 12px;
-  min-width: 78px;
-  height: 34px;
-  display: grid;
-  place-items: center;
+  min-width: 94px;
+  height: 38px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
-  background: var(--brand-pine);
-  color: var(--light-ink);
+  background: var(--accent);
+  color: var(--accent-ink);
   cursor: pointer;
   gap: 7px;
   font: inherit;
@@ -3330,8 +3496,19 @@ button {
 }
 
 .distillFollowUp form > button.isPending {
+  position: absolute;
+  overflow: hidden;
   cursor: progress;
   opacity: 0.72;
+}
+
+.distillFollowUp form > button.isPending::after {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, white 18%, transparent);
+  content: "";
+  transform: translateX(-100%);
+  animation: distillProgressSweep 1.2s ease-in-out infinite;
 }
 
 .distillFollowUpBoundary,
@@ -3346,6 +3523,58 @@ button {
 
 .distillFollowUpError {
   color: var(--danger);
+}
+
+@keyframes distillProgressSweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .distillResultHero,
+  .distillResultMetrics,
+  .distillResultModule,
+  .distillFollowUp {
+    opacity: 0;
+    animation: distillResultReveal 520ms ease forwards;
+  }
+
+  .distillResultMetrics {
+    animation-delay: 70ms;
+  }
+
+  .distillResultModule:nth-child(1) {
+    animation-delay: 120ms;
+  }
+
+  .distillResultModule:nth-child(2) {
+    animation-delay: 170ms;
+  }
+
+  .distillResultModule:nth-child(3) {
+    animation-delay: 220ms;
+  }
+
+  .distillResultModule:nth-child(4) {
+    animation-delay: 270ms;
+  }
+
+  .distillFollowUp {
+    animation-delay: 320ms;
+  }
+}
+
+@keyframes distillResultReveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .knowledgeSectionTitle {
@@ -3482,6 +3711,11 @@ button {
 
   .distillResultDocument .distillResultLayout {
     grid-template-columns: 1fr;
+  }
+
+  .distillResultBody > .distillResultModule {
+    grid-template-columns: 132px minmax(0, 1fr);
+    gap: 26px;
   }
 
   .distillAgentCapabilities {
@@ -3753,9 +3987,40 @@ button {
     padding: 42px 20px 0;
   }
 
+  .distillResultBody > .distillResultModule,
+  .distillResultBody > .distillResultModule:not(:first-child) {
+    padding: 36px 0;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .distillModuleHeading > span,
+  .distillLeadModule .distillModuleHeading > span {
+    margin-bottom: 14px;
+  }
+
+  .distillModuleHeading p {
+    max-width: none;
+  }
+
   .distillTakeawayCards,
   .knowledgeCardsCollection > div:last-child {
     grid-template-columns: 1fr;
+  }
+
+  .distillCautions,
+  .distillSuggestedQuestions > div {
+    grid-template-columns: 1fr;
+  }
+
+  .distillFollowUp > header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .distillFollowUpTitle h2 {
+    font-size: 24px;
   }
 
   .distillMessageList article {

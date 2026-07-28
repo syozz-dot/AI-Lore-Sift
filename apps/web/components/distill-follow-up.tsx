@@ -1,6 +1,11 @@
 "use client";
 
-import { ArrowUp, ChatCircleDots } from "@phosphor-icons/react";
+import {
+  ArrowRight,
+  ArrowUp,
+  ChatCircleDots,
+  Sparkle,
+} from "@phosphor-icons/react";
 import { useState } from "react";
 import type { FormEvent } from "react";
 
@@ -23,6 +28,26 @@ function cleanInlineMarkdown(value: string) {
     .trim();
 }
 
+function chunkParagraph(value: string, maxLength = 220) {
+  if (value.length <= maxLength) return [value];
+  const sentences = value
+    .match(/[^。！？!?；;]+[。！？!?；;]?/g)
+    ?.map((item) => item.trim()) ?? [value];
+  const chunks: string[] = [];
+  let current = "";
+
+  for (const sentence of sentences) {
+    if (current && current.length + sentence.length > maxLength) {
+      chunks.push(current);
+      current = sentence;
+    } else {
+      current += sentence;
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks;
+}
+
 function messageBlocks(content: string): MessageBlock[] {
   const prepared = content
     .replace(/\r\n?/g, "\n")
@@ -43,7 +68,9 @@ function messageBlocks(content: string): MessageBlock[] {
       }
       continue;
     }
-    blocks.push({ kind: "paragraph", content: line });
+    for (const paragraph of chunkParagraph(line)) {
+      blocks.push({ kind: "paragraph", content: paragraph });
+    }
   }
 
   return blocks;
@@ -134,12 +161,36 @@ export function DistillFollowUp({
   return (
     <section className="distillFollowUp" aria-labelledby="follow-up-title">
       <header>
-        <ChatCircleDots aria-hidden="true" size={21} />
-        <div>
-          <p>继续理解</p>
-          <h2 id="follow-up-title">基于这篇材料继续追问</h2>
+        <div className="distillFollowUpTitle">
+          <ChatCircleDots aria-hidden="true" size={22} />
+          <div>
+            <p>继续理解</p>
+            <h2 id="follow-up-title">基于这篇材料继续追问</h2>
+          </div>
         </div>
+        <span>
+          <Sparkle aria-hidden="true" size={14} />
+          仅基于当前材料
+        </span>
       </header>
+
+      <div className="distillSuggestedQuestions">
+        <p>你可能还想问</p>
+        <div>
+          {suggestedQuestions.map((suggestion, index) => (
+            <button
+              key={suggestion}
+              type="button"
+              onClick={() => void ask(suggestion)}
+              disabled={pending}
+            >
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <strong>{suggestion}</strong>
+              <ArrowRight aria-hidden="true" size={16} />
+            </button>
+          ))}
+        </div>
+      </div>
 
       {messages.length ? (
         <div className="distillMessageList" aria-live="polite">
@@ -159,21 +210,7 @@ export function DistillFollowUp({
             </article>
           ) : null}
         </div>
-      ) : (
-        <div className="distillSuggestedQuestions">
-          <p>你可能还想问</p>
-          {suggestedQuestions.map((suggestion) => (
-            <button
-              key={suggestion}
-              type="button"
-              onClick={() => void ask(suggestion)}
-              disabled={pending}
-            >
-              {suggestion}
-            </button>
-          ))}
-        </div>
-      )}
+      ) : null}
 
       <form onSubmit={submit}>
         <label htmlFor="distill-follow-up">继续追问</label>
@@ -181,8 +218,8 @@ export function DistillFollowUp({
           id="distill-follow-up"
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
-          placeholder="针对原文、方法或结论继续提问"
-          rows={3}
+          placeholder="追问原文、方法、结论，或让助手结合你的场景继续拆解"
+          rows={2}
           maxLength={2_000}
         />
         <button

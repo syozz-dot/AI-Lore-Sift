@@ -215,66 +215,90 @@ export default async function DistillResultPage({
 
           <div className="distillResultLayout">
             <div className="distillResultBody">
-              <section>
-                <h2>导读</h2>
-                <p className="distillLeadSummary">{analysis.summary}</p>
+              <section className="distillResultModule distillLeadModule">
+                <header className="distillModuleHeading">
+                  <span>01</span>
+                  <h2>导读</h2>
+                  <p>先判断是否值得投入时间</p>
+                </header>
+                <div className="distillModuleContent">
+                  <p className="distillLeadSummary">{analysis.summary}</p>
+                </div>
               </section>
 
-              <section>
-                <h2>作者观点</h2>
-                <div className="distillKeyPoints">
-                  {analysis.keyPoints.map((point, index) => (
-                    <article key={`${point.title}-${point.detail}`}>
-                      <span>{String(index + 1).padStart(2, "0")}</span>
-                      <h3>{point.title}</h3>
-                      <p>{point.detail}</p>
-                    </article>
-                  ))}
+              <section className="distillResultModule">
+                <header className="distillModuleHeading">
+                  <span>02</span>
+                  <h2>作者观点</h2>
+                  <p>还原作者真正提出的判断</p>
+                </header>
+                <div className="distillModuleContent">
+                  <div className="distillKeyPoints">
+                    {analysis.keyPoints.map((point, index) => (
+                      <article key={`${point.title}-${point.detail}`}>
+                        <span>{String(index + 1).padStart(2, "0")}</span>
+                        <h3>{point.title}</h3>
+                        <p>{point.detail}</p>
+                      </article>
+                    ))}
+                  </div>
                 </div>
               </section>
 
               {analysis.transferableInsights.length ? (
-                <section>
-                  <h2>干货提炼</h2>
-                  <div className="distillTakeawayCards">
-                    {analysis.transferableInsights.map((insight, index) => {
-                      const firstSentence =
-                        insight.split(/[。！？!?；;]/, 1)[0] ||
-                        `知识 ${index + 1}`;
-                      const title =
-                        firstSentence.length > 42
-                          ? `${firstSentence.slice(0, 41)}…`
-                          : firstSentence;
-                      return (
-                        <article key={`${index}-${insight}`}>
-                          <span>{String(index + 1).padStart(2, "0")}</span>
-                          <h3>{title}</h3>
-                          <p>{insight}</p>
-                          <KnowledgeCardActions
-                            documentId={document.id}
-                            insightIndex={index}
-                            title={title}
-                            content={insight}
-                            initialSaved={savedInsightIndexSet.has(index)}
-                          />
-                        </article>
-                      );
-                    })}
+                <section className="distillResultModule">
+                  <header className="distillModuleHeading">
+                    <span>03</span>
+                    <h2>干货提炼</h2>
+                    <p>可以带走和复用的知识</p>
+                  </header>
+                  <div className="distillModuleContent">
+                    <div className="distillTakeawayCards">
+                      {analysis.transferableInsights.map((insight, index) => {
+                        const firstSentence =
+                          insight.split(/[。！？!?；;]/, 1)[0] ||
+                          `知识 ${index + 1}`;
+                        const title =
+                          firstSentence.length > 42
+                            ? `${firstSentence.slice(0, 41)}…`
+                            : firstSentence;
+                        return (
+                          <article key={`${index}-${insight}`}>
+                            <span>{String(index + 1).padStart(2, "0")}</span>
+                            <h3>{title}</h3>
+                            <p>{insight}</p>
+                            <KnowledgeCardActions
+                              documentId={document.id}
+                              insightIndex={index}
+                              title={title}
+                              content={insight}
+                              initialSaved={savedInsightIndexSet.has(index)}
+                            />
+                          </article>
+                        );
+                      })}
+                    </div>
                   </div>
                 </section>
               ) : null}
 
               {analysis.cautions.length ? (
-                <section>
-                  <h2>谨慎判断</h2>
-                  <ul className="distillCautions">
-                    {analysis.cautions.map((caution) => (
-                      <li key={caution}>
-                        <WarningCircle aria-hidden="true" size={17} />
-                        {caution}
-                      </li>
-                    ))}
-                  </ul>
+                <section className="distillResultModule distillCautionModule">
+                  <header className="distillModuleHeading">
+                    <span>04</span>
+                    <h2>谨慎判断</h2>
+                    <p>证据还不足以支持的部分</p>
+                  </header>
+                  <div className="distillModuleContent">
+                    <ul className="distillCautions">
+                      {analysis.cautions.map((caution) => (
+                        <li key={caution}>
+                          <WarningCircle aria-hidden="true" size={17} />
+                          {caution}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </section>
               ) : null}
             </div>
