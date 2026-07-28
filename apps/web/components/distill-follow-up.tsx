@@ -11,6 +11,62 @@ interface FollowUpMessage {
   createdAt: string;
 }
 
+interface MessageBlock {
+  kind: "paragraph" | "list";
+  content: string | string[];
+}
+
+function cleanInlineMarkdown(value: string) {
+  return value
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/__([^_]+)__/g, "$1")
+    .trim();
+}
+
+function messageBlocks(content: string): MessageBlock[] {
+  const prepared = content
+    .replace(/\r\n?/g, "\n")
+    .replace(/\s*\*\*([^*\n]+)\*\*\s*([：:])/g, "\n\n$1$2 ")
+    .replace(/([。！？!?])\s+(?=(?:[-•]|\d+[.、])\s)/g, "$1\n")
+    .trim();
+  const lines = prepared.split(/\n+/).map(cleanInlineMarkdown).filter(Boolean);
+  const blocks: MessageBlock[] = [];
+
+  for (const line of lines) {
+    const listItem = line.match(/^(?:[-•]|\d+[.、])\s*(.+)$/);
+    if (listItem?.[1]) {
+      const last = blocks.at(-1);
+      if (last?.kind === "list" && Array.isArray(last.content)) {
+        last.content.push(listItem[1]);
+      } else {
+        blocks.push({ kind: "list", content: [listItem[1]] });
+      }
+      continue;
+    }
+    blocks.push({ kind: "paragraph", content: line });
+  }
+
+  return blocks;
+}
+
+function DistillMessageBody({ content }: { content: string }) {
+  return (
+    <div className="distillMessageBody">
+      {messageBlocks(content).map((block, index) =>
+        block.kind === "list" && Array.isArray(block.content) ? (
+          <ol key={`list-${index}`}>
+            {block.content.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ol>
+        ) : (
+          <p key={`paragraph-${index}`}>{String(block.content)}</p>
+        ),
+      )}
+    </div>
+  );
+}
+
 export function DistillFollowUp({
   documentId,
   initialMessages,
@@ -93,7 +149,7 @@ export function DistillFollowUp({
               className={message.role === "user" ? "isUser" : "isAssistant"}
             >
               <small>{message.role === "user" ? "你" : "脱水助手"}</small>
-              <p>{message.content}</p>
+              <DistillMessageBody content={message.content} />
             </article>
           ))}
           {pending ? (
@@ -132,8 +188,11 @@ export function DistillFollowUp({
         <button
           type="submit"
           disabled={pending || !question.trim()}
+          className={pending ? "isPending" : undefined}
+          aria-busy={pending}
           aria-label="发送追问"
         >
+          <span>{pending ? "回答中" : "发送"}</span>
           <ArrowUp aria-hidden="true" size={17} weight="bold" />
         </button>
       </form>

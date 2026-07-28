@@ -8,11 +8,9 @@ import {
 export function DistillProcessPanel({
   sourceType,
   paragraphCount,
-  evidenceCount,
 }: {
   sourceType: string;
   paragraphCount: number;
-  evidenceCount: number;
 }) {
   const steps = [
     {
@@ -28,7 +26,7 @@ export function DistillProcessPanel({
     {
       icon: Sparkle,
       title: "已生成知识提炼",
-      detail: `结果关联 ${evidenceCount} 个原文证据锚点，可继续追问。`,
+      detail: "导读、作者观点和可保存的知识卡片已整理完成，可继续追问。",
     },
   ];
 

@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { generateDistillation } from "./distill-analysis";
+import {
+  generateDistillation,
+  normalizeDistillFollowUp,
+} from "./distill-analysis";
 
 const originalApiKey = process.env.DEEPSEEK_API_KEY;
 
@@ -14,6 +17,14 @@ afterEach(() => {
 });
 
 describe("distill analysis generation", () => {
+  it("preserves paragraph breaks in follow-up answers", () => {
+    expect(
+      normalizeDistillFollowUp(
+        "直接答案。  \n\n  1. 第一条说明。 \n 2. 第二条说明。",
+      ),
+    ).toBe("直接答案。\n\n1. 第一条说明。\n2. 第二条说明。");
+  });
+
   it("retries with a compact response when the first output is truncated", async () => {
     process.env.DEEPSEEK_API_KEY = "test-key";
     const fetchMock = vi
@@ -41,7 +52,8 @@ describe("distill analysis generation", () => {
                   content: JSON.stringify({
                     title: "模型服务商性能评估方法",
                     verdict: "read",
-                    verdictReason: "材料给出了可复用的评估方法和证据边界，值得阅读全文。",
+                    verdictReason:
+                      "材料给出了可复用的评估方法和证据边界，值得阅读全文。",
                     summary:
                       "文章说明如何比较不同模型服务商，并把速度、稳定性与成本放进同一评估框架。",
                     keyPoints: [

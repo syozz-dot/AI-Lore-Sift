@@ -1945,18 +1945,22 @@ button {
 }
 
 .distillResultLayout {
-  display: grid;
-  grid-template-columns: minmax(0, 8fr) minmax(300px, 4fr);
-  gap: 72px;
+  display: block;
   padding-top: 72px;
 }
 
 .distillResultBody {
+  max-width: 880px;
   min-width: 0;
 }
 
 .distillResultBody > section {
   padding-bottom: 68px;
+}
+
+.distillResultBody > section:not(:first-child) {
+  padding-top: 48px;
+  border-top: 1px solid var(--line);
 }
 
 .distillResultBody h2 {
@@ -3050,7 +3054,7 @@ button {
 
 .distillResultDocument .distillResultLayout {
   padding: 60px 54px 0;
-  gap: 54px;
+  display: block;
 }
 
 .distillSectionEyebrow {
@@ -3156,7 +3160,7 @@ button {
 }
 
 .distillFollowUp {
-  margin-top: 32px;
+  margin: 0 54px 54px;
   padding: 30px;
   border: 1px solid var(--line-strong);
   background: var(--surface);
@@ -3244,14 +3248,28 @@ button {
   font-size: 9px;
 }
 
-.distillMessageList p {
+.distillMessageBody {
+  margin-top: 7px;
+  display: grid;
+  gap: 10px;
+}
+
+.distillMessageBody p,
+.distillMessageBody ol {
   margin: 6px 0 0;
-  white-space: pre-wrap;
   font-size: 13px;
   line-height: 1.75;
 }
 
-.distillMessageList .isUser p {
+.distillMessageBody ol {
+  padding-left: 21px;
+}
+
+.distillMessageBody li + li {
+  margin-top: 7px;
+}
+
+.distillMessageList .isUser .distillMessageBody {
   padding: 11px 13px;
   background: color-mix(in srgb, var(--accent) 8%, var(--canvas));
 }
@@ -3277,7 +3295,7 @@ button {
 .distillFollowUp textarea {
   width: 100%;
   min-height: 96px;
-  padding: 15px 54px 15px 15px;
+  padding: 15px 108px 15px 15px;
   resize: vertical;
   border: 0;
   outline: 0;
@@ -3292,7 +3310,7 @@ button {
   position: absolute;
   right: 12px;
   bottom: 12px;
-  width: 34px;
+  min-width: 78px;
   height: 34px;
   display: grid;
   place-items: center;
@@ -3300,11 +3318,20 @@ button {
   background: var(--brand-pine);
   color: var(--light-ink);
   cursor: pointer;
+  gap: 7px;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .distillFollowUp form > button:disabled {
-  cursor: wait;
+  cursor: not-allowed;
   opacity: 0.45;
+}
+
+.distillFollowUp form > button.isPending {
+  cursor: progress;
+  opacity: 0.72;
 }
 
 .distillFollowUpBoundary,
@@ -3712,6 +3739,10 @@ button {
   .distillFollowUp,
   .distillResultDocument .distillResultHero {
     padding: 24px 20px;
+  }
+
+  .distillFollowUp {
+    margin: 0 20px 20px;
   }
 
   .distillResultDocument .distillResultMetrics {

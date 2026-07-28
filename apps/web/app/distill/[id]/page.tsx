@@ -1,7 +1,6 @@
 import {
   ArrowLeft,
   ArrowSquareOut,
-  CheckCircle,
   FileText,
   LinkSimple,
   WarningCircle,
@@ -32,18 +31,6 @@ const verdictLabels: Record<string, string> = {
   skip: "可以跳过",
   skim: "读脱水版即可",
   read: "建议阅读原文",
-};
-
-const claimTypeLabels: Record<string, string> = {
-  fact: "可核对事实",
-  author_view: "作者观点",
-  inference: "谨慎推断",
-};
-
-const confidenceLabels: Record<string, string> = {
-  high: "高",
-  medium: "中",
-  low: "低",
 };
 
 export async function generateMetadata({
@@ -116,15 +103,6 @@ export default async function DistillResultPage({
 
   const analysis = document.analysis;
   const paragraphs = splitDistillParagraphs(document.rawText);
-  const referencedParagraphs = [
-    ...new Set([
-      ...analysis.keyPoints.flatMap((point) => point.evidenceParagraphs),
-      ...analysis.claims.flatMap((claim) => claim.evidenceParagraphs),
-    ]),
-  ]
-    .sort((left, right) => left - right)
-    .map((number) => ({ number, text: paragraphs[number - 1] }))
-    .filter((paragraph) => paragraph.text);
   const [messages, savedInsightIndexes] = await Promise.all([
     listDistillMessages(session.ownerId, id),
     listSavedKnowledgeCardIndexes(session.ownerId, id),
@@ -157,7 +135,6 @@ export default async function DistillResultPage({
         <DistillProcessPanel
           sourceType={document.sourceType}
           paragraphCount={paragraphs.length}
-          evidenceCount={referencedParagraphs.length}
         />
 
         <article className="distillResultDocument">
@@ -231,36 +208,26 @@ export default async function DistillResultPage({
               <dd>{document.inputCharacters.toLocaleString("zh-CN")} 字符</dd>
             </div>
             <div>
-              <dt>证据锚点</dt>
-              <dd>{referencedParagraphs.length} 处</dd>
+              <dt>可保存卡片</dt>
+              <dd>{analysis.transferableInsights.length} 张</dd>
             </div>
           </dl>
 
           <div className="distillResultLayout">
             <div className="distillResultBody">
               <section>
-                <p className="distillSectionEyebrow">READING GUIDE</p>
                 <h2>导读</h2>
                 <p className="distillLeadSummary">{analysis.summary}</p>
               </section>
 
               <section>
-                <p className="distillSectionEyebrow">KEY ARGUMENTS</p>
-                <h2>作者到底说了什么</h2>
+                <h2>作者观点</h2>
                 <div className="distillKeyPoints">
                   {analysis.keyPoints.map((point, index) => (
                     <article key={`${point.title}-${point.detail}`}>
                       <span>{String(index + 1).padStart(2, "0")}</span>
                       <h3>{point.title}</h3>
                       <p>{point.detail}</p>
-                      {point.evidenceParagraphs.length ? (
-                        <small>
-                          证据{" "}
-                          {point.evidenceParagraphs
-                            .map((number) => `P${number}`)
-                            .join("、")}
-                        </small>
-                      ) : null}
                     </article>
                   ))}
                 </div>
@@ -268,7 +235,6 @@ export default async function DistillResultPage({
 
               {analysis.transferableInsights.length ? (
                 <section>
-                  <p className="distillSectionEyebrow">KNOWLEDGE CARDS</p>
                   <h2>干货提炼</h2>
                   <div className="distillTakeawayCards">
                     {analysis.transferableInsights.map((insight, index) => {
@@ -300,8 +266,7 @@ export default async function DistillResultPage({
 
               {analysis.cautions.length ? (
                 <section>
-                  <p className="distillSectionEyebrow">BOUNDARIES</p>
-                  <h2>哪些表达需要谨慎</h2>
+                  <h2>谨慎判断</h2>
                   <ul className="distillCautions">
                     {analysis.cautions.map((caution) => (
                       <li key={caution}>
@@ -313,74 +278,17 @@ export default async function DistillResultPage({
                 </section>
               ) : null}
             </div>
-
-            <aside className="distillEvidenceRail" aria-label="证据与来源">
-              <section>
-                <div className="distillRailHeading">
-                  <h2>主张与证据</h2>
-                  <span>{analysis.claims.length} 条</span>
-                </div>
-                <div className="distillClaimList">
-                  {analysis.claims.map((claim) => (
-                    <article key={`${claim.type}-${claim.claim}`}>
-                      <div>
-                        <span>{claimTypeLabels[claim.type] ?? claim.type}</span>
-                        <span>
-                          置信度{" "}
-                          {confidenceLabels[claim.confidence] ??
-                            claim.confidence}
-                        </span>
-                      </div>
-                      <p>{claim.claim}</p>
-                      <small>
-                        {claim.evidenceParagraphs.length
-                          ? claim.evidenceParagraphs
-                              .map((number) => `P${number}`)
-                              .join("、")
-                          : "未标注原文段落"}
-                      </small>
-                    </article>
-                  ))}
-                </div>
-              </section>
-
-              <section>
-                <div className="distillRailHeading">
-                  <h2>原文锚点</h2>
-                  <span>{referencedParagraphs.length} 处</span>
-                </div>
-                <div className="distillParagraphs">
-                  {referencedParagraphs.map((paragraph) => (
-                    <blockquote key={paragraph.number}>
-                      <span>P{paragraph.number}</span>
-                      <p>{paragraph.text}</p>
-                    </blockquote>
-                  ))}
-                </div>
-              </section>
-
-              <section className="distillProvenance">
-                <div className="distillRailHeading">
-                  <h2>回答边界</h2>
-                  <CheckCircle aria-hidden="true" size={16} weight="fill" />
-                </div>
-                <p>当前仅使用导入正文生成，不假装调用外部搜索补写结论。</p>
-                <span>
-                  {analysis.provider} / {analysis.model}
-                </span>
-              </section>
-            </aside>
           </div>
-        </article>
 
-        <DistillFollowUp
-          documentId={document.id}
-          initialMessages={messages.map((message) => ({
-            ...message,
-            createdAt: message.createdAt.toISOString(),
-          }))}
-          suggestedQuestions={analysis.followUpQuestions}
-        />
+          <DistillFollowUp
+            documentId={document.id}
+            initialMessages={messages.map((message) => ({
+              ...message,
+              createdAt: message.createdAt.toISOString(),
+            }))}
+            suggestedQuestions={analysis.followUpQuestions}
+          />
+        </article>
       </div>
     </main>
   );
