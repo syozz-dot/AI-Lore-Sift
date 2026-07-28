@@ -7,7 +7,8 @@ export const DISTILL_PROMPT_VERSION = "private-distill-v2";
 const DEFAULT_MODEL = "deepseek-v4-flash";
 const DEFAULT_BASE_URL = "https://api.deepseek.com";
 const MAX_ANALYSIS_CHARACTERS = 42_000;
-const MAX_OUTPUT_TOKENS = 2_400;
+const MAX_OUTPUT_TOKENS = 4_200;
+const RETRY_OUTPUT_TOKENS = 5_200;
 
 type Verdict = "skip" | "skim" | "read";
 
@@ -35,6 +36,13 @@ interface DeepSeekResponse {
 interface ChatMessage {
   role: "system" | "user" | "assistant";
   content: string;
+}
+
+class DistillOutputTruncatedError extends Error {
+  constructor() {
+    super("模型输出被截断。");
+    this.name = "DistillOutputTruncatedError";
+  }
 }
 
 export interface GeneratedDistillation extends DistillOutput {
@@ -96,7 +104,8 @@ ${evidence.join("\n\n")}
 - cautions：0-4 条，说明证据边界、争议或尚不能确认的内容。
 - followUpQuestions：2-4 条，必须能够基于当前材料继续回答，避免需要实时外部数据的问题。
 
-段落引用只填写数字，例如 [1, 3]，不得引用不存在的段落。`;
+段落引用只填写数字，例如 [1, 3]，不得引用不存在的段落。
+整个 JSON 控制在 2200 个中文字符以内，不要美化缩进，不要为了凑数量重复表达。`;
 }
 
 function parseOutput(content: string): unknown {
@@ -228,13 +237,30 @@ export async function generateDistillation(input: {
   sourceUrl: string | null;
   paragraphs: string[];
 }): Promise<GeneratedDistillation> {
-  const result = await requestDeepSeek(
-    [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: buildPrompt(input) },
-    ],
-    { json: true, maxTokens: MAX_OUTPUT_TOKENS },
-  );
+  const messages: ChatMessage[] = [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: buildPrompt(input) },
+  ];
+  let result;
+  try {
+    result = await requestDeepSeek(messages, {
+      json: true,
+      maxTokens: MAX_OUTPUT_TOKENS,
+    });
+  } catch (error) {
+    if (!(error instanceof DistillOutputTruncatedError)) throw error;
+    result = await requestDeepSeek(
+      [
+        ...messages,
+        {
+          role: "user",
+          content:
+            "上一次输出被截断。请重新生成更紧凑的合法 JSON：减少到 3 条 keyPoints、2 条 claims、最多 3 条 transferableInsights；每条只保留一个判断和必要证据，不要重复。",
+        },
+      ],
+      { json: true, maxTokens: RETRY_OUTPUT_TOKENS },
+    );
+  }
 
   return {
     ...normalizeOutput(parseOutput(result.content), input.paragraphs.length),
@@ -284,7 +310,7 @@ async function requestDeepSeek(
   const content = choice?.message?.content;
   if (!content?.trim()) throw new Error("DeepSeek 返回了空内容。");
   if (choice?.finish_reason === "length") {
-    throw new Error("生成内容超过长度限制，请缩短输入后重试。");
+    throw new DistillOutputTruncatedError();
   }
 
   return {
