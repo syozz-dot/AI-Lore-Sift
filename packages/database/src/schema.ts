@@ -657,6 +657,63 @@ export const knowledgeEntries = pgTable(
   ],
 );
 
+export const distillMessages = pgTable(
+  "distill_messages",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ownerId: varchar("owner_id", { length: 128 }).notNull(),
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => distillDocuments.id, { onDelete: "cascade" }),
+    role: varchar("role", { length: 16 }).notNull(),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("distill_messages_document_created_idx").on(
+      table.documentId,
+      table.createdAt,
+    ),
+    index("distill_messages_owner_created_idx").on(
+      table.ownerId,
+      table.createdAt,
+    ),
+  ],
+);
+
+export const knowledgeCards = pgTable(
+  "knowledge_cards",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ownerId: varchar("owner_id", { length: 128 }).notNull(),
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => distillDocuments.id, { onDelete: "cascade" }),
+    insightIndex: integer("insight_index").notNull(),
+    title: text("title").notNull(),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("knowledge_cards_owner_document_insight_unique").on(
+      table.ownerId,
+      table.documentId,
+      table.insightIndex,
+    ),
+    index("knowledge_cards_owner_created_idx").on(
+      table.ownerId,
+      table.createdAt,
+    ),
+  ],
+);
+
 export type Source = typeof sources.$inferSelect;
 export type NewSource = typeof sources.$inferInsert;
 export type SourceRun = typeof sourceRuns.$inferSelect;
@@ -678,4 +735,8 @@ export type NewDistillDocument = typeof distillDocuments.$inferInsert;
 export type DistillAnalysis = typeof distillAnalyses.$inferSelect;
 export type NewDistillAnalysis = typeof distillAnalyses.$inferInsert;
 export type KnowledgeEntry = typeof knowledgeEntries.$inferSelect;
+export type DistillMessage = typeof distillMessages.$inferSelect;
+export type NewDistillMessage = typeof distillMessages.$inferInsert;
+export type KnowledgeCard = typeof knowledgeCards.$inferSelect;
+export type NewKnowledgeCard = typeof knowledgeCards.$inferInsert;
 export type NewKnowledgeEntry = typeof knowledgeEntries.$inferInsert;

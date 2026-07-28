@@ -2284,6 +2284,697 @@ button {
   color: var(--accent);
 }
 
+.distillAgentWorkspace {
+  width: min(100%, 1560px);
+  min-height: calc(100dvh - 68px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 246px minmax(0, 1fr);
+  background: var(--canvas);
+}
+
+.distillTaskRail {
+  min-width: 0;
+  padding: 24px 16px;
+  border-right: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 76%, var(--canvas));
+}
+
+.distillTaskRailHeader {
+  padding: 0 4px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.distillTaskRailHeader p,
+.distillTaskRailHeader strong {
+  margin: 0;
+}
+
+.distillTaskRailHeader p {
+  color: var(--ink-tertiary);
+  font-size: 10px;
+}
+
+.distillTaskRailHeader strong {
+  display: block;
+  margin-top: 3px;
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 12px;
+}
+
+.distillTaskRailHeader > a {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  color: var(--accent);
+}
+
+.distillTaskRail nav {
+  padding-top: 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.distillTaskRail nav > a {
+  min-width: 0;
+  padding: 11px 10px;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  border-left: 2px solid transparent;
+  color: var(--ink-secondary);
+}
+
+.distillTaskRail nav > a:hover,
+.distillTaskRail nav > a.isActive {
+  border-left-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--ink);
+}
+
+.distillTaskRail nav svg {
+  margin-top: 2px;
+  color: var(--accent);
+}
+
+.distillTaskRail nav span {
+  min-width: 0;
+}
+
+.distillTaskRail nav strong {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.distillTaskRail nav small {
+  display: block;
+  margin-top: 5px;
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 8px;
+}
+
+.distillTaskRailEmpty {
+  padding: 40px 10px;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  color: var(--ink-tertiary);
+  font-size: 11px;
+}
+
+.distillAgentCanvas {
+  width: min(calc(100% - 64px), 1120px);
+  min-width: 0;
+  margin: 0 auto;
+  padding: 64px 0 100px;
+}
+
+.distillAgentIntro {
+  max-width: 780px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.distillAgentIntro > p {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.distillAgentIntro h1 {
+  margin: 20px 0 0;
+  font-family: var(--font-serif);
+  font-size: clamp(42px, 5.2vw, 68px);
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  line-height: 1.08;
+}
+
+.distillAgentIntro > span {
+  max-width: 660px;
+  margin: 24px auto 0;
+  display: block;
+  color: var(--ink-secondary);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.distillAgentCanvas > .distillComposer {
+  max-width: 800px;
+  margin: 48px auto 0;
+}
+
+.distillAgentCanvas .distillInputFrame {
+  background: var(--surface);
+  box-shadow: 0 18px 54px color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+.distillAgentCanvas .distillInputFrame textarea {
+  min-height: 180px;
+}
+
+.distillAgentCapabilities {
+  max-width: 960px;
+  margin: 54px auto 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.distillAgentCapabilities article {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.distillAgentCapabilities article:not(:first-child) {
+  border-left: 1px solid var(--line);
+}
+
+.distillAgentCapabilities svg {
+  color: var(--accent);
+}
+
+.distillAgentCapabilities strong,
+.distillAgentCapabilities span {
+  display: block;
+}
+
+.distillAgentCapabilities strong {
+  font-size: 12px;
+}
+
+.distillAgentCapabilities span {
+  margin-top: 8px;
+  color: var(--ink-secondary);
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.distillAgentResult .distillAgentCanvas {
+  padding-top: 28px;
+}
+
+.distillSourceMessage {
+  width: min(74%, 760px);
+  margin: 36px 0 20px auto;
+}
+
+.distillSourceMessage > small {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--ink-tertiary);
+  font-size: 9px;
+  text-align: right;
+}
+
+.distillSourceMessage > div {
+  padding: 15px 17px;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 10px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+}
+
+.distillSourceMessage svg {
+  margin-top: 2px;
+  color: var(--accent);
+}
+
+.distillSourceMessage p {
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.distillProcessPanel {
+  margin: 0 0 32px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.distillProcessPanel > summary {
+  min-height: 54px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.distillProcessPanel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.distillProcessPanel > summary > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.distillProcessPanel > summary svg,
+.distillProcessPanel article > svg:last-child {
+  color: var(--accent);
+}
+
+.distillProcessPanel > summary small {
+  color: var(--ink-tertiary);
+  font-size: 10px;
+}
+
+.distillProcessPanel > div {
+  padding: 0 18px 14px;
+}
+
+.distillProcessPanel article {
+  padding: 14px 0;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) 18px;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.distillProcessPanel article > svg:first-child {
+  color: var(--ink-tertiary);
+}
+
+.distillProcessPanel article strong,
+.distillProcessPanel article small {
+  display: block;
+}
+
+.distillProcessPanel article strong {
+  font-size: 11px;
+}
+
+.distillProcessPanel article small {
+  margin-top: 5px;
+  color: var(--ink-tertiary);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.distillResultDocument {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+}
+
+.distillResultDocument .distillResultHero {
+  max-width: none;
+  padding: 52px 54px 42px;
+}
+
+.distillResultDocument .distillResultHero h1 {
+  max-width: 900px;
+  font-size: clamp(38px, 5vw, 66px);
+}
+
+.distillResultDocument .distillResultMetrics {
+  padding: 0 54px;
+}
+
+.distillResultDocument .distillResultLayout {
+  padding: 60px 54px 0;
+  gap: 54px;
+}
+
+.distillSectionEyebrow {
+  margin: 0 0 9px;
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 8px;
+  letter-spacing: 0.16em;
+}
+
+.distillResultBody .distillSectionEyebrow + h2 {
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: 27px;
+  font-weight: 600;
+}
+
+.distillKeyPoints > article > span {
+  color: var(--accent);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 9px;
+}
+
+.distillKeyPoints > article > h3 {
+  margin-top: 12px;
+}
+
+.distillKeyPoints > article > small {
+  display: block;
+  margin-top: 14px;
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 9px;
+}
+
+.distillTakeawayCards {
+  max-width: 800px;
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--line-strong);
+  border-left: 1px solid var(--line);
+}
+
+.distillTakeawayCards > article {
+  min-width: 0;
+  padding: 24px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--accent) 4%, var(--surface));
+}
+
+.distillTakeawayCards > article > span {
+  color: var(--accent);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 9px;
+}
+
+.distillTakeawayCards h3 {
+  margin: 14px 0 0;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.distillTakeawayCards p {
+  margin: 10px 0 0;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+.knowledgeCardActions {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.knowledgeCardActions button {
+  min-height: 34px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.knowledgeCardActions button[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.knowledgeCardActions > span {
+  width: 100%;
+  color: var(--danger);
+  font-size: 9px;
+}
+
+.distillFollowUp {
+  margin-top: 32px;
+  padding: 30px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+}
+
+.distillFollowUp > header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.distillFollowUp > header svg {
+  color: var(--accent);
+}
+
+.distillFollowUp > header p,
+.distillFollowUp > header h2 {
+  margin: 0;
+}
+
+.distillFollowUp > header p {
+  color: var(--ink-tertiary);
+  font-size: 9px;
+}
+
+.distillFollowUp > header h2 {
+  margin-top: 4px;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.distillSuggestedQuestions {
+  margin-top: 22px;
+  display: grid;
+  gap: 8px;
+}
+
+.distillSuggestedQuestions p {
+  margin: 0 0 3px;
+  color: var(--ink-secondary);
+  font-size: 11px;
+}
+
+.distillSuggestedQuestions button {
+  min-height: 48px;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.55;
+  text-align: left;
+}
+
+.distillSuggestedQuestions button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.distillMessageList {
+  margin-top: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.distillMessageList article {
+  max-width: 82%;
+}
+
+.distillMessageList article.isUser {
+  justify-self: end;
+  text-align: right;
+}
+
+.distillMessageList article.isAssistant {
+  padding-left: 14px;
+  border-left: 2px solid var(--accent);
+}
+
+.distillMessageList small {
+  color: var(--ink-tertiary);
+  font-size: 9px;
+}
+
+.distillMessageList p {
+  margin: 6px 0 0;
+  white-space: pre-wrap;
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.distillMessageList .isUser p {
+  padding: 11px 13px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--canvas));
+}
+
+.distillMessageList .isPending {
+  color: var(--ink-tertiary);
+}
+
+.distillFollowUp form {
+  position: relative;
+  margin-top: 24px;
+  border: 1px solid var(--line-strong);
+}
+
+.distillFollowUp form > label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.distillFollowUp textarea {
+  width: 100%;
+  min-height: 96px;
+  padding: 15px 54px 15px 15px;
+  resize: vertical;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.distillFollowUp form > button {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: var(--brand-pine);
+  color: var(--light-ink);
+  cursor: pointer;
+}
+
+.distillFollowUp form > button:disabled {
+  cursor: wait;
+  opacity: 0.45;
+}
+
+.distillFollowUpBoundary,
+.distillFollowUpError {
+  margin: 9px 0 0;
+  font-size: 9px;
+}
+
+.distillFollowUpBoundary {
+  color: var(--ink-tertiary);
+}
+
+.distillFollowUpError {
+  color: var(--danger);
+}
+
+.knowledgeSectionTitle {
+  padding: 54px 0 20px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.knowledgeSectionTitle p,
+.knowledgeSectionTitle h2 {
+  margin: 0;
+}
+
+.knowledgeSectionTitle p {
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.knowledgeSectionTitle h2 {
+  margin-top: 7px;
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.knowledgeCardsCollection > div:last-child {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-left: 1px solid var(--line);
+}
+
+.knowledgeCardsCollection article {
+  min-width: 0;
+  padding: 28px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--accent) 4%, var(--surface));
+}
+
+.knowledgeCardsCollection article > span {
+  color: var(--accent);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 9px;
+}
+
+.knowledgeCardsCollection h3 {
+  margin: 14px 0 0;
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.knowledgeCardsCollection article > p {
+  margin: 12px 0 0;
+  color: var(--ink-secondary);
+  line-height: 1.75;
+}
+
+.knowledgeCardsCollection footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.knowledgeCardsCollection footer small {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-tertiary);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.knowledgeCardsCollection footer a {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  font-size: 10px;
+}
+
 @media (max-width: 1023px) {
   .distillHero {
     min-height: auto;
@@ -2317,6 +3008,31 @@ button {
   .distillEvidenceRail {
     padding-left: 0;
     border-top: 1px solid var(--line-strong);
+    border-left: 0;
+  }
+
+  .distillAgentWorkspace {
+    grid-template-columns: 1fr;
+  }
+
+  .distillTaskRail {
+    display: none;
+  }
+
+  .distillAgentCanvas {
+    width: min(calc(100% - 40px), 980px);
+  }
+
+  .distillResultDocument .distillResultLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .distillAgentCapabilities {
+    grid-template-columns: 1fr;
+  }
+
+  .distillAgentCapabilities article:not(:first-child) {
+    border-top: 1px solid var(--line);
     border-left: 0;
   }
 }
@@ -2468,6 +3184,46 @@ button {
 
   .knowledgeOpen {
     grid-column: 2;
+  }
+
+  .distillAgentCanvas {
+    width: calc(100% - 28px);
+    padding: 40px 0 72px;
+  }
+
+  .distillAgentIntro h1 {
+    font-size: 40px;
+  }
+
+  .distillSourceMessage {
+    width: 92%;
+  }
+
+  .distillFollowUp,
+  .distillResultDocument .distillResultHero {
+    padding: 24px 20px;
+  }
+
+  .distillResultDocument .distillResultMetrics {
+    padding: 0 20px;
+  }
+
+  .distillResultDocument .distillResultLayout {
+    padding: 42px 20px 0;
+  }
+
+  .distillTakeawayCards,
+  .knowledgeCardsCollection > div:last-child {
+    grid-template-columns: 1fr;
+  }
+
+  .distillMessageList article {
+    max-width: 94%;
+  }
+
+  .knowledgeCardsCollection footer {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 

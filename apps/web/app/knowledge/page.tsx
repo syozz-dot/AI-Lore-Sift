@@ -4,7 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getDistillSession } from "../../lib/distill-auth";
-import { listKnowledgeEntries } from "../../lib/distill";
+import { listKnowledgeCards, listKnowledgeEntries } from "../../lib/distill";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +16,12 @@ export const metadata: Metadata = {
 export default async function KnowledgePage() {
   const session = await getDistillSession();
   if (!session) redirect("/distill/access?next=/knowledge");
-  const entries = process.env.DATABASE_URL
-    ? await listKnowledgeEntries(session.ownerId)
-    : [];
+  const [entries, cards] = process.env.DATABASE_URL
+    ? await Promise.all([
+        listKnowledgeEntries(session.ownerId),
+        listKnowledgeCards(session.ownerId),
+      ])
+    : [[], []];
 
   return (
     <main className="knowledgePage">
@@ -37,8 +40,43 @@ export default async function KnowledgePage() {
         </div>
       </header>
 
+      {cards.length ? (
+        <section
+          className="knowledgeCardsCollection"
+          aria-labelledby="cards-title"
+        >
+          <div className="knowledgeSectionTitle">
+            <p>可复用判断</p>
+            <h2 id="cards-title">知识卡片</h2>
+          </div>
+          <div>
+            {cards.map((card, index) => (
+              <article key={card.id}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <h3>{card.title}</h3>
+                <p>{card.content}</p>
+                <footer>
+                  <small>
+                    来自《{card.documentTitle || card.sourceTitle || "脱水内容"}
+                    》
+                  </small>
+                  <Link href={`/distill/${card.documentId}`}>
+                    回到原文
+                    <ArrowRight aria-hidden="true" size={15} />
+                  </Link>
+                </footer>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       {entries.length ? (
         <section className="knowledgeCollection" aria-label="知识条目">
+          <div className="knowledgeSectionTitle">
+            <p>完整文档</p>
+            <h2>已保存的脱水内容</h2>
+          </div>
           {entries.map((entry, index) => (
             <article key={entry.id}>
               <span className="knowledgeIndex">
@@ -70,7 +108,7 @@ export default async function KnowledgePage() {
             </article>
           ))}
         </section>
-      ) : (
+      ) : !cards.length ? (
         <section className="knowledgeEmpty">
           <Books aria-hidden="true" size={30} />
           <h2>知识库还是空的</h2>
@@ -80,7 +118,7 @@ export default async function KnowledgePage() {
             <ArrowRight aria-hidden="true" size={16} />
           </Link>
         </section>
-      )}
+      ) : null}
     </main>
   );
 }

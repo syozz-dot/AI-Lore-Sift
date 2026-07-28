@@ -1,11 +1,13 @@
 import {
   distillAnalyses,
   distillDocuments,
+  distillMessages,
+  knowledgeCards,
   knowledgeEntries,
   type NewDistillAnalysis,
   type NewDistillDocument,
 } from "@ai-news-navigator/database";
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 
 import { getDatabaseConnection } from "./database";
 
@@ -85,6 +87,42 @@ export async function listDistillDocuments(ownerId: string, limit = 18) {
     .where(eq(distillDocuments.ownerId, ownerId))
     .orderBy(desc(distillDocuments.createdAt))
     .limit(limit);
+}
+
+export async function listDistillMessages(ownerId: string, documentId: string) {
+  const { db } = getDatabaseConnection();
+  return db
+    .select({
+      id: distillMessages.id,
+      role: distillMessages.role,
+      content: distillMessages.content,
+      createdAt: distillMessages.createdAt,
+    })
+    .from(distillMessages)
+    .where(
+      and(
+        eq(distillMessages.ownerId, ownerId),
+        eq(distillMessages.documentId, documentId),
+      ),
+    )
+    .orderBy(asc(distillMessages.createdAt));
+}
+
+export async function createDistillMessage(input: {
+  ownerId: string;
+  documentId: string;
+  role: "user" | "assistant";
+  content: string;
+}) {
+  const { db } = getDatabaseConnection();
+  const [message] = await db.insert(distillMessages).values(input).returning({
+    id: distillMessages.id,
+    role: distillMessages.role,
+    content: distillMessages.content,
+    createdAt: distillMessages.createdAt,
+  });
+  if (!message) throw new Error("无法保存本次追问。");
+  return message;
 }
 
 export async function getDistillDocument(ownerId: string, id: string) {
@@ -180,6 +218,85 @@ export async function removeDistillFromKnowledge(ownerId: string, id: string) {
     );
 }
 
+function knowledgeCardTitle(content: string) {
+  const firstSentence =
+    content.split(/[。！？!?；;\n]/, 1)[0]?.trim() || content;
+  return firstSentence.length > 42
+    ? `${firstSentence.slice(0, 41)}…`
+    : firstSentence;
+}
+
+export async function listSavedKnowledgeCardIndexes(
+  ownerId: string,
+  documentId: string,
+) {
+  const { db } = getDatabaseConnection();
+  const rows = await db
+    .select({ insightIndex: knowledgeCards.insightIndex })
+    .from(knowledgeCards)
+    .where(
+      and(
+        eq(knowledgeCards.ownerId, ownerId),
+        eq(knowledgeCards.documentId, documentId),
+      ),
+    );
+  return rows.map((row) => row.insightIndex);
+}
+
+export async function saveKnowledgeCard(
+  ownerId: string,
+  documentId: string,
+  insightIndex: number,
+) {
+  const document = await getDistillDocument(ownerId, documentId);
+  const insight = document?.analysis?.transferableInsights[insightIndex];
+  if (!document?.analysis || document.status !== "ready" || !insight) {
+    throw new Error("这条知识还不能保存。");
+  }
+
+  const { db } = getDatabaseConnection();
+  const [card] = await db
+    .insert(knowledgeCards)
+    .values({
+      ownerId,
+      documentId,
+      insightIndex,
+      title: knowledgeCardTitle(insight),
+      content: insight,
+    })
+    .onConflictDoUpdate({
+      target: [
+        knowledgeCards.ownerId,
+        knowledgeCards.documentId,
+        knowledgeCards.insightIndex,
+      ],
+      set: {
+        title: knowledgeCardTitle(insight),
+        content: insight,
+        updatedAt: new Date(),
+      },
+    })
+    .returning({ id: knowledgeCards.id });
+  return card?.id ?? null;
+}
+
+export async function removeKnowledgeCard(
+  ownerId: string,
+  documentId: string,
+  insightIndex: number,
+) {
+  const { db } = getDatabaseConnection();
+  await db
+    .delete(knowledgeCards)
+    .where(
+      and(
+        eq(knowledgeCards.ownerId, ownerId),
+        eq(knowledgeCards.documentId, documentId),
+        eq(knowledgeCards.insightIndex, insightIndex),
+      ),
+    );
+}
+
 export async function deleteDistillDocument(ownerId: string, id: string) {
   const { db } = getDatabaseConnection();
   const [deleted] = await db
@@ -212,5 +329,34 @@ export async function listKnowledgeEntries(ownerId: string, limit = 40) {
     )
     .where(eq(knowledgeEntries.ownerId, ownerId))
     .orderBy(desc(knowledgeEntries.createdAt))
+    .limit(limit);
+}
+
+export async function listKnowledgeCards(ownerId: string, limit = 60) {
+  const { db } = getDatabaseConnection();
+  return db
+    .select({
+      id: knowledgeCards.id,
+      documentId: knowledgeCards.documentId,
+      insightIndex: knowledgeCards.insightIndex,
+      title: knowledgeCards.title,
+      content: knowledgeCards.content,
+      createdAt: knowledgeCards.createdAt,
+      sourceType: distillDocuments.sourceType,
+      sourceUrl: distillDocuments.sourceUrl,
+      sourceTitle: distillDocuments.sourceTitle,
+      documentTitle: distillAnalyses.title,
+    })
+    .from(knowledgeCards)
+    .innerJoin(
+      distillDocuments,
+      eq(distillDocuments.id, knowledgeCards.documentId),
+    )
+    .leftJoin(
+      distillAnalyses,
+      eq(distillAnalyses.documentId, knowledgeCards.documentId),
+    )
+    .where(eq(knowledgeCards.ownerId, ownerId))
+    .orderBy(desc(knowledgeCards.createdAt))
     .limit(limit);
 }
