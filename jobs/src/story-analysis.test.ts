@@ -169,6 +169,7 @@ ${JSON.stringify({
     const result = await analyzer.analyze({
       storyId: "story-1",
       title: "Original title",
+      contentType: "product",
       evidence: [
         {
           id: "item-1",
@@ -185,6 +186,10 @@ ${JSON.stringify({
     expect(requestBody?.thinking).toEqual({ type: "disabled" });
     expect(requestBody?.response_format).toEqual({ type: "json_object" });
     expect(requestBody?.max_tokens).toBe(1_600);
+    const messages = requestBody?.messages as
+      Array<{ role: string; content: string }> | undefined;
+    expect(messages?.[1]?.content).toContain("为什么值得试");
+    expect(messages?.[1]?.content).toContain("上手前仍未知");
     expect(result.provider).toBe("deepseek");
     expect(result.translatedTitle).toBe("中文标题");
   });

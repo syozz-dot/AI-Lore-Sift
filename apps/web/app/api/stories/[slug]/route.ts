@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getStoryDetail } from "../../../../lib/queries";
+import { decodeRouteSegment } from "../../../../lib/route-params";
 
 export const dynamic = "force-dynamic";
 
@@ -8,7 +9,8 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ slug: string }> },
 ) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeRouteSegment(rawSlug);
   try {
     const story = await getStoryDetail(slug);
     if (!story)

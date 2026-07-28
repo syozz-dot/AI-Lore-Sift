@@ -58,6 +58,7 @@ export {
   OpenAIStoryAnalyzer,
   PostgresStoryAnalysisProcessor,
   STORY_ANALYSIS_PROMPT_VERSION,
+  PRODUCT_STORY_ANALYSIS_PROMPT_VERSION,
   VercelGatewayStoryAnalyzer,
   type GeneratedStoryAnalysis,
   type StoryAnalysisInput,

@@ -53,6 +53,7 @@ export function buildStoryMarkdown(
   story: StoryMarkdownInput,
   pageUrl?: string,
 ): string {
+  const isProduct = story.contentType === "产品";
   const lines = [
     "---",
     `title: ${yamlString(story.title)}`,
@@ -79,12 +80,21 @@ export function buildStoryMarkdown(
     ...(story.originalTitle
       ? [`> 原文标题：${clean(story.originalTitle)}`, ""]
       : []),
-    ...section("发生了什么", story.factualSummary),
-    ...section("为什么重要", story.whyItMatters),
-    ...section("底层逻辑", story.underlyingLogic),
-    ...section("产品与商业影响", story.productImpact),
-    ...listSection("产品与商业机会", story.productOpportunities),
-    ...listSection("仍待确认", story.openQuestions),
+    ...section(isProduct ? "产品速览" : "发生了什么", story.factualSummary),
+    ...section(isProduct ? "为什么值得试" : "为什么重要", story.whyItMatters),
+    ...section(isProduct ? "核心能力" : "底层逻辑", story.underlyingLogic),
+    ...section(
+      isProduct ? "适合谁与使用场景" : "产品与商业影响",
+      story.productImpact,
+    ),
+    ...listSection(
+      isProduct ? "建议尝试的用法" : "产品与商业机会",
+      story.productOpportunities,
+    ),
+    ...listSection(
+      isProduct ? "上手前待确认" : "仍待确认",
+      story.openQuestions,
+    ),
     ...listSection("规则信号", story.matchedSignals),
     "## 来源证据",
     "",

@@ -18,6 +18,7 @@ import {
 } from "../../../lib/presentation";
 import { getStoryDetail } from "../../../lib/queries";
 import { createMediaProxyUrl } from "../../../lib/media-proxy";
+import { decodeRouteSegment } from "../../../lib/route-params";
 import { sanitizeSourceHtml } from "../../../lib/source-content";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +28,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeRouteSegment(rawSlug);
   const story = await getStoryDetail(slug);
   return story
     ? {
@@ -42,7 +44,8 @@ export default async function StoryPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeRouteSegment(rawSlug);
   const story = await getStoryDetail(slug);
   if (!story) notFound();
 
@@ -64,6 +67,7 @@ export default async function StoryPage({
     showSourceContent && story.sourceContentFormat === "html"
       ? []
       : story.sourceMediaAssets;
+  const isProduct = story.contentType === "product";
 
   return (
     <main className="storyPage">
@@ -170,32 +174,32 @@ export default async function StoryPage({
         <div className="analysisLayout">
           <article className="analysisBody">
             <section>
-              <h2>发生了什么</h2>
+              <h2>{isProduct ? "产品速览" : "发生了什么"}</h2>
               {factualSummary ? (
                 <p>{factualSummary}</p>
               ) : (
-                <MissingAnalysis label="事实摘要" />
+                <MissingAnalysis label={isProduct ? "产品速览" : "事实摘要"} />
               )}
             </section>
 
             <section>
-              <h2>为什么重要</h2>
+              <h2>{isProduct ? "为什么值得试" : "为什么重要"}</h2>
               {story.analysis?.whyItMatters ? (
                 <p>{story.analysis.whyItMatters}</p>
               ) : (
-                <MissingAnalysis label="影响分析" />
+                <MissingAnalysis label={isProduct ? "产品判断" : "影响分析"} />
               )}
             </section>
 
             {story.analysis?.underlyingLogic ? (
               <section>
-                <h2>底层逻辑</h2>
+                <h2>{isProduct ? "核心能力" : "底层逻辑"}</h2>
                 <p>{story.analysis.underlyingLogic}</p>
               </section>
             ) : null}
 
             <section>
-              <h2>产品与商业机会</h2>
+              <h2>{isProduct ? "适合谁与使用场景" : "产品与商业机会"}</h2>
               {story.analysis?.productImpact ? (
                 <p>{story.analysis.productImpact}</p>
               ) : null}
@@ -206,13 +210,15 @@ export default async function StoryPage({
                   ))}
                 </ul>
               ) : (
-                <MissingAnalysis label="机会分析" />
+                <MissingAnalysis
+                  label={isProduct ? "使用场景判断" : "机会分析"}
+                />
               )}
             </section>
 
             {story.analysis?.openQuestions.length ? (
               <section>
-                <h2>仍待确认</h2>
+                <h2>{isProduct ? "上手前待确认" : "仍待确认"}</h2>
                 <ul className="questionList">
                   {story.analysis.openQuestions.map((question) => (
                     <li key={question}>{question}</li>

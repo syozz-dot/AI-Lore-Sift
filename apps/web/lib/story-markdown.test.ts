@@ -48,4 +48,20 @@ describe("buildStoryMarkdown", () => {
     expect(markdown).toContain("## 为什么重要");
     expect(markdown).not.toContain("## 底层逻辑");
   });
+
+  it("uses product-oriented section labels for product stories", () => {
+    const markdown = buildStoryMarkdown({
+      ...story,
+      contentType: "产品",
+      underlyingLogic: "它通过结构化工作流完成任务。",
+    });
+
+    expect(markdown).toContain("## 产品速览");
+    expect(markdown).toContain("## 为什么值得试");
+    expect(markdown).toContain("## 核心能力");
+    expect(markdown).toContain("## 适合谁与使用场景");
+    expect(markdown).toContain("## 建议尝试的用法");
+    expect(markdown).toContain("## 上手前待确认");
+    expect(markdown).not.toContain("## 产品与商业机会");
+  });
 });
