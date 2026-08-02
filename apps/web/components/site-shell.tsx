@@ -81,6 +81,7 @@ export function SiteShell({
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [favoriteCount, setFavoriteCount] = useState(0);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
 
   const syncFavoriteCount = useCallback(() => {
     setFavoriteCount(readFavorites(window.localStorage).length);
@@ -106,6 +107,7 @@ export function SiteShell({
 
   useEffect(() => {
     setMobileOpen(false);
+    setPendingHref(null);
   }, [pathname]);
 
   function toggleCollapsed() {
@@ -154,14 +156,20 @@ export function SiteShell({
 
   function renderDistillNavItem(item: NavItem) {
     const active = isRouteActive(pathname, item.href);
+    const pending = pendingHref === item.href && !active;
     const Icon = item.icon;
 
     return (
       <Link
         key={item.href}
-        className={`distillGlobalNavLink${active ? " active" : ""}`}
+        className={`distillGlobalNavLink${active ? " active" : ""}${pending ? " pending" : ""}`}
         href={item.href}
+        prefetch={true}
+        onClick={() => {
+          if (!active) setPendingHref(item.href);
+        }}
         aria-current={active ? "page" : undefined}
+        aria-busy={pending || undefined}
         aria-label={item.label}
         title={item.label}
       >

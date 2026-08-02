@@ -1386,26 +1386,26 @@ button {
 .distillGlobalNav nav {
   width: 100%;
   display: flex;
-  flex: 1;
+  flex: 0 1 auto;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 10px;
 }
 
 .distillGlobalNav nav > div {
   width: 100%;
-  padding-bottom: 18px;
+  padding-bottom: 10px;
   display: grid;
   justify-items: center;
-  gap: 8px;
+  gap: 6px;
   border-bottom: 1px solid var(--line);
 }
 
 .distillGlobalNav nav > div:last-child {
-  margin-top: auto;
-  padding-top: 18px;
+  margin-top: 0;
+  padding-top: 0;
   padding-bottom: 0;
-  border-top: 1px solid var(--line);
+  border-top: 0;
   border-bottom: 0;
 }
 
@@ -1432,6 +1432,25 @@ button {
 .distillGlobalNavLink.active {
   background: #dfe9e2;
   color: var(--accent);
+}
+
+.distillGlobalNavLink.pending {
+  background: #e6ece7;
+  color: var(--accent);
+  transform: scale(0.96);
+}
+
+.distillGlobalNavLink.pending svg {
+  animation: distillNavPulse 600ms ease-in-out infinite alternate;
+}
+
+@keyframes distillNavPulse {
+  from {
+    opacity: 0.56;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .distillGlobalNavLink.active::before {
@@ -1522,6 +1541,10 @@ button {
   gap: 10px;
   border-left-width: 0;
   border-radius: 10px;
+  transition:
+    background 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
 }
 
 .distillStandaloneShell .distillTaskRail nav > a:hover,
@@ -1532,6 +1555,10 @@ button {
 
 .distillStandaloneShell .distillTaskRail nav > a.isActive {
   box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.distillStandaloneShell .distillTaskRail nav > a:active {
+  transform: scale(0.985);
 }
 
 .distillStandaloneShell .distillTaskRail nav strong {
@@ -1682,20 +1709,20 @@ button {
   border-radius: 12px;
 }
 
-/* Result document: a quiet, centered reading object on its own dark stage. */
+/* Result document: a warm, full-bleed reading surface without an outer stage. */
 .distillStandaloneShell .distillAgentResult {
   min-height: 100dvh;
-  padding: 6px;
-  background: #171917;
+  padding: 0;
+  background: var(--canvas);
 }
 
 .distillStandaloneShell .distillResultDocument {
-  min-height: calc(100dvh - 12px);
+  min-height: 100dvh;
   overflow: clip;
   border: 0;
-  border-radius: 24px;
+  border-radius: 0;
   background: var(--canvas);
-  box-shadow: 0 28px 90px rgb(0 0 0 / 20%);
+  box-shadow: none;
 }
 
 .distillStandaloneShell .distillDocumentTopbar {

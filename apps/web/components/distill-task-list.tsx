@@ -36,7 +36,7 @@ export function DistillTaskList({
           <p>任务记录</p>
           <strong>{documents.length} 篇</strong>
         </div>
-        <Link href="/distill" aria-label="新建脱水任务">
+        <Link href="/distill" prefetch={true} aria-label="新建脱水任务">
           <Plus aria-hidden="true" size={17} />
         </Link>
       </div>
@@ -47,6 +47,7 @@ export function DistillTaskList({
             <Link
               key={document.id}
               href={`/distill/${document.id}`}
+              prefetch={true}
               className={active ? "isActive" : undefined}
               aria-current={active ? "page" : undefined}
             >
