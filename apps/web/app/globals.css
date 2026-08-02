@@ -1334,9 +1334,132 @@ button {
   --accent: #185d48;
   --accent-ink: #f8fbf8;
   min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
   background: var(--canvas);
   color: var(--ink);
   color-scheme: light;
+}
+
+.distillStandaloneContent {
+  min-width: 0;
+  min-height: 100dvh;
+}
+
+.distillGlobalNav {
+  position: sticky;
+  z-index: 30;
+  top: 0;
+  height: 100dvh;
+  padding: 18px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  border-right: 1px solid var(--line);
+  background: #f1f2ed;
+}
+
+.distillGlobalBrand {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: 19px;
+  line-height: 1;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.distillGlobalBrand:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.distillGlobalNav nav {
+  width: 100%;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.distillGlobalNav nav > div {
+  width: 100%;
+  padding-bottom: 18px;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.distillGlobalNav nav > div:last-child {
+  margin-top: auto;
+  padding-top: 18px;
+  padding-bottom: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 0;
+}
+
+.distillGlobalNavLink {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  color: var(--ink-tertiary);
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.distillGlobalNavLink:hover {
+  background: var(--surface);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.distillGlobalNavLink.active {
+  background: #dfe9e2;
+  color: var(--accent);
+}
+
+.distillGlobalNavLink.active::before {
+  position: absolute;
+  top: 9px;
+  bottom: 9px;
+  left: -12px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent);
+  content: "";
+}
+
+.distillGlobalNavLink > span {
+  position: absolute;
+  top: 3px;
+  right: 2px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .distillStandaloneShell .distillAgentWorkspace {
@@ -1851,6 +1974,68 @@ button {
 }
 
 @media (max-width: 820px) {
+  .distillStandaloneShell {
+    grid-template-columns: minmax(0, 1fr);
+    padding-bottom: 64px;
+  }
+
+  .distillStandaloneContent {
+    min-height: calc(100dvh - 64px);
+  }
+
+  .distillGlobalNav {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 64px;
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    flex-direction: row;
+    justify-content: center;
+    border-top: 1px solid var(--line);
+    border-right: 0;
+    background: color-mix(in srgb, var(--canvas) 94%, transparent);
+    backdrop-filter: blur(14px);
+  }
+
+  .distillGlobalBrand {
+    display: none;
+  }
+
+  .distillGlobalNav nav {
+    max-width: 460px;
+    height: 100%;
+    flex: 0 1 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  .distillGlobalNav nav > div,
+  .distillGlobalNav nav > div:last-child {
+    width: auto;
+    padding: 0;
+    display: contents;
+    border: 0;
+  }
+
+  .distillGlobalNavLink {
+    width: 42px;
+    height: 42px;
+  }
+
+  .distillGlobalNavLink.active::before {
+    top: auto;
+    right: 10px;
+    bottom: -8px;
+    left: 10px;
+    width: auto;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+  }
+
   .distillStandaloneShell .distillAgentWorkspace {
     grid-template-columns: 1fr;
   }

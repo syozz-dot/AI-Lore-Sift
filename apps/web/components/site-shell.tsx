@@ -152,8 +152,58 @@ export function SiteShell({
     );
   }
 
+  function renderDistillNavItem(item: NavItem) {
+    const active = isRouteActive(pathname, item.href);
+    const Icon = item.icon;
+
+    return (
+      <Link
+        key={item.href}
+        className={`distillGlobalNavLink${active ? " active" : ""}`}
+        href={item.href}
+        aria-current={active ? "page" : undefined}
+        aria-label={item.label}
+        title={item.label}
+      >
+        <Icon
+          aria-hidden={true}
+          size={20}
+          weight={
+            item.href === "/favorites" && favoriteCount > 0
+              ? "fill"
+              : "regular"
+          }
+        />
+        {item.href === "/favorites" && favoriteCount > 0 ? (
+          <span aria-label={`${favoriteCount} 条收藏`}>
+            {favoriteCount > 9 ? "9+" : favoriteCount}
+          </span>
+        ) : null}
+      </Link>
+    );
+  }
+
   if (pathname === "/distill" || pathname.startsWith("/distill/")) {
-    return <div className="distillStandaloneShell">{children}</div>;
+    return (
+      <div className="distillStandaloneShell">
+        <aside className="distillGlobalNav" aria-label="全局导航">
+          <Link
+            className="distillGlobalBrand"
+            href="/"
+            aria-label="AI News Navigator 首页"
+            title="返回情报流"
+          >
+            N
+          </Link>
+          <nav>
+            <div>{contentItems.map(renderDistillNavItem)}</div>
+            <div>{workspaceItems.map(renderDistillNavItem)}</div>
+            <div>{personalItems.map(renderDistillNavItem)}</div>
+          </nav>
+        </aside>
+        <div className="distillStandaloneContent">{children}</div>
+      </div>
+    );
   }
 
   return (

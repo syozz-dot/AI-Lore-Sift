@@ -21,6 +21,8 @@ Compared the reference and implementation at matching desktop states.
 
 - `/distill` retains the real task history and submit flow.
 - `/distill/[id]` retains save, Markdown export, original link, delete, process details, and follow-up behavior.
+- The focused workspace now keeps a narrow global navigation rail, so users can leave the distill flow without restoring the full news-site shell.
+- On mobile, the global rail becomes a fixed bottom dock while the task-history rail remains hidden.
 - Standalone layout has explicit tablet and mobile fallbacks for the rail, composer, result document, actions, metrics, and content modules.
 - Browser automation was stopped at the user's request after it interfered with the local Chrome session; final validation used source review, TypeScript, and the production build.
 
