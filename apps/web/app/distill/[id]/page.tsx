@@ -2,7 +2,6 @@ import {
   ArrowLeft,
   ArrowSquareOut,
   FileText,
-  LinkSimple,
   WarningCircle,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Metadata } from "next";
@@ -110,34 +109,21 @@ export default async function DistillResultPage({
   const savedInsightIndexSet = new Set(savedInsightIndexes);
 
   return (
-    <main className="distillAgentWorkspace distillAgentResult">
-      <DistillTaskList documents={documents} currentId={id} />
-      <div className="distillAgentCanvas">
-        <nav className="distillResultBack" aria-label="返回">
+    <main className="distillAgentResult">
+      <article className="distillResultDocument">
+        <div className="distillDocumentTopbar">
           <Link href="/distill">
-            <ArrowLeft aria-hidden="true" size={15} />
+            <ArrowLeft aria-hidden="true" size={16} />
             新建脱水
           </Link>
-        </nav>
+          <DistillProcessPanel
+            sourceType={document.sourceType}
+            paragraphCount={paragraphs.length}
+            compact
+          />
+        </div>
 
-        <section className="distillSourceMessage" aria-label="用户输入">
-          <small>你提交的内容</small>
-          <div>
-            <LinkSimple aria-hidden="true" size={17} />
-            <p>
-              {document.sourceTitle ||
-                document.sourceUrl ||
-                `${document.rawText.slice(0, 180)}${document.rawText.length > 180 ? "…" : ""}`}
-            </p>
-          </div>
-        </section>
-
-        <DistillProcessPanel
-          sourceType={document.sourceType}
-          paragraphCount={paragraphs.length}
-        />
-
-        <article className="distillResultDocument">
+        <div className="distillDocumentInner">
           <header className="distillResultHero">
             <div className="distillResultMeta">
               <span>{document.sourceType === "url" ? "网页" : "粘贴正文"}</span>
@@ -312,8 +298,8 @@ export default async function DistillResultPage({
             }))}
             suggestedQuestions={analysis.followUpQuestions}
           />
-        </article>
-      </div>
+        </div>
+      </article>
     </main>
   );
 }

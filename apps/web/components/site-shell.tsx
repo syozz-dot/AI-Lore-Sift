@@ -152,6 +152,10 @@ export function SiteShell({
     );
   }
 
+  if (pathname === "/distill" || pathname.startsWith("/distill/")) {
+    return <div className="distillStandaloneShell">{children}</div>;
+  }
+
   return (
     <div
       className="siteShell"

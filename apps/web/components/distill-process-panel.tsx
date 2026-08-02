@@ -8,9 +8,11 @@ import {
 export function DistillProcessPanel({
   sourceType,
   paragraphCount,
+  compact = false,
 }: {
   sourceType: string;
   paragraphCount: number;
+  compact?: boolean;
 }) {
   const steps = [
     {
@@ -31,7 +33,9 @@ export function DistillProcessPanel({
   ];
 
   return (
-    <details className="distillProcessPanel">
+    <details
+      className={`distillProcessPanel${compact ? " distillProcessPanelCompact" : ""}`}
+    >
       <summary>
         <span>
           <CheckCircle aria-hidden="true" size={18} weight="fill" />
