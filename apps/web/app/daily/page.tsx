@@ -63,6 +63,17 @@ function compactPeriodLabel(type: ReportType, key: string): string {
   return `第 ${Number(key.slice(-2))} 周`;
 }
 
+function compactPeriodMeta(type: ReportType, key: string): string {
+  if (type === "daily") {
+    return new Intl.DateTimeFormat("zh-CN", {
+      timeZone: "UTC",
+      weekday: "long",
+    }).format(new Date(`${key}T00:00:00Z`));
+  }
+  if (type === "monthly") return `${key.slice(0, 4)} 年`;
+  return key.slice(0, 4);
+}
+
 function reportHref(type: ReportType, period?: string): string {
   const params = new URLSearchParams({ type });
   if (period) params.set("period", period);
@@ -119,8 +130,11 @@ export default async function DailyPage({
                   href={reportHref(type, item.periodKey)}
                   key={`${item.type}-${item.periodKey}`}
                 >
-                  <span>{compactPeriodLabel(type, item.periodKey)}</span>
-                  <strong>{item.storyCount} 条</strong>
+                  <span className="reportArchivePeriod">
+                    <strong>{compactPeriodLabel(type, item.periodKey)}</strong>
+                    <small>{compactPeriodMeta(type, item.periodKey)}</small>
+                  </span>
+                  <b>{item.storyCount}</b>
                 </Link>
               ))
             ) : (
@@ -157,8 +171,8 @@ function ReportArticle({ issue }: { issue: ReportIssue }) {
         </div>
         <div className="dailyIssueTitleRow">
           <div>
-            <p>{formatPeriodLabel(issue.type, issue.periodKey)}</p>
             <h1>{issue.title}</h1>
+            <p>{formatPeriodLabel(issue.type, issue.periodKey)}</p>
           </div>
           <dl className="dailyIssueSummary">
             <div>
@@ -176,8 +190,7 @@ function ReportArticle({ issue }: { issue: ReportIssue }) {
         ) : null}
       </header>
 
-      <nav className="dailyContents" aria-label="本期目录">
-        <span>本期目录</span>
+      <nav className="dailyContents" aria-label="本期分类概览">
         {issue.content.sections.map((section, index) => (
           <a key={section.type} href={`#report-${section.type}`}>
             <span>{String(index + 1).padStart(2, "0")}</span>
