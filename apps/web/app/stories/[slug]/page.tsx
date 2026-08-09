@@ -6,6 +6,7 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 
 import { FavoriteButton } from "../../../components/favorite-button";
 import { MarkdownExportButton } from "../../../components/markdown-export-button";
@@ -68,143 +69,214 @@ export default async function StoryPage({
       ? []
       : story.sourceMediaAssets;
   const isProduct = story.contentType === "product";
+  const readingMinutes = estimateReadingMinutes(
+    story.sourceContent ??
+      [
+        factualSummary,
+        story.analysis?.whyItMatters,
+        story.analysis?.underlyingLogic,
+        story.analysis?.productImpact,
+        ...(story.analysis?.productOpportunities ?? []),
+        ...(story.analysis?.openQuestions ?? []),
+      ]
+        .filter(Boolean)
+        .join("\n"),
+  );
+  const topicLabels = Array.from(
+    new Set([
+      ...story.topics,
+      ...story.matchedSignals.map((signal) => signalLabel(signal)),
+    ]),
+  );
+  const sectionLabels = isProduct
+    ? ([
+        "产品速览",
+        "为什么值得试",
+        "核心能力",
+        "适合谁与使用场景",
+        "上手前待确认",
+      ] as const)
+    : (["发生了什么", "为什么重要", "底层逻辑", "产品与商业机会", "仍待确认"] as const);
 
   return (
-    <main className="storyPage">
-      <div className="storyDetailShell">
-        <Link className="backLink" href="/">
-          <ArrowLeft size={17} />
+    <main className="storyPage storyPageV2">
+      <div className="storyDetailShell storyDetailShellV2">
+        <Link className="backLink storyBackLink" href="/">
+          <ArrowLeft size={15} />
           返回情报流
         </Link>
-        <header className="storyHero">
-          <div className="storyHeroTopbar">
-            <div className="storyHeroMeta">
-              <span>
+
+        <header className="storyHeaderV2">
+          <div className="storyHeaderMain">
+            <div className="storyKicker">
+              <span className="storyTypeBadge">
                 {story.contentType
                   ? contentTypeLabels[story.contentType]
                   : "情报"}
               </span>
               <span>{story.sourceName ?? "未知信源"}</span>
+              <i aria-hidden="true">/</i>
               <span>{formatFullDateTime(story.lastPublishedAt)}</span>
+              <i aria-hidden="true">/</i>
+              <span>阅读约 {readingMinutes} 分钟</span>
             </div>
-            <div className="storyHeroActions">
-              <MarkdownExportButton
-                story={{
-                  slug: story.slug,
-                  title: displayTitle,
-                  originalTitle: story.analysis?.translatedTitle
-                    ? story.title
-                    : null,
-                  contentType: story.contentType
-                    ? contentTypeLabels[story.contentType]
-                    : "情报",
-                  sourceName: story.sourceName ?? "未知信源",
-                  publishedAt: formatFullDateTime(story.lastPublishedAt),
-                  relevanceScore: formatScore(score),
-                  sourceCount: story.independentSourceCount,
-                  status: storyStatusLabels[story.status],
-                  factualSummary,
-                  whyItMatters: story.analysis?.whyItMatters ?? null,
-                  underlyingLogic: story.analysis?.underlyingLogic ?? null,
-                  productImpact: story.analysis?.productImpact ?? null,
-                  productOpportunities:
-                    story.analysis?.productOpportunities ?? [],
-                  openQuestions: story.analysis?.openQuestions ?? [],
-                  matchedSignals: story.matchedSignals.map(signalLabel),
-                  analysisProvider: story.analysis?.provider ?? null,
-                  analysisModel: story.analysis?.model ?? null,
-                  evidence: story.evidence.map((item) => ({
-                    sourceName: item.sourceName,
-                    title: item.title,
-                    url: item.originalUrl,
-                    publishedAt: formatFullDateTime(
-                      item.sourcePublishedAt ?? item.discoveredAt,
-                    ),
-                    contentType: contentTypeLabels[item.contentType],
-                    relevanceScore: formatScore(item.relevanceScore),
-                    excerpt: item.excerpt,
-                  })),
-                }}
-              />
-              <FavoriteButton
-                story={{
-                  slug: story.slug,
-                  title: displayTitle,
-                  originalTitle:
-                    displayTitle === story.title ? null : story.title,
-                  summary: story.analysis?.whyItMatters ?? factualSummary,
-                  contentType: story.contentType
-                    ? contentTypeLabels[story.contentType]
-                    : "情报",
-                  sourceName: story.sourceName ?? "未知信源",
-                  publishedAt: story.lastPublishedAt?.toISOString() ?? null,
-                  score,
-                }}
-              />
-            </div>
+
+            <h1 lang={story.analysis?.translatedTitle ? undefined : "en"}>
+              {displayTitle}
+            </h1>
+            {story.analysis?.translatedTitle ? (
+              <p className="storyOriginalTitle" lang="en">
+                原文：{story.title}
+              </p>
+            ) : null}
+            {factualSummary ? (
+              <p className="storyDeck">{factualSummary}</p>
+            ) : (
+              <p className="storyDeck storyDeckMuted">
+                中文事实摘要尚未生成，当前仅展示原文索引与可验证信息。
+              </p>
+            )}
           </div>
-          <h1 lang={story.analysis?.translatedTitle ? undefined : "en"}>
-            {displayTitle}
-          </h1>
-          {story.analysis?.translatedTitle ? (
-            <p className="storyOriginalTitle" lang="en">
-              原文：{story.title}
-            </p>
-          ) : (
-            <p className="storyOriginalTitle">英文原文索引 · 标题保持原样</p>
-          )}
-          {factualSummary ? <p>{factualSummary}</p> : null}
+
+          <div className="storyHeaderActions">
+            <MarkdownExportButton
+              story={{
+                slug: story.slug,
+                title: displayTitle,
+                originalTitle: story.analysis?.translatedTitle
+                  ? story.title
+                  : null,
+                contentType: story.contentType
+                  ? contentTypeLabels[story.contentType]
+                  : "情报",
+                sourceName: story.sourceName ?? "未知信源",
+                publishedAt: formatFullDateTime(story.lastPublishedAt),
+                relevanceScore: formatScore(score),
+                sourceCount: story.independentSourceCount,
+                status: storyStatusLabels[story.status],
+                factualSummary,
+                whyItMatters: story.analysis?.whyItMatters ?? null,
+                underlyingLogic: story.analysis?.underlyingLogic ?? null,
+                productImpact: story.analysis?.productImpact ?? null,
+                productOpportunities:
+                  story.analysis?.productOpportunities ?? [],
+                openQuestions: story.analysis?.openQuestions ?? [],
+                matchedSignals: story.matchedSignals.map(signalLabel),
+                analysisProvider: story.analysis?.provider ?? null,
+                analysisModel: story.analysis?.model ?? null,
+                evidence: story.evidence.map((item) => ({
+                  sourceName: item.sourceName,
+                  title: item.title,
+                  url: item.originalUrl,
+                  publishedAt: formatFullDateTime(
+                    item.sourcePublishedAt ?? item.discoveredAt,
+                  ),
+                  contentType: contentTypeLabels[item.contentType],
+                  relevanceScore: formatScore(item.relevanceScore),
+                  excerpt: item.excerpt,
+                })),
+              }}
+            />
+            <FavoriteButton
+              story={{
+                slug: story.slug,
+                title: displayTitle,
+                originalTitle: displayTitle === story.title ? null : story.title,
+                summary: story.analysis?.whyItMatters ?? factualSummary,
+                contentType: story.contentType
+                  ? contentTypeLabels[story.contentType]
+                  : "情报",
+                sourceName: story.sourceName ?? "未知信源",
+                publishedAt: story.lastPublishedAt?.toISOString() ?? null,
+                score,
+              }}
+            />
+          </div>
         </header>
 
-        <dl className="storyMetrics">
-          <div>
-            <dt>相关度</dt>
-            <dd>{formatScore(score)}</dd>
+        <div className="storySignalBar">
+          <div className="storyRelevance">
+            <span>相关度</span>
+            <strong>{formatScore(score)}</strong>
+            <i aria-hidden="true">
+              <b
+                style={{
+                  width: `${Math.min(100, Math.max(4, score ?? 0))}%`,
+                }}
+              />
+            </i>
           </div>
-          <div>
-            <dt>信源</dt>
-            <dd>{story.independentSourceCount}</dd>
-          </div>
-          <div>
-            <dt>状态</dt>
-            <dd>{storyStatusLabels[story.status]}</dd>
-          </div>
-        </dl>
+          <span className="storySourceStatus">
+            信源 {story.independentSourceCount} 条 · {storyStatusLabels[story.status]}
+          </span>
+          {story.originalUrl ? (
+            <a
+              className="storyOriginalLink"
+              href={story.originalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              原文：{story.title}
+              <ArrowUpRight aria-hidden="true" size={14} />
+            </a>
+          ) : null}
+        </div>
 
-        <div className="analysisLayout">
-          <article className="analysisBody">
-            <section>
-              <h2>{isProduct ? "产品速览" : "发生了什么"}</h2>
+        <div className="storyReadingLayout">
+          <article className="storyReadingCard">
+            <dl className="storyFactStrip">
+              <div>
+                <dt>类型</dt>
+                <dd>
+                  {story.contentType
+                    ? contentTypeLabels[story.contentType]
+                    : "情报"}
+                </dd>
+              </div>
+              <div>
+                <dt>来源</dt>
+                <dd>{story.sourceName ?? "未知信源"}</dd>
+              </div>
+              <div>
+                <dt>发布</dt>
+                <dd>{formatFullDateTime(story.lastPublishedAt)}</dd>
+              </div>
+              <div>
+                <dt>状态</dt>
+                <dd>{storyStatusLabels[story.status]}</dd>
+              </div>
+            </dl>
+
+            <StorySection index="01" id="section-1" title={sectionLabels[0]}>
               {factualSummary ? (
                 <p>{factualSummary}</p>
               ) : (
                 <MissingAnalysis label={isProduct ? "产品速览" : "事实摘要"} />
               )}
-            </section>
+            </StorySection>
 
-            <section>
-              <h2>{isProduct ? "为什么值得试" : "为什么重要"}</h2>
+            <StorySection index="02" id="section-2" title={sectionLabels[1]}>
               {story.analysis?.whyItMatters ? (
                 <p>{story.analysis.whyItMatters}</p>
               ) : (
                 <MissingAnalysis label={isProduct ? "产品判断" : "影响分析"} />
               )}
-            </section>
+            </StorySection>
 
-            {story.analysis?.underlyingLogic ? (
-              <section>
-                <h2>{isProduct ? "核心能力" : "底层逻辑"}</h2>
+            <StorySection index="03" id="section-3" title={sectionLabels[2]}>
+              {story.analysis?.underlyingLogic ? (
                 <p>{story.analysis.underlyingLogic}</p>
-              </section>
-            ) : null}
+              ) : (
+                <MissingAnalysis label={isProduct ? "核心能力" : "底层逻辑"} />
+              )}
+            </StorySection>
 
-            <section>
-              <h2>{isProduct ? "适合谁与使用场景" : "产品与商业机会"}</h2>
+            <StorySection index="04" id="section-4" title={sectionLabels[3]}>
               {story.analysis?.productImpact ? (
                 <p>{story.analysis.productImpact}</p>
               ) : null}
               {story.analysis?.productOpportunities.length ? (
-                <ul className="opportunityList">
+                <ul className="opportunityList storyNumberedList">
                   {story.analysis.productOpportunities.map((opportunity) => (
                     <li key={opportunity}>{opportunity}</li>
                   ))}
@@ -214,34 +286,26 @@ export default async function StoryPage({
                   label={isProduct ? "使用场景判断" : "机会分析"}
                 />
               )}
-            </section>
+            </StorySection>
 
-            {story.analysis?.openQuestions.length ? (
-              <section>
-                <h2>{isProduct ? "上手前待确认" : "仍待确认"}</h2>
-                <ul className="questionList">
+            <StorySection index="05" id="section-5" title={sectionLabels[4]}>
+              {story.analysis?.openQuestions.length ? (
+                <ul className="storyOpenQuestions">
                   {story.analysis.openQuestions.map((question) => (
                     <li key={question}>{question}</li>
                   ))}
                 </ul>
-              </section>
-            ) : null}
+              ) : (
+                <MissingAnalysis label="待确认问题" />
+              )}
+            </StorySection>
 
             {showSourceContent || standaloneMedia.length ? (
-              <section className="sourceMaterial">
-                <div className="sourceMaterialHeading">
-                  <h2>原文与媒体</h2>
-                  {story.originalUrl ? (
-                    <a
-                      href={story.originalUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      打开原始来源
-                      <ArrowUpRight aria-hidden="true" size={15} />
-                    </a>
-                  ) : null}
-                </div>
+              <details className="sourceMaterial storySourceMaterial">
+                <summary>
+                  <span>原文与媒体</span>
+                  <span>展开查看</span>
+                </summary>
                 {story.primaryAuthor ? (
                   <p className="sourceByline">{story.primaryAuthor}</p>
                 ) : null}
@@ -254,18 +318,11 @@ export default async function StoryPage({
                         <figure key={`${asset.url}-${index}`}>
                           <img
                             src={createMediaProxyUrl(imageUrl)}
-                            alt={
-                              asset.alt ?? `${displayTitle} 配图 ${index + 1}`
-                            }
+                            alt={asset.alt ?? `${displayTitle} 配图 ${index + 1}`}
                             loading="lazy"
                             decoding="async"
                             referrerPolicy="no-referrer"
                           />
-                          {asset.type !== "image" ? (
-                            <figcaption>
-                              {asset.type.toUpperCase()} 预览
-                            </figcaption>
-                          ) : null}
                         </figure>
                       ) : null;
                     })}
@@ -281,17 +338,27 @@ export default async function StoryPage({
                     <p className="sourcePlainText">{story.sourceContent}</p>
                   )
                 ) : null}
-              </section>
+              </details>
             ) : null}
           </article>
 
-          <aside className="evidenceRail">
-            <section>
-              <div className="evidenceHeading">
-                <h2>来源证据</h2>
-                <span>{story.evidence.length} 条</span>
+          <aside className="storyContextRail">
+            <nav aria-label="本篇结构">
+              <p>本篇结构</p>
+              {sectionLabels.map((label, index) => (
+                <a href={`#section-${index + 1}`} key={label}>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  {label}
+                </a>
+              ))}
+            </nav>
+
+            <section className="storyEvidenceSection">
+              <div className="storyRailHeading">
+                <p>来源证据</p>
+                <span>{story.evidence.length}</span>
               </div>
-              <div className="evidenceList">
+              <div className="storyEvidenceCards">
                 {story.evidence.map((item) => (
                   <a
                     href={item.originalUrl}
@@ -299,50 +366,66 @@ export default async function StoryPage({
                     rel="noreferrer"
                     key={item.id}
                   >
-                    <div className="evidenceMeta">
+                    <div>
                       <span>{item.sourceName}</span>
-                      <span>{formatScore(item.relevanceScore)}</span>
+                      <strong>{formatScore(item.relevanceScore)}</strong>
                     </div>
                     <h3>{item.title}</h3>
-                    <div className="evidenceFooter">
-                      <span>
-                        {formatFullDateTime(
-                          item.sourcePublishedAt ?? item.discoveredAt,
-                        )}
-                      </span>
-                      <ArrowUpRight aria-hidden="true" size={16} />
-                    </div>
+                    <small>
+                      {formatFullDateTime(
+                        item.sourcePublishedAt ?? item.discoveredAt,
+                      )}
+                    </small>
                   </a>
                 ))}
               </div>
             </section>
 
-            <section className="signalSummary">
-              <h2>规则信号</h2>
+            <section className="storyTopicSection">
+              <p>主要信号</p>
               <div>
-                {story.matchedSignals.length ? (
-                  story.matchedSignals.map((signal) => (
-                    <span key={signal}>{signalLabel(signal)}</span>
-                  ))
+                {topicLabels.length ? (
+                  topicLabels.map((label) => <span key={label}>{label}</span>)
                 ) : (
-                  <span>暂无可展示信号</span>
+                  <span>暂无标签</span>
                 )}
               </div>
             </section>
 
             {story.analysis ? (
-              <section className="analysisProvenance">
-                <h2>分析来源</h2>
+              <section className="storyModelSection">
                 <p>
-                  {story.analysis.provider} / {story.analysis.model}
+                  脱水模型 {story.analysis.provider} / {story.analysis.model}
                 </p>
-                <p>置信度 {formatScore(story.analysis.confidence)}</p>
+                <span>置信度 {formatScore(story.analysis.confidence)}</span>
               </section>
             ) : null}
           </aside>
         </div>
       </div>
     </main>
+  );
+}
+
+function StorySection({
+  index,
+  id,
+  title,
+  children,
+}: {
+  index: string;
+  id: string;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="storyReadingSection" id={id}>
+      <div className="storySectionTitle">
+        <span>{index}</span>
+        <h2>{title}</h2>
+      </div>
+      {children}
+    </section>
   );
 }
 
@@ -356,4 +439,10 @@ function MissingAnalysis({ label }: { label: string }) {
       </div>
     </div>
   );
+}
+
+function estimateReadingMinutes(content: string | null) {
+  if (!content) return 1;
+  const plainText = content.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ");
+  return Math.max(1, Math.ceil(plainText.length / 450));
 }
