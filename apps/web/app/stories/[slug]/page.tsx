@@ -21,6 +21,10 @@ import { getStoryDetail } from "../../../lib/queries";
 import { createMediaProxyUrl } from "../../../lib/media-proxy";
 import { decodeRouteSegment } from "../../../lib/route-params";
 import { sanitizeSourceHtml } from "../../../lib/source-content";
+import {
+  selectPromotedStoryMedia,
+  type PresentableStoryMedia,
+} from "../../../lib/story-media";
 
 export const dynamic = "force-dynamic";
 
@@ -64,10 +68,20 @@ export default async function StoryPage({
     story.sourceContent
       ? sanitizeSourceHtml(story.sourceContent)
       : null;
-  const standaloneMedia =
+  const promotedMedia = selectPromotedStoryMedia(story.sourceMediaAssets, {
+    contentType: story.contentType,
+    sourceName: story.sourceName,
+  });
+  const promotedUrls = new Set(promotedMedia.map((asset) => asset.imageUrl));
+  const standaloneMedia = (
     showSourceContent && story.sourceContentFormat === "html"
       ? []
-      : story.sourceMediaAssets;
+      : story.sourceMediaAssets
+  ).filter((asset) => {
+    const imageUrl = asset.type === "image" ? asset.url : asset.previewUrl;
+    return !imageUrl || !promotedUrls.has(imageUrl);
+  });
+  const [leadMedia, ...inlineMedia] = promotedMedia;
   const isProduct = story.contentType === "product";
   const readingMinutes = estimateReadingMinutes(
     story.sourceContent ??
@@ -96,7 +110,13 @@ export default async function StoryPage({
         "适合谁与使用场景",
         "上手前待确认",
       ] as const)
-    : (["发生了什么", "为什么重要", "底层逻辑", "产品与商业机会", "仍待确认"] as const);
+    : ([
+        "发生了什么",
+        "为什么重要",
+        "底层逻辑",
+        "产品与商业机会",
+        "仍待确认",
+      ] as const);
 
   return (
     <main className="storyPage storyPageV2">
@@ -181,7 +201,8 @@ export default async function StoryPage({
               story={{
                 slug: story.slug,
                 title: displayTitle,
-                originalTitle: displayTitle === story.title ? null : story.title,
+                originalTitle:
+                  displayTitle === story.title ? null : story.title,
                 summary: story.analysis?.whyItMatters ?? factualSummary,
                 contentType: story.contentType
                   ? contentTypeLabels[story.contentType]
@@ -207,7 +228,8 @@ export default async function StoryPage({
             </i>
           </div>
           <span className="storySourceStatus">
-            信源 {story.independentSourceCount} 条 · {storyStatusLabels[story.status]}
+            信源 {story.independentSourceCount} 条 ·{" "}
+            {storyStatusLabels[story.status]}
           </span>
           {story.originalUrl ? (
             <a
@@ -247,6 +269,16 @@ export default async function StoryPage({
               </div>
             </dl>
 
+            {leadMedia ? (
+              <StoryEvidenceMedia
+                asset={leadMedia}
+                title={displayTitle}
+                sourceName={story.sourceName}
+                originalUrl={story.originalUrl}
+                eager
+              />
+            ) : null}
+
             <StorySection index="01" id="section-1" title={sectionLabels[0]}>
               {factualSummary ? (
                 <p>{factualSummary}</p>
@@ -262,6 +294,20 @@ export default async function StoryPage({
                 <MissingAnalysis label={isProduct ? "产品判断" : "影响分析"} />
               )}
             </StorySection>
+
+            {inlineMedia.length ? (
+              <div className="storyInlineMediaGrid">
+                {inlineMedia.map((asset, index) => (
+                  <StoryEvidenceMedia
+                    asset={asset}
+                    title={displayTitle}
+                    sourceName={story.sourceName}
+                    originalUrl={story.originalUrl}
+                    key={`${asset.imageUrl}-${index}`}
+                  />
+                ))}
+              </div>
+            ) : null}
 
             <StorySection index="03" id="section-3" title={sectionLabels[2]}>
               {story.analysis?.underlyingLogic ? (
@@ -318,7 +364,9 @@ export default async function StoryPage({
                         <figure key={`${asset.url}-${index}`}>
                           <img
                             src={createMediaProxyUrl(imageUrl)}
-                            alt={asset.alt ?? `${displayTitle} 配图 ${index + 1}`}
+                            alt={
+                              asset.alt ?? `${displayTitle} 配图 ${index + 1}`
+                            }
                             loading="lazy"
                             decoding="async"
                             referrerPolicy="no-referrer"
@@ -426,6 +474,43 @@ function StorySection({
       </div>
       {children}
     </section>
+  );
+}
+
+function StoryEvidenceMedia({
+  asset,
+  title,
+  sourceName,
+  originalUrl,
+  eager = false,
+}: {
+  asset: PresentableStoryMedia;
+  title: string;
+  sourceName: string | null;
+  originalUrl: string | null;
+  eager?: boolean;
+}) {
+  const targetUrl = originalUrl ?? asset.imageUrl;
+
+  return (
+    <figure className="storyEvidenceMedia">
+      <a href={targetUrl} target="_blank" rel="noopener noreferrer">
+        <img
+          src={createMediaProxyUrl(asset.imageUrl)}
+          alt={asset.alt ?? `${title} 原文配图`}
+          loading={eager ? "eager" : "lazy"}
+          decoding="async"
+          referrerPolicy="no-referrer"
+        />
+      </a>
+      <figcaption>
+        <span>{asset.alt ?? `${title} 原文配图`}</span>
+        <span>
+          来源：{sourceName ?? "原文"}
+          <ArrowUpRight aria-hidden="true" size={12} />
+        </span>
+      </figcaption>
+    </figure>
   );
 }
 

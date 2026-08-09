@@ -137,7 +137,13 @@ describe("RssSourceAdapter", () => {
             <link>https://example.com/rich</link>
             <content:encoded><![CDATA[
               <p>Full text</p>
-              <img src="https://images.example.com/diagram.png" alt="Diagram" />
+              <img
+                src="https://images.example.com/pixel.gif"
+                data-original="https://images.example.com/diagram.png"
+                alt="Provider benchmark chart"
+                width="1280"
+                height="720"
+              />
             ]]></content:encoded>
             <enclosure url="https://images.example.com/diagram.png" type="image/png" />
           </item>
@@ -158,7 +164,13 @@ describe("RssSourceAdapter", () => {
     expect(item).toMatchObject({
       contentFormat: "html",
       mediaAssets: [
-        { type: "image", url: "https://images.example.com/diagram.png" },
+        {
+          type: "image",
+          url: "https://images.example.com/diagram.png",
+          alt: "Provider benchmark chart",
+          width: 1280,
+          height: 720,
+        },
       ],
     });
     expect(item?.content).toContain("<p>Full text</p>");

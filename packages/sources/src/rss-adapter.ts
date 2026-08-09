@@ -178,14 +178,46 @@ function normalizeMediaUrl(value: string | undefined): string | undefined {
   }
 }
 
+function htmlAttribute(tag: string, name: string): string | undefined {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = tag.match(
+    new RegExp(
+      `\\b${escaped}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'=<>]+))`,
+      "i",
+    ),
+  );
+  return match?.[1] ?? match?.[2] ?? match?.[3];
+}
+
+function positiveInteger(value: unknown): number | undefined {
+  const text = textValue(value);
+  if (!text) return undefined;
+  const parsed = Number.parseInt(text, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
+
 function mediaFromHtml(value: string | undefined): SourceMediaAsset[] {
   if (!value) return [];
   const assets: SourceMediaAsset[] = [];
-  const imagePattern =
-    /<img\b[^>]*\b(?:src|data-src|data-original)=["']([^"']+)["'][^>]*>/gi;
+  const imagePattern = /<img\b[^>]*>/gi;
   for (const match of value.matchAll(imagePattern)) {
-    const url = normalizeMediaUrl(match[1]);
-    if (url) assets.push({ type: "image", url });
+    const tag = match[0];
+    const url = normalizeMediaUrl(
+      htmlAttribute(tag, "data-original") ??
+        htmlAttribute(tag, "data-src") ??
+        htmlAttribute(tag, "src"),
+    );
+    if (!url) continue;
+    const alt = htmlAttribute(tag, "alt") ?? htmlAttribute(tag, "title");
+    const width = positiveInteger(htmlAttribute(tag, "width"));
+    const height = positiveInteger(htmlAttribute(tag, "height"));
+    assets.push({
+      type: "image",
+      url,
+      ...(alt ? { alt } : {}),
+      ...(width ? { width } : {}),
+      ...(height ? { height } : {}),
+    });
   }
   return assets;
 }
@@ -210,7 +242,21 @@ function mediaFromEntry(entry: XmlRecord): SourceMediaAsset[] {
       : declaredType.startsWith("audio/")
         ? "audio"
         : "image";
-    assets.push({ type, url });
+    const alt = textValue(
+      candidate["@alt"] ??
+        candidate.alt ??
+        candidate["@title"] ??
+        candidate.title,
+    );
+    const width = positiveInteger(candidate["@width"] ?? candidate.width);
+    const height = positiveInteger(candidate["@height"] ?? candidate.height);
+    assets.push({
+      type,
+      url,
+      ...(alt ? { alt } : {}),
+      ...(width ? { width } : {}),
+      ...(height ? { height } : {}),
+    });
   }
 
   return assets;
@@ -219,14 +265,27 @@ function mediaFromEntry(entry: XmlRecord): SourceMediaAsset[] {
 function deduplicateMediaAssets(
   assets: SourceMediaAsset[],
 ): SourceMediaAsset[] {
-  const seen = new Set<string>();
-  return assets
-    .filter((asset) => {
-      if (seen.has(asset.url)) return false;
-      seen.add(asset.url);
-      return true;
-    })
-    .slice(0, 12);
+  const byUrl = new Map<string, SourceMediaAsset>();
+
+  for (const asset of assets) {
+    const existing = byUrl.get(asset.url);
+    if (!existing) {
+      byUrl.set(asset.url, asset);
+      continue;
+    }
+
+    byUrl.set(asset.url, {
+      ...existing,
+      ...(!existing.previewUrl && asset.previewUrl
+        ? { previewUrl: asset.previewUrl }
+        : {}),
+      ...(!existing.alt && asset.alt ? { alt: asset.alt } : {}),
+      ...(!existing.width && asset.width ? { width: asset.width } : {}),
+      ...(!existing.height && asset.height ? { height: asset.height } : {}),
+    });
+  }
+
+  return [...byUrl.values()].slice(0, 12);
 }
 
 export class RssSourceAdapter implements SourceAdapter {
