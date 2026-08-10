@@ -8193,6 +8193,8 @@ button {
 
 .storyHeaderMain {
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .storyKicker {
@@ -8251,12 +8253,14 @@ button {
 }
 
 .storyDeck {
+  width: 100%;
   max-width: 1120px;
   margin: 13px 0 0;
   color: var(--ink-secondary);
   font-size: 16px;
   line-height: 1.75;
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .storyDeckMuted {
@@ -8396,6 +8400,7 @@ button {
 }
 
 .storyFactStrip dd {
+  min-width: 0;
   margin: 0;
   overflow: hidden;
   color: var(--ink-secondary);
@@ -8503,12 +8508,14 @@ button {
 
 .storyReadingSection > p,
 .storyReadingSection > ul {
+  width: 100%;
   max-width: 60em;
   margin: 0;
   color: var(--ink-secondary);
   font-size: 18px;
   line-height: 1.82;
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .storyNumberedList,
@@ -8519,9 +8526,12 @@ button {
 
 .storyNumberedList li,
 .storyOpenQuestions li {
+  min-width: 0;
   position: relative;
   padding: 13px 12px 13px 38px;
   border-top: 1px solid var(--line);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .storyNumberedList li:last-child,
@@ -8826,7 +8836,9 @@ button {
   }
 
   .storyKicker {
+    width: 100%;
     gap: 6px;
+    row-gap: 8px;
     letter-spacing: 0.1em;
   }
 
@@ -8853,7 +8865,26 @@ button {
   }
 
   .storyFactStrip {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .storyFactStrip div {
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .storyFactStrip div:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .storyFactStrip dd {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .storyInlineMediaGrid {
@@ -8876,6 +8907,7 @@ button {
 
   .storyReadingSection > p,
   .storyReadingSection > ul {
+    max-width: 100%;
     font-size: 16px;
     line-height: 1.78;
   }
