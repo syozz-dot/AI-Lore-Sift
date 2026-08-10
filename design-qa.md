@@ -1,33 +1,22 @@
-# Distill workspace design QA
+# Mobile Story Detail QA
 
-## Target
+## Visual references
 
-- New task reference: `codex-clipboard-LT5CzM.png`
-- Result reference: `codex-clipboard-Hssx5s.png`
-- Scope: `/distill` and `/distill/[id]`
+- Homepage baseline: `/private/tmp/ann-mobile-home.png`
+- Story overflow baseline: `/private/tmp/ann-mobile-story.png`
+- Primary route: `/stories/inkling-small-51202629cf`
+- Primary viewport: `390 x 844`
 
-## Pass 1 — desktop comparison
+## Acceptance checklist
 
-Compared the reference and implementation at matching desktop states.
+- [x] The document has no page-level horizontal scroll at 360 px, 390 px, or 430 px.
+- [x] The story title, deck, metadata, and original-source link wrap within the viewport.
+- [x] Story facts and body copy remain readable without clipping.
+- [x] Images, video, embeds, code blocks, and tables cannot widen the page.
+- [x] Wide code blocks and tables scroll inside their own container when necessary.
+- [ ] The mobile navigation still opens, closes, and leaves the story content usable.
+- [ ] Homepage mobile layout remains unchanged apart from safe text wrapping.
 
-- New task: task rail, private-workspace header, centered empty state, and bottom composer align with the reference hierarchy.
-- Result: moved out of the global product shell into a full-bleed warm reading document.
-- Result title was too large and wrapped to three lines; reduced the responsive type scale to keep the reference's two-line rhythm at wide viewports.
-- Removed the dark stage gutter entirely so the document fills the result area without a stray black edge.
-- Action buttons were too stark; normalized them to the document's quiet border and surface treatment.
-- The floating annotation toolbar visible in the Lovable screenshots is editor chrome, so it is intentionally not reproduced.
+## Result
 
-## Functional and responsive review
-
-- `/distill` retains the real task history and submit flow.
-- `/distill/[id]` retains save, Markdown export, original link, delete, process details, and follow-up behavior.
-- The focused workspace now keeps a narrow global navigation rail, so users can leave the distill flow without restoring the full news-site shell.
-- Personal actions now stay grouped directly below the workspace entry instead of being anchored to the viewport bottom.
-- Global navigation and task links are prefetched; navigation gains immediate pressed and pending feedback while the next route resolves.
-- On mobile, the global rail becomes a fixed bottom dock while the task-history rail remains hidden.
-- Standalone layout has explicit tablet and mobile fallbacks for the rail, composer, result document, actions, metrics, and content modules.
-- Browser automation was stopped at the user's request after it interfered with the local Chrome session; final validation used source review, TypeScript, and the production build.
-
-## Final status
-
-PASS — the requested Lovable structure is implemented without changing the distillation data or action logic.
+Status: production story layout verified at 360 x 800, 390 x 844, and 430 x 932. In all three viewports, document and body `clientWidth` equal `scrollWidth`; the story header, deck, signal bar, reading layout, and reading card remain inside the viewport. Navigation interaction and homepage visual regression remain manual checks.
