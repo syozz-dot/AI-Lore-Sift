@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 type Theme = "light" | "dark";
 
-function resolveTheme(): Theme {
+export function resolveTheme(): Theme {
   const saved = window.localStorage.getItem("ann-theme");
   if (saved === "light" || saved === "dark") return saved;
   return window.matchMedia("(prefers-color-scheme: dark)").matches

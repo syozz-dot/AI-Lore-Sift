@@ -9,6 +9,8 @@ import {
 import { useState } from "react";
 import type { FormEvent } from "react";
 
+import { distillMessageBlocks } from "../lib/distill-message";
+
 interface FollowUpMessage {
   id: string;
   role: string;
@@ -16,70 +18,10 @@ interface FollowUpMessage {
   createdAt: string;
 }
 
-interface MessageBlock {
-  kind: "paragraph" | "list";
-  content: string | string[];
-}
-
-function cleanInlineMarkdown(value: string) {
-  return value
-    .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .replace(/__([^_]+)__/g, "$1")
-    .trim();
-}
-
-function chunkParagraph(value: string, maxLength = 220) {
-  if (value.length <= maxLength) return [value];
-  const sentences = value
-    .match(/[^。！？!?；;]+[。！？!?；;]?/g)
-    ?.map((item) => item.trim()) ?? [value];
-  const chunks: string[] = [];
-  let current = "";
-
-  for (const sentence of sentences) {
-    if (current && current.length + sentence.length > maxLength) {
-      chunks.push(current);
-      current = sentence;
-    } else {
-      current += sentence;
-    }
-  }
-  if (current) chunks.push(current);
-  return chunks;
-}
-
-function messageBlocks(content: string): MessageBlock[] {
-  const prepared = content
-    .replace(/\r\n?/g, "\n")
-    .replace(/\s*\*\*([^*\n]+)\*\*\s*([：:])/g, "\n\n$1$2 ")
-    .replace(/([。！？!?])\s+(?=(?:[-•]|\d+[.、])\s)/g, "$1\n")
-    .trim();
-  const lines = prepared.split(/\n+/).map(cleanInlineMarkdown).filter(Boolean);
-  const blocks: MessageBlock[] = [];
-
-  for (const line of lines) {
-    const listItem = line.match(/^(?:[-•]|\d+[.、])\s*(.+)$/);
-    if (listItem?.[1]) {
-      const last = blocks.at(-1);
-      if (last?.kind === "list" && Array.isArray(last.content)) {
-        last.content.push(listItem[1]);
-      } else {
-        blocks.push({ kind: "list", content: [listItem[1]] });
-      }
-      continue;
-    }
-    for (const paragraph of chunkParagraph(line)) {
-      blocks.push({ kind: "paragraph", content: paragraph });
-    }
-  }
-
-  return blocks;
-}
-
 function DistillMessageBody({ content }: { content: string }) {
   return (
     <div className="distillMessageBody">
-      {messageBlocks(content).map((block, index) =>
+      {distillMessageBlocks(content).map((block, index) =>
         block.kind === "list" && Array.isArray(block.content) ? (
           <ol key={`list-${index}`}>
             {block.content.map((item) => (

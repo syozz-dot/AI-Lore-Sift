@@ -1338,6 +1338,7 @@ button {
 .distillStandaloneShell {
   --canvas: #f7f5ef;
   --surface: #fbfaf6;
+  --surface-strong: #eef1ec;
   --ink: #17201d;
   --ink-secondary: #5f6965;
   --ink-tertiary: #7f8984;
@@ -1345,12 +1346,110 @@ button {
   --line-strong: #c9cec5;
   --accent: #185d48;
   --accent-ink: #f8fbf8;
+  --distill-nav: #f1f2ed;
+  --distill-nav-active: #dfe9e2;
+  --distill-nav-pending: #e6ece7;
+  --distill-rail-active: #e8eee9;
+  --distill-chip: #f3f5f1;
+  --distill-workspace: #efeee8;
+  --distill-document: #fff;
+  --distill-document-line: #d4d2ca;
+  --distill-copy: #626c7e;
+  --distill-copy-soft: #6b7483;
+  --distill-evidence: #5e687b;
+  --distill-verdict-border: #a6bbb3;
+  --distill-verdict: #f0f5f3;
+  --distill-control: #fff;
+  --distill-primary: #214f40;
+  --distill-primary-hover: #173f33;
+  --distill-primary-ink: #fff;
+  --distill-hover: #f4f6f4;
+  --distill-input: #f7f8f6;
+  --distill-card-shadow: 0 2px 10px rgb(29 36 32 / 7%);
+  --distill-control-shadow: 0 3px 10px rgb(29 42 36 / 6%);
+  --distill-popover-shadow: 0 4px 8px rgb(24 34 30 / 10%);
   min-height: 100dvh;
   display: grid;
   grid-template-columns: 68px minmax(0, 1fr);
   background: var(--canvas);
   color: var(--ink);
   color-scheme: light;
+}
+
+:root[data-theme="dark"] .distillStandaloneShell {
+  --canvas: #0d110e;
+  --surface: #171d18;
+  --surface-strong: #222a24;
+  --ink: #edf1ed;
+  --ink-secondary: #b4beb6;
+  --ink-tertiary: #8b968d;
+  --line: #2d362f;
+  --line-strong: #424c44;
+  --accent: #8fb59b;
+  --accent-ink: #0c1a11;
+  --danger: #e18780;
+  --distill-nav: #090d0a;
+  --distill-nav-active: #223027;
+  --distill-nav-pending: #1d2821;
+  --distill-rail-active: #202a23;
+  --distill-chip: #1c241e;
+  --distill-workspace: #090d0a;
+  --distill-document: #151a16;
+  --distill-document-line: #303832;
+  --distill-copy: #b4beb6;
+  --distill-copy-soft: #929d94;
+  --distill-evidence: #a7b2a9;
+  --distill-verdict-border: #4c6254;
+  --distill-verdict: #1a241e;
+  --distill-control: #1b211c;
+  --distill-primary: #8fb59b;
+  --distill-primary-hover: #a4c4ac;
+  --distill-primary-ink: #0c1a11;
+  --distill-hover: #1c251f;
+  --distill-input: #171d18;
+  --distill-card-shadow: none;
+  --distill-control-shadow: none;
+  --distill-popover-shadow: none;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .distillStandaloneShell {
+    --canvas: #0d110e;
+    --surface: #171d18;
+    --surface-strong: #222a24;
+    --ink: #edf1ed;
+    --ink-secondary: #b4beb6;
+    --ink-tertiary: #8b968d;
+    --line: #2d362f;
+    --line-strong: #424c44;
+    --accent: #8fb59b;
+    --accent-ink: #0c1a11;
+    --danger: #e18780;
+    --distill-nav: #090d0a;
+    --distill-nav-active: #223027;
+    --distill-nav-pending: #1d2821;
+    --distill-rail-active: #202a23;
+    --distill-chip: #1c241e;
+    --distill-workspace: #090d0a;
+    --distill-document: #151a16;
+    --distill-document-line: #303832;
+    --distill-copy: #b4beb6;
+    --distill-copy-soft: #929d94;
+    --distill-evidence: #a7b2a9;
+    --distill-verdict-border: #4c6254;
+    --distill-verdict: #1a241e;
+    --distill-control: #1b211c;
+    --distill-primary: #8fb59b;
+    --distill-primary-hover: #a4c4ac;
+    --distill-primary-ink: #0c1a11;
+    --distill-hover: #1c251f;
+    --distill-input: #171d18;
+    --distill-card-shadow: none;
+    --distill-control-shadow: none;
+    --distill-popover-shadow: none;
+    color-scheme: dark;
+  }
 }
 
 .distillStandaloneContent {
@@ -1369,7 +1468,7 @@ button {
   align-items: center;
   gap: 30px;
   border-right: 1px solid var(--line);
-  background: #f1f2ed;
+  background: var(--distill-nav);
 }
 
 .distillGlobalBrand {
@@ -1442,12 +1541,12 @@ button {
 }
 
 .distillGlobalNavLink.active {
-  background: #dfe9e2;
+  background: var(--distill-nav-active);
   color: var(--accent);
 }
 
 .distillGlobalNavLink.pending {
-  background: #e6ece7;
+  background: var(--distill-nav-pending);
   color: var(--accent);
   transform: scale(0.96);
 }
@@ -1562,7 +1661,7 @@ button {
 .distillStandaloneShell .distillTaskRail nav > a:hover,
 .distillStandaloneShell .distillTaskRail nav > a.isActive {
   border-left-color: transparent;
-  background: #e8eee9;
+  background: var(--distill-rail-active);
 }
 
 .distillStandaloneShell .distillTaskRail nav > a.isActive {
@@ -1635,7 +1734,7 @@ button {
   height: 60px;
   border-radius: 16px;
   background: var(--surface);
-  box-shadow: 0 8px 28px rgb(26 49 40 / 7%);
+  box-shadow: var(--distill-card-shadow);
 }
 
 .distillStandaloneShell .distillConversationEmpty > p {
@@ -1663,7 +1762,7 @@ button {
 .distillStandaloneShell .distillConversationPrompts span {
   padding: 9px 15px;
   border-color: var(--line-strong);
-  background: rgb(255 255 255 / 35%);
+  background: var(--distill-chip);
   font-size: 12px;
 }
 
@@ -1674,7 +1773,7 @@ button {
   border-color: var(--line-strong);
   border-radius: 18px;
   background: var(--surface);
-  box-shadow: 0 14px 42px rgb(28 42 37 / 10%);
+  box-shadow: var(--distill-card-shadow);
   backdrop-filter: none;
 }
 
@@ -1700,7 +1799,7 @@ button {
   footer
   > div
   span:first-child {
-  background: #e5eee8;
+  background: var(--distill-nav-active);
   color: var(--accent);
 }
 
@@ -1729,7 +1828,7 @@ button {
 .distillStandaloneShell .distillAgentResult {
   min-height: 100dvh;
   padding: 24px;
-  background: #efeee8;
+  background: var(--distill-workspace);
 }
 
 .distillStandaloneShell .distillResultDocument {
@@ -1737,10 +1836,10 @@ button {
   min-height: 100dvh;
   margin: 0 auto;
   overflow: clip;
-  border: 1px solid #d8d7d1;
+  border: 1px solid var(--line);
   border-radius: 28px;
-  background: #fff;
-  box-shadow: 0 2px 10px rgb(29 36 32 / 7%);
+  background: var(--distill-document);
+  box-shadow: var(--distill-card-shadow);
 }
 
 .distillStandaloneShell .distillDocumentTopbar {
@@ -1798,7 +1897,7 @@ button {
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--surface);
-  box-shadow: 0 18px 55px rgb(24 34 30 / 14%);
+  box-shadow: var(--distill-popover-shadow);
 }
 
 .distillStandaloneShell .distillDocumentInner {
@@ -1866,7 +1965,7 @@ button {
 
 .distillStandaloneShell .distillOriginalTitle {
   margin-top: 18px;
-  color: #626c7e;
+  color: var(--distill-copy);
   font-size: 17px;
 }
 
@@ -1875,10 +1974,9 @@ button {
   margin-top: 48px;
   padding: 26px 34px;
   display: block;
-  border: 0;
-  border-left: 4px solid #76968b;
+  border: 1px solid var(--distill-verdict-border);
   border-radius: 0;
-  background: #f0f5f3;
+  background: var(--distill-verdict);
 }
 
 .distillStandaloneShell .distillVerdict strong {
@@ -1904,17 +2002,17 @@ button {
   padding-inline: 17px;
   border: 1px solid var(--line-strong);
   border-radius: 11px;
-  background: #fff;
+  background: var(--distill-control);
   color: var(--ink);
-  box-shadow: 0 3px 10px rgb(29 42 36 / 6%);
+  box-shadow: var(--distill-control-shadow);
   font-size: 14px;
 }
 
 .distillStandaloneShell .distillResultActions .knowledgeSaveControl button {
-  border-color: #214f40;
-  background: #214f40;
-  color: #fff;
-  box-shadow: 0 4px 9px rgb(25 65 51 / 16%);
+  border-color: var(--distill-primary);
+  background: var(--distill-primary);
+  color: var(--distill-primary-ink);
+  box-shadow: var(--distill-control-shadow);
 }
 
 .distillStandaloneShell
@@ -1925,9 +2023,9 @@ button {
   .distillResultActions
   .knowledgeSaveControl
   button[aria-pressed="true"] {
-  border-color: #173f33;
-  background: #173f33;
-  color: #fff;
+  border-color: var(--distill-primary-hover);
+  background: var(--distill-primary-hover);
+  color: var(--distill-primary-ink);
 }
 
 .distillStandaloneShell .distillSourceLink {
@@ -1950,8 +2048,8 @@ button {
 
 .distillStandaloneShell .distillResultDocument .distillResultMetrics {
   padding: 0;
-  border-top: 1px solid #d4d2ca;
-  border-bottom: 1px solid #d4d2ca;
+  border-top: 1px solid var(--distill-document-line);
+  border-bottom: 1px solid var(--distill-document-line);
 }
 
 .distillStandaloneShell .distillResultMetrics > div {
@@ -1959,7 +2057,7 @@ button {
 }
 
 .distillStandaloneShell .distillResultMetrics dt {
-  color: #626c7e;
+  color: var(--distill-copy);
   font-size: 12px;
   letter-spacing: 0.08em;
 }
@@ -1988,7 +2086,7 @@ button {
   > .distillResultModule:not(:first-child) {
   padding: 70px 0;
   display: block;
-  border-bottom: 1px solid #d4d2ca;
+  border-bottom: 1px solid var(--distill-document-line);
 }
 
 .distillStandaloneShell .distillModuleHeading {
@@ -2011,7 +2109,7 @@ button {
 .distillStandaloneShell .distillModuleHeading p {
   max-width: none;
   margin: 0;
-  color: #6b7483;
+  color: var(--distill-copy-soft);
   font-size: 12px;
 }
 
@@ -2036,14 +2134,14 @@ button {
   padding: 0 0 0 28px;
   display: grid;
   gap: 12px;
-  border-left: 1px solid #d4d2ca;
+  border-left: 1px solid var(--distill-document-line);
 }
 
 .distillStandaloneShell .distillEvidenceIndex a {
   display: flex;
   align-items: baseline;
   gap: 11px;
-  color: #5e687b;
+  color: var(--distill-evidence);
   font-size: 14px;
 }
 
@@ -2111,7 +2209,7 @@ button {
 .distillStandaloneShell .distillKeyPoints > article > div > p,
 .distillStandaloneShell .distillTakeawayCards p {
   margin-top: 12px;
-  color: #626c7e;
+  color: var(--distill-copy);
   font-size: 14px;
   line-height: 1.9;
 }
@@ -2155,7 +2253,7 @@ button {
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: #626c7e;
+  color: var(--distill-copy);
   font-size: 15px;
   line-height: 1.85;
 }
@@ -2167,7 +2265,7 @@ button {
 .distillStandaloneShell .distillQuoteModule blockquote {
   margin: 0;
   padding: 4px 0 4px 34px;
-  border-left: 3px solid #a6bbb3;
+  border-left: 1px solid var(--distill-verdict-border);
 }
 
 .distillStandaloneShell .distillQuoteModule blockquote p {
@@ -2189,7 +2287,7 @@ button {
   margin: 0;
   padding: 70px 0 0;
   border: 0;
-  border-top: 1px solid #d4d2ca;
+  border-top: 1px solid var(--distill-document-line);
   background: transparent;
 }
 
@@ -2217,7 +2315,7 @@ button {
 
 .distillStandaloneShell .distillFollowUpTitle p {
   margin: 0;
-  color: #6b7483;
+  color: var(--distill-copy-soft);
   font-size: 12px;
 }
 
@@ -2247,12 +2345,58 @@ button {
 }
 
 .distillStandaloneShell .distillSuggestedQuestions button:hover {
-  background: #f4f6f4;
+  background: var(--distill-hover);
 }
 
 .distillStandaloneShell .distillFollowUp form {
   border-radius: 12px;
-  background: #f7f8f6;
+  background: var(--distill-input);
+  box-shadow: none;
+}
+
+.distillStandaloneShell .distillConversationAssistant {
+  min-width: 0;
+  border-left-width: 1px;
+}
+
+.distillStandaloneShell .distillConversationAssistant p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.distillStandaloneShell .distillMessageList {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.distillStandaloneShell .distillMessageList article {
+  width: min(100%, 880px);
+  min-width: 0;
+  max-width: none;
+}
+
+.distillStandaloneShell .distillMessageList article.isUser {
+  width: fit-content;
+  max-width: min(84%, 880px);
+  text-align: left;
+}
+
+.distillStandaloneShell .distillMessageList .isUser > small {
+  display: block;
+  text-align: right;
+}
+
+.distillStandaloneShell .distillMessageList article.isAssistant {
+  justify-self: start;
+  border-left-width: 1px;
+}
+
+.distillStandaloneShell .distillMessageBody,
+.distillStandaloneShell .distillMessageBody p,
+.distillStandaloneShell .distillMessageBody ol,
+.distillStandaloneShell .distillMessageBody li {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 @media (min-width: 821px) {
@@ -2448,6 +2592,10 @@ button {
 
   .distillStandaloneShell .distillModuleContent {
     margin-top: 28px;
+  }
+
+  .distillStandaloneShell .distillMessageList article.isUser {
+    max-width: 94%;
   }
 
   .distillStandaloneShell .distillKeyPoints > article,

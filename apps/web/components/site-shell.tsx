@@ -26,7 +26,7 @@ import {
   FAVORITES_STORAGE_KEY,
   readFavorites,
 } from "../lib/favorites";
-import { ThemeToggle } from "./theme-toggle";
+import { resolveTheme, ThemeToggle } from "./theme-toggle";
 
 const SIDEBAR_STORAGE_KEY = "ann-sidebar-collapsed";
 
@@ -88,6 +88,7 @@ export function SiteShell({
   }, []);
 
   useEffect(() => {
+    document.documentElement.dataset.theme = resolveTheme();
     setCollapsed(window.localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true");
     syncFavoriteCount();
 
