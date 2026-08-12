@@ -13,6 +13,7 @@ import {
 import {
   CURATED_TOPICS,
   findCuratedTopic,
+  scoreStoryWithinCategory,
   type CuratedTopic,
   type CuratedTopicSlug,
 } from "@ai-news-navigator/intelligence";
@@ -33,6 +34,7 @@ import { alias } from "drizzle-orm/pg-core";
 import { cache } from "react";
 
 import { getDatabaseConnection } from "./database";
+import { balanceStoryFeed } from "./feed-ranking";
 import { normalizeSearchQuery, storySearchTerms } from "./search";
 
 export type ContentType = typeof items.$inferSelect.contentType;
@@ -49,6 +51,7 @@ export interface StoryFeedItem {
   lastPublishedAt: Date | null;
   independentSourceCount: number;
   relevanceScore: number | null;
+  categoryScore: number | null;
   overallScore: number | null;
   confidence: number | null;
   primaryItemId: string | null;
@@ -175,6 +178,8 @@ async function hydrateFeedRows(
     contentType: ContentType | null;
     sourceName: string | null;
     sourceSlug: string | null;
+    sourceReliability?: typeof sources.$inferSelect.reliability | null;
+    sourceIsFirstParty?: boolean | null;
   }>,
 ): Promise<StoryFeedItem[]> {
   if (baseRows.length === 0) return [];
@@ -247,8 +252,19 @@ async function hydrateFeedRows(
       ? assessmentByItem.get(row.primaryItemId)
       : undefined;
     const analysis = analysisByStory.get(row.id);
+    const { sourceReliability, sourceIsFirstParty, ...publicRow } = row;
     return {
-      ...row,
+      ...publicRow,
+      categoryScore: row.contentType
+        ? scoreStoryWithinCategory({
+            contentType: row.contentType,
+            relevanceScore: row.overallScore ?? row.relevanceScore,
+            publishedAt: row.lastPublishedAt,
+            independentSourceCount: row.independentSourceCount,
+            sourceReliability,
+            isFirstParty: sourceIsFirstParty,
+          })
+        : null,
       translatedTitle: analysis?.translatedTitle ?? null,
       factualSummary: analysis?.factualSummary ?? row.factualSummary,
       matchedSignals: assessment?.matchedSignals ?? [],
@@ -325,49 +341,96 @@ export const getStoryFeed = cache(
     const relevanceSort = desc(
       sql`coalesce(${stories.overallScore}, ${stories.relevanceScore}, 0)`,
     );
-    const sortOrder =
-      contentType === "product"
-        ? [desc(stories.lastPublishedAt), relevanceSort]
-        : [relevanceSort, desc(stories.lastPublishedAt)];
+    const balanceCategories = contentType === undefined;
+    const freshnessFirst =
+      balanceCategories ||
+      contentType === "news" ||
+      contentType === "product" ||
+      contentType === "post" ||
+      contentType === "release" ||
+      contentType === "other";
+    const sortOrder = freshnessFirst
+      ? [desc(stories.lastPublishedAt), relevanceSort]
+      : [relevanceSort, desc(stories.lastPublishedAt)];
+    const candidateLimit = balanceCategories
+      ? Math.max(40, offset + limit)
+      : Math.max(120, (offset + limit) * 6);
+    const feedSelection = {
+      id: stories.id,
+      slug: stories.slug,
+      status: stories.status,
+      title: stories.title,
+      factualSummary: stories.factualSummary,
+      firstPublishedAt: stories.firstPublishedAt,
+      lastPublishedAt: stories.lastPublishedAt,
+      independentSourceCount: stories.independentSourceCount,
+      relevanceScore: stories.relevanceScore,
+      overallScore: stories.overallScore,
+      confidence: stories.confidence,
+      primaryItemId: stories.primaryItemId,
+      excerpt: primaryItems.excerpt,
+      originalUrl: primaryItems.originalUrl,
+      contentType: primaryItems.contentType,
+      sourceName: sources.name,
+      sourceSlug: sources.slug,
+      sourceReliability: sources.reliability,
+      sourceIsFirstParty: sources.isFirstParty,
+    };
+    const selectCandidates = (
+      candidateWhere: ReturnType<typeof and>,
+      order: typeof sortOrder,
+    ) =>
+      db
+        .select(feedSelection)
+        .from(stories)
+        .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
+        .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
+        .where(candidateWhere)
+        .orderBy(...order)
+        .limit(candidateLimit)
+        .offset(0);
+    const candidateQueries = balanceCategories
+      ? [
+          selectCandidates(
+            and(
+              where,
+              inArray(primaryItems.contentType, ["news", "post", "other"]),
+            ),
+            [desc(stories.lastPublishedAt), relevanceSort],
+          ),
+          selectCandidates(
+            and(where, eq(primaryItems.contentType, "product")),
+            [desc(stories.lastPublishedAt), relevanceSort],
+          ),
+          selectCandidates(
+            and(where, eq(primaryItems.contentType, "model")),
+            [relevanceSort, desc(stories.lastPublishedAt)],
+          ),
+          selectCandidates(
+            and(where, eq(primaryItems.contentType, "paper")),
+            [relevanceSort, desc(stories.lastPublishedAt)],
+          ),
+        ]
+      : [selectCandidates(where, sortOrder)];
 
-    const [baseRows, totals] = await Promise.all([
+    const [candidateGroups, totals] = await Promise.all([
+      Promise.all(candidateQueries),
       db
         .select({
-          id: stories.id,
-          slug: stories.slug,
-          status: stories.status,
-          title: stories.title,
-          factualSummary: stories.factualSummary,
-          firstPublishedAt: stories.firstPublishedAt,
-          lastPublishedAt: stories.lastPublishedAt,
-          independentSourceCount: stories.independentSourceCount,
-          relevanceScore: stories.relevanceScore,
-          overallScore: stories.overallScore,
-          confidence: stories.confidence,
-          primaryItemId: stories.primaryItemId,
-          excerpt: primaryItems.excerpt,
-          originalUrl: primaryItems.originalUrl,
-          contentType: primaryItems.contentType,
-          sourceName: sources.name,
-          sourceSlug: sources.slug,
+          count: count(),
         })
         .from(stories)
         .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
         .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
         .where(where)
-        .orderBy(...sortOrder)
-        .limit(limit)
-        .offset(Math.max(0, offset)),
-      db
-        .select({ count: count() })
-        .from(stories)
-        .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
-        .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
-        .where(where),
+        .limit(1),
     ]);
 
+    const baseRows = candidateGroups.flat();
+    const hydrated = await hydrateFeedRows(baseRows);
+    const ranked = balanceStoryFeed(hydrated);
     return {
-      items: await hydrateFeedRows(baseRows),
+      items: ranked.slice(offset, offset + limit),
       total: Number(totals[0]?.count ?? 0),
     };
   },
@@ -423,6 +486,8 @@ export const getTopicIndex = cache(async (): Promise<TopicIndexItem[]> => {
         contentType: primaryItems.contentType,
         sourceName: sources.name,
         sourceSlug: sources.slug,
+        sourceReliability: sources.reliability,
+        sourceIsFirstParty: sources.isFirstParty,
       })
       .from(storyTopics)
       .innerJoin(topics, eq(storyTopics.topicId, topics.id))
@@ -527,6 +592,8 @@ export const getDailyIssue = cache(
         contentType: primaryItems.contentType,
         sourceName: sources.name,
         sourceSlug: sources.slug,
+        sourceReliability: sources.reliability,
+        sourceIsFirstParty: sources.isFirstParty,
       })
       .from(stories)
       .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
@@ -540,7 +607,7 @@ export const getDailyIssue = cache(
       )
       .limit(80);
 
-    const hydrated = await hydrateFeedRows(baseRows);
+    const hydrated = balanceStoryFeed(await hydrateFeedRows(baseRows));
     const counts: DailyIssue["counts"] = {
       news: 0,
       paper: 0,
@@ -690,6 +757,8 @@ export const getStoryDetail = cache(
         contentType: primaryItems.contentType,
         sourceName: sources.name,
         sourceSlug: sources.slug,
+        sourceReliability: sources.reliability,
+        sourceIsFirstParty: sources.isFirstParty,
         sourceAllowsFullText: sources.allowFullText,
       })
       .from(stories)

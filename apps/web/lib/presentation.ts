@@ -63,6 +63,10 @@ export function signalLabel(signal: string) {
   return signalLabels[signal] ?? signal.replaceAll("_", " ");
 }
 
+export function categoryScoreLabel(contentType: ContentType | null) {
+  return contentType ? `${contentTypeLabels[contentType]}评分` : "类别评分";
+}
+
 export function selectFeedInterpretation(input: {
   contentType: ContentType | null;
   excerpt: string | null;

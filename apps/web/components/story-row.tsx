@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import type { StoryFeedItem } from "../lib/queries";
 import {
+  categoryScoreLabel,
   contentTypeLabels,
   formatDateTime,
   formatScore,
@@ -18,9 +19,12 @@ export function StoryRow({
   story: StoryFeedItem;
   index: number;
 }) {
-  const score = story.overallScore ?? story.relevanceScore;
+  const score = story.categoryScore;
   const interpretation = selectFeedInterpretation(story);
   const displayTitle = story.translatedTitle ?? story.title;
+  const typeLabel = story.contentType
+    ? contentTypeLabels[story.contentType]
+    : "情报";
 
   return (
     <article className="storyRow">
@@ -29,7 +33,10 @@ export function StoryRow({
       </div>
       <div className="storyHeadline">
         <Link className="storyTitleLink" href={`/stories/${story.slug}`}>
-          <h2>{displayTitle}</h2>
+          <h2>
+            <span className="storyTypeTag">{typeLabel}</span>
+            {displayTitle}
+          </h2>
         </Link>
         <div className="storySignals" aria-label="筛选线索">
           <span className="storySignalLabel">筛选线索</span>
@@ -60,10 +67,6 @@ export function StoryRow({
           {story.sourceName ?? "未知信源"}
         </strong>
         <span aria-hidden="true">/</span>
-        <span className="storyType">
-          {story.contentType ? contentTypeLabels[story.contentType] : "情报"}
-        </span>
-        <span aria-hidden="true">/</span>
         <time
           className="storyTime"
           dateTime={story.lastPublishedAt?.toISOString()}
@@ -74,7 +77,7 @@ export function StoryRow({
       <Link
         className="storyScoreLink"
         href={`/stories/${story.slug}`}
-        aria-label={`阅读 ${displayTitle}，相关度 ${formatScore(score)}`}
+        aria-label={`阅读 ${displayTitle}，${categoryScoreLabel(story.contentType)} ${formatScore(score)}`}
       >
         <span>{formatScore(score)}</span>
         <ArrowRight aria-hidden="true" size={18} weight="regular" />

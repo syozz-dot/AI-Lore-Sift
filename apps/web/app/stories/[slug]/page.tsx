@@ -11,6 +11,7 @@ import type { ReactNode } from "react";
 import { FavoriteButton } from "../../../components/favorite-button";
 import { MarkdownExportButton } from "../../../components/markdown-export-button";
 import {
+  categoryScoreLabel,
   contentTypeLabels,
   formatFullDateTime,
   formatScore,
@@ -54,7 +55,8 @@ export default async function StoryPage({
   const story = await getStoryDetail(slug);
   if (!story) notFound();
 
-  const score = story.overallScore ?? story.relevanceScore;
+  const relevanceScore = story.overallScore ?? story.relevanceScore;
+  const score = story.categoryScore;
   const factualSummary =
     story.analysis?.factualSummary ??
     story.factualSummary ??
@@ -171,7 +173,7 @@ export default async function StoryPage({
                   : "情报",
                 sourceName: story.sourceName ?? "未知信源",
                 publishedAt: formatFullDateTime(story.lastPublishedAt),
-                relevanceScore: formatScore(score),
+                relevanceScore: formatScore(relevanceScore),
                 sourceCount: story.independentSourceCount,
                 status: storyStatusLabels[story.status],
                 factualSummary,
@@ -217,12 +219,12 @@ export default async function StoryPage({
 
         <div className="storySignalBar">
           <div className="storyRelevance">
-            <span>相关度</span>
+            <span>{categoryScoreLabel(story.contentType)}</span>
             <strong>{formatScore(score)}</strong>
             <i aria-hidden="true">
               <b
                 style={{
-                  width: `${Math.min(100, Math.max(4, score ?? 0))}%`,
+                  width: `${Math.min(100, Math.max(4, (score ?? 0) * 100))}%`,
                 }}
               />
             </i>

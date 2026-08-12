@@ -6,7 +6,12 @@ import { EmptyFeed } from "../components/empty-feed";
 import { FeedPagination } from "../components/feed-pagination";
 import { InfiniteStoryFeed } from "../components/infinite-story-feed";
 import { StoryRow } from "../components/story-row";
-import { contentTypeLabels, formatCalendarDate } from "../lib/presentation";
+import {
+  categoryScoreLabel,
+  contentTypeLabels,
+  formatCalendarDate,
+  formatScore,
+} from "../lib/presentation";
 import { getDailyIssue, getStoryFeed, type ContentType } from "../lib/queries";
 import { normalizeSearchQuery } from "../lib/search";
 
@@ -150,13 +155,8 @@ export default async function Home({
               )}
             </div>
             <div className="focusScore">
-              <span>产品相关度</span>
-              <strong>
-                {Math.round(
-                  (focusStory.overallScore ?? focusStory.relevanceScore ?? 0) *
-                    100,
-                )}
-              </strong>
+              <span>{categoryScoreLabel(focusStory.contentType)}</span>
+              <strong>{formatScore(focusStory.categoryScore)}</strong>
               <small>
                 类别：
                 {focusStory.contentType
@@ -243,7 +243,7 @@ export default async function Home({
               <span>
                 {activeType === "product" ? "产品简介" : "为什么值得看"}
               </span>
-              <span>相关度</span>
+              <span>类别评分</span>
             </div>
           ) : null}
 

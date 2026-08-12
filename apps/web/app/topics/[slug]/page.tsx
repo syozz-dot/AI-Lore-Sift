@@ -168,7 +168,7 @@ export default async function TopicDetailPage({
             <span>#</span>
             <span>Story</span>
             <span>为什么值得看</span>
-            <span>相关度</span>
+            <span>类别评分</span>
           </div>
         ) : null}
 
@@ -206,7 +206,7 @@ export default async function TopicDetailPage({
         {total > items.length ? (
           <div className="feedLimit">
             <ArrowDown aria-hidden="true" size={17} />
-            当前展示相关度最高的 {items.length} 条，共 {total} 条
+            当前展示各类别评分靠前的 {items.length} 条，共 {total} 条
           </div>
         ) : null}
       </section>

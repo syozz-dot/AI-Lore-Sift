@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  categoryScoreLabel,
   formatCalendarDate,
   selectFeedInterpretation,
   signalLabel,
@@ -10,6 +11,12 @@ describe("Chinese rule presentation", () => {
   it("translates current deterministic signal identifiers", () => {
     expect(signalLabel("ai:agents")).toBe("智能体");
     expect(signalLabel("product:safety-policy")).toBe("安全与治理");
+  });
+
+  it("labels scores by content category", () => {
+    expect(categoryScoreLabel("model")).toBe("模型评分");
+    expect(categoryScoreLabel("product")).toBe("产品评分");
+    expect(categoryScoreLabel(null)).toBe("类别评分");
   });
 
   it("does not present rule metadata as product meaning", () => {

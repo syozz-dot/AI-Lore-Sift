@@ -1,4 +1,10 @@
 export {
+  CATEGORY_SCORE_STANDARDS,
+  CATEGORY_SCORE_VERSION,
+  scoreStoryWithinCategory,
+  type CategoryScoreInput,
+} from "./category-score.js";
+export {
   CLUSTERING_VERSION,
   findBestStoryMatch,
   scoreStoryCandidate,

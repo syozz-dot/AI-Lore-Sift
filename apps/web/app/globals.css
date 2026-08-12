@@ -370,6 +370,24 @@ button {
   letter-spacing: -0.04em;
   line-height: 1.25;
 }
+
+.storyTypeTag {
+  margin-right: 9px;
+  padding: 3px 7px;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: 2px;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+  color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  white-space: nowrap;
+}
 .storyTitleLink svg {
   margin-top: 5px;
   color: var(--ink-tertiary);
