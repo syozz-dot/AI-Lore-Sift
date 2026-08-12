@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "脱水工作台",
   description: "把网页与长文变成有来源、有证据、可沉淀的结构化知识。",
+  robots: { index: false, follow: false, noarchive: true },
 };
 
 export default async function DistillPage() {

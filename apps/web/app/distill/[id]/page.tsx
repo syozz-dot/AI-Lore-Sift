@@ -84,17 +84,14 @@ function selectSourceQuote(
 }
 
 export async function generateMetadata({
-  params,
+  params: _params,
 }: {
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
-  const session = await getDistillSession();
-  if (!session || !process.env.DATABASE_URL) return { title: "脱水结果" };
-  const { id } = await params;
-  const document = await getDistillDocument(session.ownerId, id);
   return {
-    title: document?.analysis?.title ?? document?.sourceTitle ?? "脱水结果",
-    description: document?.analysis?.summary ?? "私人脱水结果。",
+    title: "脱水结果",
+    description: "私人脱水结果。",
+    robots: { index: false, follow: false, noarchive: true },
   };
 }
 

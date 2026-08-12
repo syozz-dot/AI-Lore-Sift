@@ -40,6 +40,9 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
+      - name: Reject tracked secrets
+        run: pnpm security:secrets
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 

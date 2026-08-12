@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "知识库",
   description: "从新闻、长文和后续视频中沉淀的私人知识卡片。",
+  robots: { index: false, follow: false, noarchive: true },
 };
 
 export default async function KnowledgePage() {

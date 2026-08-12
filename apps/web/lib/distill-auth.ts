@@ -1,21 +1,21 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 import { cookies } from "next/headers";
 
 export const DISTILL_SESSION_COOKIE = "ann_distill_session";
-const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
+const SESSION_MAX_AGE_SECONDS = 60 * 60 * 12;
+const MIN_ACCESS_KEY_LENGTH = 6;
+const MIN_SESSION_SECRET_LENGTH = 32;
 
 interface DistillSessionPayload {
   ownerId: string;
+  issuedAt: number;
   expiresAt: number;
+  nonce: string;
 }
 
 function sessionSecret() {
-  return (
-    process.env.DISTILL_SESSION_SECRET?.trim() ||
-    process.env.DISTILL_ACCESS_KEY?.trim() ||
-    ""
-  );
+  return process.env.DISTILL_SESSION_SECRET?.trim() || "";
 }
 
 function sign(value: string) {
@@ -34,8 +34,12 @@ function equalStrings(left: string, right: string) {
 }
 
 export function isDistillWorkspaceConfigured() {
+  const accessKey = process.env.DISTILL_ACCESS_KEY?.trim() || "";
+  const secret = sessionSecret();
   return Boolean(
-    process.env.DISTILL_ACCESS_KEY?.trim() && sessionSecret().length >= 12,
+    accessKey.length >= MIN_ACCESS_KEY_LENGTH &&
+    secret.length >= MIN_SESSION_SECRET_LENGTH &&
+    !equalStrings(accessKey, secret),
   );
 }
 
@@ -55,7 +59,9 @@ export function createDistillSessionValue() {
 
   const payload: DistillSessionPayload = {
     ownerId: getConfiguredDistillOwnerId(),
+    issuedAt: Date.now(),
     expiresAt: Date.now() + SESSION_MAX_AGE_SECONDS * 1_000,
+    nonce: randomBytes(18).toString("base64url"),
   };
   const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
   return `${encoded}.${sign(encoded)}`;
@@ -78,7 +84,12 @@ export function verifyDistillSessionValue(value: string | undefined | null) {
     ) as Partial<DistillSessionPayload>;
     if (
       typeof payload.ownerId !== "string" ||
+      payload.ownerId !== getConfiguredDistillOwnerId() ||
+      typeof payload.issuedAt !== "number" ||
       typeof payload.expiresAt !== "number" ||
+      typeof payload.nonce !== "string" ||
+      payload.nonce.length < 16 ||
+      payload.issuedAt > Date.now() + 60_000 ||
       payload.expiresAt <= Date.now()
     )
       return null;
@@ -97,8 +108,9 @@ export async function getDistillSession() {
 
 export const distillSessionCookieOptions = {
   httpOnly: true,
-  sameSite: "lax" as const,
+  sameSite: "strict" as const,
   secure: process.env.NODE_ENV === "production",
   path: "/",
   maxAge: SESSION_MAX_AGE_SECONDS,
+  priority: "high" as const,
 };

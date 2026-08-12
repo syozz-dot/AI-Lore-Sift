@@ -1,5 +1,3 @@
-import { NextResponse } from "next/server";
-
 import {
   createDistillSessionValue,
   DISTILL_SESSION_COOKIE,
@@ -7,14 +5,35 @@ import {
   isDistillWorkspaceConfigured,
   verifyDistillAccessKey,
 } from "../../../../lib/distill-auth";
+import {
+  canAttemptLogin,
+  clearLoginFailures,
+  loginRateLimitKey,
+  recordLoginFailure,
+} from "../../../../lib/login-rate-limit";
+import {
+  privateJson,
+  rejectUntrustedPrivateMutation,
+} from "../../../../lib/private-request";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  const rejected = rejectUntrustedPrivateMutation(request);
+  if (rejected) return rejected;
+
   if (!isDistillWorkspaceConfigured()) {
-    return NextResponse.json(
+    return privateJson(
       { error: "私人工作区尚未配置访问口令。" },
       { status: 503 },
+    );
+  }
+
+  const rateLimitKey = loginRateLimitKey(request);
+  if (!canAttemptLogin(rateLimitKey)) {
+    return privateJson(
+      { error: "验证请求过多，请稍后再试。" },
+      { status: 429 },
     );
   }
 
@@ -25,10 +44,12 @@ export async function POST(request: Request) {
     typeof body?.accessKey === "string" ? body.accessKey.trim() : "";
 
   if (!verifyDistillAccessKey(accessKey)) {
-    return NextResponse.json({ error: "访问口令不正确。" }, { status: 401 });
+    recordLoginFailure(rateLimitKey);
+    return privateJson({ error: "验证未通过。" }, { status: 401 });
   }
 
-  const response = NextResponse.json({ ok: true });
+  clearLoginFailures(rateLimitKey);
+  const response = privateJson({ ok: true });
   response.cookies.set(
     DISTILL_SESSION_COOKIE,
     createDistillSessionValue(),
@@ -37,8 +58,10 @@ export async function POST(request: Request) {
   return response;
 }
 
-export async function DELETE() {
-  const response = NextResponse.json({ ok: true });
+export async function DELETE(request: Request) {
+  const rejected = rejectUntrustedPrivateMutation(request);
+  if (rejected) return rejected;
+  const response = privateJson({ ok: true });
   response.cookies.set(DISTILL_SESSION_COOKIE, "", {
     ...distillSessionCookieOptions,
     maxAge: 0,

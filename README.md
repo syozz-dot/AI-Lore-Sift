@@ -8,11 +8,12 @@ It is designed to answer three questions:
 2. Why does it matter?
 3. What product or business opportunity could follow?
 
-The private Distill workspace adds a user-directed knowledge flow: paste a web
+The single-owner Distill workspace adds a user-directed knowledge flow: paste a web
 page or long text, receive a reading verdict and evidence-anchored Chinese
-distillation, then save the result to the knowledge library. It is private by
-default and keeps owner, usage, model, and cost fields ready for a later account
-and billing layer.
+distillation, then save the result to the knowledge library. Access is private,
+but the current implementation stores source text, analysis, follow-up messages,
+and saved knowledge in PostgreSQL. It must not be presented as a zero-storage or
+multi-user privacy system.
 
 ## Project status
 
@@ -93,6 +94,11 @@ The private workspace lives at `/distill`, and saved knowledge lives at
 `/knowledge`. Configure `DISTILL_ACCESS_KEY` and `DISTILL_SESSION_SECRET` before
 using it. Platform video imports are intentionally adapter boundaries rather
 than public scraping endpoints in the first release.
+
+Because this is a public repository, secrets must live only in deployment
+environment variables. Run `pnpm security:secrets` before pushing, and review
+[docs/security-and-privacy.md](docs/security-and-privacy.md) before exposing the
+private workspace or importing sensitive material.
 
 Production web deployments run committed Drizzle migrations before the Next.js build. When available, migrations use `DATABASE_URL_UNPOOLED`; application requests continue to use the pooled `DATABASE_URL`.
 

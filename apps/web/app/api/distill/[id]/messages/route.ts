@@ -1,5 +1,3 @@
-import { NextResponse } from "next/server";
-
 import { generateDistillFollowUp } from "../../../../../lib/distill-analysis";
 import { getDistillSession } from "../../../../../lib/distill-auth";
 import {
@@ -7,6 +5,10 @@ import {
   getDistillDocument,
   listDistillMessages,
 } from "../../../../../lib/distill";
+import {
+  privateJson,
+  rejectUntrustedPrivateMutation,
+} from "../../../../../lib/private-request";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -19,15 +21,17 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const rejected = rejectUntrustedPrivateMutation(request);
+  if (rejected) return rejected;
   const session = await getDistillSession();
   if (!session) {
-    return NextResponse.json(
+    return privateJson(
       { error: "私人工作区登录已失效，请重新验证。" },
       { status: 401 },
     );
   }
   if (!process.env.DATABASE_URL) {
-    return NextResponse.json({ error: "数据库尚未配置。" }, { status: 503 });
+    return privateJson({ error: "数据库尚未配置。" }, { status: 503 });
   }
 
   const { id } = await params;
@@ -37,22 +41,16 @@ export async function POST(
   const question =
     typeof body?.question === "string" ? body.question.trim() : "";
   if (!question) {
-    return NextResponse.json(
-      { error: "请输入想继续追问的问题。" },
-      { status: 400 },
-    );
+    return privateJson({ error: "请输入想继续追问的问题。" }, { status: 400 });
   }
   if (question.length > 2_000) {
-    return NextResponse.json(
-      { error: "单次追问最多 2,000 字。" },
-      { status: 413 },
-    );
+    return privateJson({ error: "单次追问最多 2,000 字。" }, { status: 413 });
   }
 
   try {
     const document = await getDistillDocument(session.ownerId, id);
     if (!document?.analysis || document.status !== "ready") {
-      return NextResponse.json(
+      return privateJson(
         { error: "这份内容还没有完成脱水，暂时不能追问。" },
         { status: 409 },
       );
@@ -78,10 +76,10 @@ export async function POST(
       role: "assistant",
       content: answer,
     });
-    return NextResponse.json({
+    return privateJson({
       messages: [userMessage, assistantMessage],
     });
   } catch (error) {
-    return NextResponse.json({ error: messageFor(error) }, { status: 422 });
+    return privateJson({ error: messageFor(error) }, { status: 422 });
   }
 }
