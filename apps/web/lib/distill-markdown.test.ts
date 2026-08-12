@@ -33,6 +33,14 @@ describe("distill markdown export", () => {
         transferableInsights: ["先建立证据，再生成结论。"],
         cautions: ["当前只有一个来源。"],
         followUpQuestions: ["是否存在独立验证？"],
+        personalizedInsights: [
+          {
+            title: "可用于当前评测工作",
+            detail: "先固定测试条件，再比较不同服务商。",
+            basis: "profile",
+            evidenceParagraphs: [2],
+          },
+        ],
         createdAt: "2026-07-27T00:00:00.000Z",
       },
       "https://example.com/distill/document-1",
@@ -41,5 +49,6 @@ describe("distill markdown export", () => {
     expect(markdown).toContain("https://example.com/article");
     expect(markdown).toContain("P2、P4");
     expect(markdown).toContain("## 阅读边界");
+    expect(markdown).toContain("## 与我的目标有关");
   });
 });

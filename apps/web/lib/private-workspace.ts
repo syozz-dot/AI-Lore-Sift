@@ -42,8 +42,79 @@ export interface PrivateDistillRecord {
   rawText: string | null;
   analysis: Record<string, unknown>;
   messages: PrivateDistillMessage[];
+  personalizedInsights?: PrivatePersonalizedInsight[];
+  personalizationRequested?: boolean;
+  personalizationError?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PrivatePersonalizedInsight {
+  title: string;
+  detail: string;
+  basis: "profile" | "memory" | "both";
+  evidenceParagraphs: number[];
+}
+
+export async function savePrivatePersonalizedInsights(
+  documentId: string,
+  insights: PrivatePersonalizedInsight[],
+  error: string | null = null,
+) {
+  const database = await openPrivateWorkspace();
+  try {
+    const transaction = database.transaction(DISTILL_STORE, "readwrite");
+    const completion = transactionComplete(transaction);
+    const store = transaction.objectStore(DISTILL_STORE);
+    const existing = (await requestResult(
+      store.get(documentId) as IDBRequest<PrivateDistillRecord | undefined>,
+    )) ?? {
+      id: documentId,
+      sourceType: "text" as const,
+      sourceUrl: null,
+      sourceTitle: null,
+      sourceAuthor: null,
+      rawText: null,
+      analysis: {},
+      messages: [],
+      personalizedInsights: [],
+      personalizationRequested: true,
+      personalizationError: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    store.put({
+      ...existing,
+      personalizedInsights: insights,
+      personalizationRequested: true,
+      personalizationError: error,
+      updatedAt: new Date().toISOString(),
+    });
+    await completion;
+  } finally {
+    database.close();
+  }
+}
+
+export async function readPrivatePersonalization(documentId: string) {
+  const database = await openPrivateWorkspace();
+  try {
+    const transaction = database.transaction(DISTILL_STORE, "readonly");
+    const completion = transactionComplete(transaction);
+    const record = await requestResult(
+      transaction.objectStore(DISTILL_STORE).get(documentId) as IDBRequest<
+        PrivateDistillRecord | undefined
+      >,
+    );
+    await completion;
+    return {
+      requested: record?.personalizationRequested ?? false,
+      insights: record?.personalizedInsights ?? [],
+      error: record?.personalizationError ?? null,
+    };
+  } finally {
+    database.close();
+  }
 }
 
 export interface PrivateKnowledgeCard {

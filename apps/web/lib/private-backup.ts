@@ -109,6 +109,25 @@ function hasIdentityAndDates(value: unknown) {
   );
 }
 
+function isPersonalizedInsight(value: unknown) {
+  if (!value || typeof value !== "object") return false;
+  const insight = value as {
+    title?: unknown;
+    detail?: unknown;
+    basis?: unknown;
+    evidenceParagraphs?: unknown;
+  };
+  return (
+    typeof insight.title === "string" &&
+    typeof insight.detail === "string" &&
+    ["profile", "memory", "both"].includes(String(insight.basis)) &&
+    Array.isArray(insight.evidenceParagraphs) &&
+    insight.evidenceParagraphs.every(
+      (paragraph) => Number.isInteger(paragraph) && Number(paragraph) > 0,
+    )
+  );
+}
+
 function isDistillRecord(value: unknown): value is PrivateDistillRecord {
   if (!hasIdentityAndDates(value)) return false;
   const record = value as Partial<PrivateDistillRecord>;
@@ -120,7 +139,15 @@ function isDistillRecord(value: unknown): value is PrivateDistillRecord {
     (record.rawText === null || typeof record.rawText === "string") &&
     Boolean(record.analysis) &&
     typeof record.analysis === "object" &&
-    Array.isArray(record.messages)
+    Array.isArray(record.messages) &&
+    (record.personalizedInsights === undefined ||
+      (Array.isArray(record.personalizedInsights) &&
+        record.personalizedInsights.every(isPersonalizedInsight))) &&
+    (record.personalizationRequested === undefined ||
+      typeof record.personalizationRequested === "boolean") &&
+    (record.personalizationError === undefined ||
+      record.personalizationError === null ||
+      typeof record.personalizationError === "string")
   );
 }
 

@@ -12,6 +12,7 @@ import { DistillDeleteButton } from "../../../components/distill-delete-button";
 import { DistillFollowUp } from "../../../components/distill-follow-up";
 import { DistillMarkdownButton } from "../../../components/distill-markdown-button";
 import { DistillProcessPanel } from "../../../components/distill-process-panel";
+import { DistillPersonalizationSection } from "../../../components/distill-personalization-section";
 import { DistillTaskList } from "../../../components/distill-task-list";
 import { KnowledgeCardActions } from "../../../components/knowledge-card-actions";
 import { KnowledgeSaveButton } from "../../../components/knowledge-save-button";
@@ -364,6 +365,8 @@ export default async function DistillResultPage({
                   ) : null}
                 </div>
               </section>
+
+              <DistillPersonalizationSection documentId={document.id} />
 
               {analysis.cautions.length && cautionSectionNumber ? (
                 <section className="distillResultModule distillCautionModule">

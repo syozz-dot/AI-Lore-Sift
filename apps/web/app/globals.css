@@ -4121,6 +4121,60 @@ button {
   opacity: 0.65;
 }
 
+.distillPersonalizationConsent {
+  min-height: 48px;
+  padding: 8px 13px 8px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.distillPersonalizationConsent > label {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 16px 18px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.distillPersonalizationConsent input {
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.distillPersonalizationConsent label > svg {
+  color: var(--accent);
+}
+
+.distillPersonalizationConsent label > span,
+.distillPersonalizationConsent strong,
+.distillPersonalizationConsent small {
+  min-width: 0;
+  display: block;
+}
+
+.distillPersonalizationConsent strong {
+  color: var(--ink-secondary);
+  font-size: 9px;
+}
+
+.distillPersonalizationConsent small {
+  margin-top: 2px;
+  color: var(--ink-tertiary);
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.distillPersonalizationConsent > a {
+  flex: 0 0 auto;
+  color: var(--accent);
+  font-size: 9px;
+  font-weight: 650;
+}
+
 .distillConversationComposer footer {
   min-height: 50px;
   padding: 8px 10px 8px 18px;
@@ -4176,6 +4230,63 @@ button {
 .distillTaskStateCanvas {
   min-height: calc(100dvh - 68px);
   padding-top: 28px;
+}
+
+.distillPersonalModule {
+  background: color-mix(in srgb, var(--accent) 3%, transparent);
+}
+
+.distillPersonalInsights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+
+.distillPersonalInsights article {
+  padding: 24px 22px 26px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.distillPersonalInsights article:nth-child(even) {
+  padding-right: 0;
+  padding-left: 22px;
+  border-left: 1px solid var(--line);
+}
+
+.distillPersonalInsights article > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 8px;
+}
+
+.distillPersonalInsights article > div span {
+  color: var(--accent);
+}
+
+.distillPersonalInsights h3 {
+  margin: 15px 0 0;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.distillPersonalInsights p,
+.distillNoPersonalMatch {
+  margin: 9px 0 0;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.distillNoPersonalMatch {
+  max-width: 660px;
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
 }
 
 .distillTaskState {
@@ -5262,6 +5373,21 @@ button {
 
   .distillConversationComposer footer > small {
     display: none;
+  }
+
+  .distillPersonalizationConsent {
+    align-items: flex-start;
+    padding-left: 13px;
+  }
+
+  .distillPersonalInsights {
+    grid-template-columns: 1fr;
+  }
+
+  .distillPersonalInsights article,
+  .distillPersonalInsights article:nth-child(even) {
+    padding: 20px 0;
+    border-left: 0;
   }
 
   .distillConversationComposer button {

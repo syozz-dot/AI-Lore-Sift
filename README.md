@@ -97,9 +97,13 @@ than public scraping endpoints in the first release.
 
 `/settings` contains the first local-first private workspace layer: a
 user-authored reading profile, user-approved memories, browser persistence
-status, and encrypted import/export. This phase does not yet feed the profile
-into model requests or migrate existing PostgreSQL Distill history; those
-boundaries are stated in the interface rather than implied.
+status, and encrypted import/export. Distill can use that context only after a
+per-request opt-in. Generic analysis remains source-only; the separate personal
+relevance result returns to and stays in the submitting browser rather than
+being added to PostgreSQL Distill history.
+
+The Distill output contract and its versioned multi-format evaluation baseline
+are documented in [docs/distill-v2-contract.md](docs/distill-v2-contract.md).
 
 Because this is a public repository, secrets must live only in deployment
 environment variables. Run `pnpm security:secrets` before pushing, and review

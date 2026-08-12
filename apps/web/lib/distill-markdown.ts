@@ -3,6 +3,8 @@ import type {
   DistillKeyPoint,
 } from "@ai-news-navigator/database";
 
+import type { DistillPersonalizedInsight } from "./distill-analysis";
+
 export interface DistillMarkdownInput {
   id: string;
   title: string;
@@ -18,6 +20,7 @@ export interface DistillMarkdownInput {
   transferableInsights: string[];
   cautions: string[];
   followUpQuestions: string[];
+  personalizedInsights?: DistillPersonalizedInsight[];
   createdAt: string;
 }
 
@@ -83,6 +86,20 @@ export function buildDistillMarkdown(
     "",
     list(input.transferableInsights),
     "",
+    ...(input.personalizedInsights?.length
+      ? [
+          "## 与我的目标有关",
+          "",
+          ...input.personalizedInsights.flatMap((insight) => [
+            `### ${insight.title}`,
+            "",
+            insight.detail,
+            "",
+            `依据：${insight.basis}；原文段落：${paragraphRefs(insight.evidenceParagraphs)}`,
+            "",
+          ]),
+        ]
+      : []),
     "## 阅读边界",
     "",
     list(input.cautions),

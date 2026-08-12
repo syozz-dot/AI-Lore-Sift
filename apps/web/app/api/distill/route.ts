@@ -1,7 +1,7 @@
 import {
   DISTILL_PROMPT_VERSION,
   estimateOriginalReadingMinutes,
-  generateDistillation,
+  generateDistillationResponse,
 } from "../../../lib/distill-analysis";
 import { getDistillSession } from "../../../lib/distill-auth";
 import {
@@ -14,6 +14,7 @@ import {
   privateJson,
   rejectUntrustedPrivateMutation,
 } from "../../../lib/private-request";
+import type { DistillPersonalizationContext } from "../../../lib/distill-analysis";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -38,6 +39,7 @@ export async function POST(request: Request) {
 
   const body = (await request.json().catch(() => null)) as {
     input?: unknown;
+    personalization?: unknown;
   } | null;
   const input = typeof body?.input === "string" ? body.input.trim() : "";
   if (!input) {
@@ -46,6 +48,8 @@ export async function POST(request: Request) {
   if (input.length > 100_000) {
     return privateJson({ error: "单次输入最多 10 万字符。" }, { status: 413 });
   }
+
+  const personalization = parsePersonalization(body?.personalization);
 
   let documentId: string | null = null;
   try {
@@ -62,11 +66,13 @@ export async function POST(request: Request) {
       accessMode: "private",
       billableUnits: 0,
     });
-    const analysis = await generateDistillation({
+    const generated = await generateDistillationResponse({
       sourceTitle: source.sourceTitle,
       sourceUrl: source.sourceUrl,
       paragraphs: source.paragraphs,
+      personalization,
     });
+    const analysis = generated.persisted;
     await completeDistillDocument(documentId, {
       documentId,
       title: analysis.title,
@@ -86,10 +92,45 @@ export async function POST(request: Request) {
       promptVersion: DISTILL_PROMPT_VERSION,
       outputTokens: analysis.outputTokens,
     });
-    return privateJson({ id: documentId });
+    return privateJson({
+      id: documentId,
+      personalizedInsights: generated.personalizedInsights,
+      personalizationError: generated.personalizationError,
+    });
   } catch (error) {
     const message = errorMessage(error);
     if (documentId) await failDistillDocument(documentId, message);
     return privateJson({ error: message }, { status: 422 });
   }
+}
+
+function parsePersonalization(
+  value: unknown,
+): DistillPersonalizationContext | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const context = value as Record<string, unknown>;
+  const text = (field: string, limit: number) =>
+    typeof context[field] === "string"
+      ? context[field].trim().slice(0, limit)
+      : "";
+  const memories = Array.isArray(context.memories)
+    ? context.memories
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => item.trim().slice(0, 600))
+        .filter(Boolean)
+        .slice(0, 20)
+    : [];
+  const result = {
+    purpose: text("purpose", 2_000),
+    directions: text("directions", 2_000),
+    currentContext: text("currentContext", 2_000),
+    preferredHelp: text("preferredHelp", 2_000),
+    boundaries: text("boundaries", 2_000),
+    memories,
+  };
+  return Object.values(result).some((item) =>
+    Array.isArray(item) ? item.length : item,
+  )
+    ? result
+    : null;
 }

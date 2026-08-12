@@ -7,6 +7,7 @@ import {
   buildDistillMarkdown,
   type DistillMarkdownInput,
 } from "../lib/distill-markdown";
+import { readPrivatePersonalization } from "../lib/private-workspace";
 
 export function DistillMarkdownButton({
   document,
@@ -15,8 +16,17 @@ export function DistillMarkdownButton({
 }) {
   const [exported, setExported] = useState(false);
 
-  function download() {
-    const content = buildDistillMarkdown(document, window.location.href);
+  async function download() {
+    const personalization = await readPrivatePersonalization(document.id).catch(
+      () => null,
+    );
+    const content = buildDistillMarkdown(
+      {
+        ...document,
+        personalizedInsights: personalization?.insights ?? [],
+      },
+      window.location.href,
+    );
     const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = window.document.createElement("a");

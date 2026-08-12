@@ -6,6 +6,7 @@ import {
   CircleNotch,
   FileMagnifyingGlass,
   LinkSimple,
+  SlidersHorizontal,
   Sparkle,
   TextAlignLeft,
   WarningCircle,
@@ -14,6 +15,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
 
+import {
+  readPrivateWorkspace,
+  savePrivatePersonalizedInsights,
+  type PrivatePersonalizedInsight,
+  type PrivateWorkspaceSnapshot,
+} from "../lib/private-workspace";
+
 export function DistillSubmitForm() {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
@@ -21,6 +29,15 @@ export function DistillSubmitForm() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [activeStage, setActiveStage] = useState(0);
+  const [privateWorkspace, setPrivateWorkspace] =
+    useState<PrivateWorkspaceSnapshot | null>(null);
+  const [usePersonalization, setUsePersonalization] = useState(false);
+
+  useEffect(() => {
+    readPrivateWorkspace()
+      .then(setPrivateWorkspace)
+      .catch(() => setPrivateWorkspace(null));
+  }, []);
 
   useEffect(() => {
     if (!submitting) {
@@ -39,14 +56,51 @@ export function DistillSubmitForm() {
     setSubmitting(true);
     setError(null);
     try {
+      const selectedMemories =
+        privateWorkspace?.memories
+          .slice(0, 20)
+          .map((memory) => memory.statement) ?? [];
+      const personalization =
+        usePersonalization && privateWorkspace
+          ? {
+              purpose: privateWorkspace.profile.purpose,
+              directions: privateWorkspace.profile.directions,
+              currentContext: privateWorkspace.profile.currentContext,
+              preferredHelp: privateWorkspace.profile.preferredHelp,
+              boundaries: privateWorkspace.profile.boundaries,
+              memories: selectedMemories,
+            }
+          : null;
       const response = await fetch("/api/distill", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input }),
+        body: JSON.stringify({ input, personalization }),
       });
-      const body = (await response.json()) as { id?: string; error?: string };
+      const body = (await response.json()) as {
+        id?: string;
+        error?: string;
+        personalizedInsights?: PrivatePersonalizedInsight[];
+        personalizationError?: string | null;
+      };
       if (!response.ok || !body.id) {
         throw new Error(body.error || "脱水任务没有成功创建。");
+      }
+      if (usePersonalization) {
+        try {
+          await savePrivatePersonalizedInsights(
+            body.id,
+            body.personalizedInsights ?? [],
+            body.personalizationError ?? null,
+          );
+          window.sessionStorage.removeItem(
+            `ann-personalization-status:${body.id}`,
+          );
+        } catch {
+          window.sessionStorage.setItem(
+            `ann-personalization-status:${body.id}`,
+            "本机未能保存个性化结果；通用脱水仍可正常阅读。",
+          );
+        }
       }
       router.push(`/distill/${body.id}`);
       router.refresh();
@@ -73,6 +127,15 @@ export function DistillSubmitForm() {
   }
 
   const hasThread = submitting || Boolean(error);
+  const hasPrivateContext = Boolean(
+    privateWorkspace &&
+    (privateWorkspace.memories.length ||
+      privateWorkspace.profile.purpose.trim() ||
+      privateWorkspace.profile.directions.trim() ||
+      privateWorkspace.profile.currentContext.trim() ||
+      privateWorkspace.profile.preferredHelp.trim() ||
+      privateWorkspace.profile.boundaries.trim()),
+  );
   const steps = [
     {
       icon: FileMagnifyingGlass,
@@ -195,6 +258,26 @@ export function DistillSubmitForm() {
           disabled={submitting}
           required
         />
+        <div className="distillPersonalizationConsent">
+          <label>
+            <input
+              type="checkbox"
+              checked={usePersonalization}
+              disabled={submitting || !hasPrivateContext}
+              onChange={(event) => setUsePersonalization(event.target.checked)}
+            />
+            <SlidersHorizontal aria-hidden="true" size={15} />
+            <span>
+              <strong>本次使用私人画像</strong>
+              <small>
+                {hasPrivateContext
+                  ? `额外调用一次模型；发送画像字段与 ${Math.min(privateWorkspace?.memories.length ?? 0, 20)} 条确认记忆，仅生成“与你有关”部分`
+                  : "尚未设置画像；默认只分析原文"}
+              </small>
+            </span>
+          </label>
+          <a href="/settings">查看与编辑</a>
+        </div>
         <footer>
           <div aria-label="当前支持的输入">
             <span>
