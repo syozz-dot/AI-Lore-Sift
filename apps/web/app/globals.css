@@ -1713,20 +1713,22 @@ button {
   border-radius: 12px;
 }
 
-/* Result document: a warm, full-bleed reading surface without an outer stage. */
+/* Result document: a calm editorial reading sheet grounded in source evidence. */
 .distillStandaloneShell .distillAgentResult {
   min-height: 100dvh;
-  padding: 0;
-  background: var(--canvas);
+  padding: 24px;
+  background: #efeee8;
 }
 
 .distillStandaloneShell .distillResultDocument {
+  width: min(100%, 1520px);
   min-height: 100dvh;
+  margin: 0 auto;
   overflow: clip;
-  border: 0;
-  border-radius: 0;
-  background: var(--canvas);
-  box-shadow: none;
+  border: 1px solid #d8d7d1;
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgb(29 36 32 / 7%);
 }
 
 .distillStandaloneShell .distillDocumentTopbar {
@@ -1788,70 +1790,138 @@ button {
 }
 
 .distillStandaloneShell .distillDocumentInner {
-  width: min(calc(100% - 64px), 1040px);
+  width: min(calc(100% - 96px), 1356px);
   margin: 0 auto;
-  padding: 68px 0 100px;
+  padding: 76px 0 100px;
 }
 
 .distillStandaloneShell .distillResultDocument .distillResultHero {
-  padding: 0 0 46px;
+  padding: 0 0 40px;
   border-bottom: 0;
   background: transparent;
 }
 
-.distillStandaloneShell .distillResultMeta {
-  gap: 13px;
-  color: var(--ink-tertiary);
-  font-size: 12px;
-}
-
-.distillStandaloneShell .distillResultDocument .distillResultHero h1 {
-  max-width: 980px;
-  margin-top: 30px;
-  font-size: clamp(46px, 4vw, 64px);
-  line-height: 1.08;
-  letter-spacing: -0.055em;
-}
-
-.distillStandaloneShell .distillOriginalTitle {
-  margin-top: 22px;
-  font-size: 15px;
-}
-
-.distillStandaloneShell .distillVerdict {
-  margin-top: 40px;
-  padding: 28px 30px;
-  border: 1px solid #b7c9bf;
-  border-radius: 18px;
-  background: #e7efea;
-  grid-template-columns: 190px minmax(0, 1fr);
+.distillStandaloneShell .distillResultMetaBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 24px;
 }
 
+.distillStandaloneShell .distillResultMeta {
+  align-items: center;
+  gap: 14px;
+  color: var(--ink-tertiary);
+  font-size: 13px;
+}
+
+.distillStandaloneShell .distillResultMeta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.distillStandaloneShell .distillResultMeta > span + span::before {
+  margin-right: 5px;
+  content: "·";
+}
+
+.distillStandaloneShell .distillResultUtilities {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.distillStandaloneShell .distillResultUtilities > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-tertiary);
+  font-size: 11px;
+}
+
+.distillStandaloneShell .distillResultUtilities > a:hover {
+  color: var(--accent);
+}
+
+.distillStandaloneShell .distillResultDocument .distillResultHero h1 {
+  max-width: 1240px;
+  margin-top: 32px;
+  font-size: clamp(44px, 3.55vw, 58px);
+  line-height: 1.2;
+  letter-spacing: -0.045em;
+}
+
+.distillStandaloneShell .distillOriginalTitle {
+  margin-top: 18px;
+  color: #626c7e;
+  font-size: 17px;
+}
+
+.distillStandaloneShell .distillVerdict {
+  max-width: none;
+  margin-top: 48px;
+  padding: 26px 34px;
+  display: block;
+  border: 0;
+  border-left: 4px solid #76968b;
+  border-radius: 0;
+  background: #f0f5f3;
+}
+
 .distillStandaloneShell .distillVerdict strong {
-  font-family: var(--font-serif);
-  font-size: 22px;
+  font-size: 17px;
+  font-weight: 720;
 }
 
 .distillStandaloneShell .distillVerdict p {
-  font-size: 14px;
-  line-height: 1.75;
+  margin-top: 12px;
+  font-size: 17px;
+  line-height: 1.8;
 }
 
 .distillStandaloneShell .distillResultActions {
-  margin-top: 30px;
+  margin: 38px 0 28px;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
 }
 
 .distillStandaloneShell .distillResultActions button,
 .distillStandaloneShell .distillUtilityButton {
-  min-height: 46px;
+  min-height: 48px;
+  padding-inline: 17px;
   border: 1px solid var(--line-strong);
-  border-radius: 10px;
+  border-radius: 11px;
   background: #fff;
   color: var(--ink);
   box-shadow: 0 3px 10px rgb(29 42 36 / 6%);
+  font-size: 14px;
+}
+
+.distillStandaloneShell .distillResultActions .knowledgeSaveControl button {
+  border-color: #214f40;
+  background: #214f40;
+  color: #fff;
+  box-shadow: 0 4px 9px rgb(25 65 51 / 16%);
+}
+
+.distillStandaloneShell
+  .distillResultActions
+  .knowledgeSaveControl
+  button:hover,
+.distillStandaloneShell
+  .distillResultActions
+  .knowledgeSaveControl
+  button[aria-pressed="true"] {
+  border-color: #173f33;
+  background: #173f33;
+  color: #fff;
+}
+
+.distillStandaloneShell .distillSourceLink {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
 }
 
 .distillStandaloneShell .distillDeleteButton {
@@ -1862,24 +1932,38 @@ button {
   box-shadow: none;
 }
 
+.distillStandaloneShell .distillResultActions .distillDeleteControl {
+  margin-left: auto;
+}
+
 .distillStandaloneShell .distillResultDocument .distillResultMetrics {
   padding: 0;
-  border-top: 1px solid var(--line-strong);
-  border-bottom: 1px solid var(--line-strong);
+  border-top: 1px solid #d4d2ca;
+  border-bottom: 1px solid #d4d2ca;
 }
 
 .distillStandaloneShell .distillResultMetrics > div {
-  padding: 24px 0;
+  padding: 24px 0 22px;
 }
 
 .distillStandaloneShell .distillResultMetrics dt {
-  font-size: 11px;
+  color: #626c7e;
+  font-size: 12px;
+  letter-spacing: 0.08em;
 }
 
 .distillStandaloneShell .distillResultMetrics dd {
-  margin-top: 10px;
+  margin-top: 12px;
   font-family: var(--font-serif);
-  font-size: 25px;
+  font-size: 27px;
+}
+
+.distillStandaloneShell .distillResultMetrics dd a {
+  color: inherit;
+}
+
+.distillStandaloneShell .distillResultMetrics dd a:hover {
+  color: var(--accent);
 }
 
 .distillStandaloneShell .distillResultDocument .distillResultLayout {
@@ -1890,25 +1974,37 @@ button {
 .distillStandaloneShell
   .distillResultBody
   > .distillResultModule:not(:first-child) {
-  padding: 64px 0;
-  grid-template-columns: 150px minmax(0, 1fr);
-  gap: 38px;
+  padding: 70px 0;
+  display: block;
+  border-bottom: 1px solid #d4d2ca;
+}
+
+.distillStandaloneShell .distillModuleHeading {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
 }
 
 .distillStandaloneShell .distillModuleHeading > span {
-  margin-bottom: 26px;
+  flex: 0 0 auto;
+  margin: 0;
   color: var(--accent);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .distillStandaloneShell .distillModuleHeading h2 {
-  font-size: 28px;
+  font-size: 27px;
 }
 
 .distillStandaloneShell .distillModuleHeading p {
-  max-width: 150px;
-  margin-top: 12px;
-  font-size: 11px;
+  max-width: none;
+  margin: 0;
+  color: #6b7483;
+  font-size: 12px;
+}
+
+.distillStandaloneShell .distillModuleContent {
+  margin-top: 38px;
 }
 
 .distillStandaloneShell .distillLeadModule {
@@ -1916,24 +2012,64 @@ button {
 }
 
 .distillStandaloneShell .distillLeadModule .distillLeadSummary {
-  font-size: clamp(21px, 2vw, 28px);
-  line-height: 1.72;
+  max-width: 1280px;
+  font-size: clamp(19px, 1.55vw, 23px);
+  line-height: 1.82;
+  letter-spacing: -0.01em;
+}
+
+.distillStandaloneShell .distillEvidenceIndex {
+  max-width: 820px;
+  margin-top: 34px;
+  padding: 0 0 0 28px;
+  display: grid;
+  gap: 12px;
+  border-left: 1px solid #d4d2ca;
+}
+
+.distillStandaloneShell .distillEvidenceIndex a {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  color: #5e687b;
+  font-size: 14px;
+}
+
+.distillStandaloneShell .distillEvidenceIndex a:hover {
+  color: var(--accent);
+}
+
+.distillStandaloneShell .distillEvidenceIndex span {
+  flex: 0 0 auto;
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 12px;
 }
 
 .distillStandaloneShell .distillKeyPoints,
 .distillStandaloneShell .distillTakeawayCards {
   border: 0;
-  border-top: 1px solid var(--line-strong);
   border-radius: 0;
+}
+
+.distillStandaloneShell .distillTakeawayCards {
+  border-top: 1px solid var(--line-strong);
 }
 
 .distillStandaloneShell .distillKeyPoints > article,
 .distillStandaloneShell .distillKeyPoints > article:nth-child(even),
 .distillStandaloneShell .distillTakeawayCards > article {
-  padding: 28px 4px;
+  padding: 0 0 48px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 18px;
   border-right: 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 0;
+  border-left: 0;
   background: transparent;
+}
+
+.distillStandaloneShell .distillKeyPoints > article:last-child {
+  padding-bottom: 0;
 }
 
 .distillStandaloneShell .distillKeyPoints > article:hover,
@@ -1946,10 +2082,54 @@ button {
   font-size: 23px;
 }
 
-.distillStandaloneShell .distillKeyPoints > article > p,
+.distillStandaloneShell .distillKeyPoints > article > span {
+  padding-top: 4px;
+}
+
+.distillStandaloneShell .distillKeyPoints > article > div {
+  min-width: 0;
+}
+
+.distillStandaloneShell .distillKeyPoints > article > div > h3 {
+  margin: 0;
+  font-size: 23px;
+  line-height: 1.45;
+}
+
+.distillStandaloneShell .distillKeyPoints > article > div > p,
 .distillStandaloneShell .distillTakeawayCards p {
+  margin-top: 12px;
+  color: #626c7e;
   font-size: 14px;
-  line-height: 1.8;
+  line-height: 1.9;
+}
+
+.distillStandaloneShell .distillKnowledgeDrawer {
+  margin-top: 46px;
+  scroll-margin-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.distillStandaloneShell .distillKnowledgeDrawer > summary {
+  padding: 18px 0;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.distillStandaloneShell .distillKnowledgeDrawer .distillTakeawayCards {
+  margin-top: 4px;
+  padding: 0;
+}
+
+.distillStandaloneShell
+  .distillKnowledgeDrawer
+  .distillTakeawayCards
+  > article {
+  padding: 24px 0;
+  display: block;
+  border-bottom: 1px solid var(--line);
 }
 
 .distillStandaloneShell .distillCautions {
@@ -1959,40 +2139,108 @@ button {
 
 .distillStandaloneShell .distillCautions li {
   min-height: 0;
-  padding: 18px 20px;
-  border-radius: 12px;
-  background: #f4ece8;
-  font-size: 13px;
+  padding: 0 0 24px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #626c7e;
+  font-size: 15px;
+  line-height: 1.85;
+}
+
+.distillStandaloneShell .distillCautions li:last-child {
+  padding-bottom: 0;
+}
+
+.distillStandaloneShell .distillQuoteModule blockquote {
+  margin: 0;
+  padding: 4px 0 4px 34px;
+  border-left: 3px solid #a6bbb3;
+}
+
+.distillStandaloneShell .distillQuoteModule blockquote p {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(19px, 1.7vw, 24px);
+  font-style: italic;
+  line-height: 1.72;
+}
+
+.distillStandaloneShell .distillQuoteModule blockquote footer {
+  margin-top: 14px;
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 10px;
 }
 
 .distillStandaloneShell .distillFollowUp {
   margin: 0;
-  padding: 46px 0 0;
+  padding: 70px 0 0;
   border: 0;
-  border-top: 1px solid var(--line-strong);
+  border-top: 1px solid #d4d2ca;
   background: transparent;
 }
 
+.distillStandaloneShell .distillFollowUpTitle {
+  align-items: baseline;
+  gap: 18px;
+}
+
+.distillStandaloneShell .distillFollowUpTitle > span {
+  color: var(--accent);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 11px;
+}
+
+.distillStandaloneShell .distillFollowUpTitle > div {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+}
+
 .distillStandaloneShell .distillFollowUpTitle h2 {
-  font-size: 32px;
+  margin: 0;
+  font-size: 27px;
+}
+
+.distillStandaloneShell .distillFollowUpTitle p {
+  margin: 0;
+  color: #6b7483;
+  font-size: 12px;
+}
+
+.distillStandaloneShell .distillSuggestedQuestions {
+  margin-top: 38px;
+}
+
+.distillStandaloneShell .distillSuggestedQuestions > p {
+  display: none;
 }
 
 .distillStandaloneShell .distillSuggestedQuestions > div {
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 0;
   border: 0;
 }
 
 .distillStandaloneShell .distillSuggestedQuestions button {
-  min-height: 66px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface);
+  min-height: 64px;
+  padding: 14px 10px;
+  grid-template-columns: 30px minmax(0, 1fr) 18px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  font-size: 15px;
+}
+
+.distillStandaloneShell .distillSuggestedQuestions button:hover {
+  background: #f4f6f4;
 }
 
 .distillStandaloneShell .distillFollowUp form {
-  border-radius: 14px;
-  background: var(--surface);
+  border-radius: 12px;
+  background: #f7f8f6;
 }
 
 @media (max-width: 1100px) {
@@ -2089,6 +2337,7 @@ button {
 
   .distillStandaloneShell .distillResultDocument {
     min-height: 100dvh;
+    border: 0;
     border-radius: 0;
     box-shadow: none;
   }
@@ -2112,17 +2361,28 @@ button {
 
   .distillStandaloneShell .distillDocumentInner {
     width: min(calc(100% - 40px), 680px);
-    padding-top: 42px;
+    padding: 42px 0 72px;
+  }
+
+  .distillStandaloneShell .distillResultMetaBar {
+    align-items: flex-start;
+    flex-direction: column-reverse;
+    gap: 18px;
+  }
+
+  .distillStandaloneShell .distillResultUtilities {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .distillStandaloneShell .distillResultDocument .distillResultHero h1 {
-    font-size: clamp(38px, 11vw, 56px);
+    margin-top: 26px;
+    font-size: clamp(34px, 10vw, 48px);
   }
 
   .distillStandaloneShell .distillVerdict {
-    padding: 22px;
-    grid-template-columns: 1fr;
-    gap: 10px;
+    margin-top: 34px;
+    padding: 20px;
   }
 
   .distillStandaloneShell .distillDeleteButton {
@@ -2133,17 +2393,32 @@ button {
   .distillStandaloneShell
     .distillResultBody
     > .distillResultModule:not(:first-child) {
-    padding: 46px 0;
-    grid-template-columns: 1fr;
-    gap: 24px;
+    padding: 50px 0;
   }
 
-  .distillStandaloneShell .distillModuleHeading > span {
-    margin-bottom: 12px;
+  .distillStandaloneShell .distillModuleHeading {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 7px 12px;
   }
 
   .distillStandaloneShell .distillModuleHeading p {
-    max-width: none;
+    grid-column: 2;
+  }
+
+  .distillStandaloneShell .distillModuleContent {
+    margin-top: 28px;
+  }
+
+  .distillStandaloneShell .distillKeyPoints > article,
+  .distillStandaloneShell .distillKeyPoints > article:nth-child(even) {
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .distillStandaloneShell .distillFollowUpTitle > div {
+    display: grid;
+    gap: 5px;
   }
 }
 

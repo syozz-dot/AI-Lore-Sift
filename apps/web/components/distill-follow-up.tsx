@@ -96,10 +96,12 @@ function DistillMessageBody({ content }: { content: string }) {
 
 export function DistillFollowUp({
   documentId,
+  sectionNumber,
   initialMessages,
   suggestedQuestions,
 }: {
   documentId: string;
+  sectionNumber: string;
   initialMessages: FollowUpMessage[];
   suggestedQuestions: string[];
 }) {
@@ -162,10 +164,10 @@ export function DistillFollowUp({
     <section className="distillFollowUp" aria-labelledby="follow-up-title">
       <header>
         <div className="distillFollowUpTitle">
-          <ChatCircleDots aria-hidden="true" size={22} />
+          <span>{sectionNumber}</span>
           <div>
-            <p>继续理解</p>
-            <h2 id="follow-up-title">基于这篇材料继续追问</h2>
+            <h2 id="follow-up-title">继续追问</h2>
+            <p>基于这篇材料展开</p>
           </div>
         </div>
         <span>
@@ -177,14 +179,14 @@ export function DistillFollowUp({
       <div className="distillSuggestedQuestions">
         <p>你可能还想问</p>
         <div>
-          {suggestedQuestions.map((suggestion, index) => (
+          {suggestedQuestions.map((suggestion) => (
             <button
               key={suggestion}
               type="button"
               onClick={() => void ask(suggestion)}
               disabled={pending}
             >
-              <span>{String(index + 1).padStart(2, "0")}</span>
+              <ChatCircleDots aria-hidden="true" size={18} />
               <strong>{suggestion}</strong>
               <ArrowRight aria-hidden="true" size={16} />
             </button>

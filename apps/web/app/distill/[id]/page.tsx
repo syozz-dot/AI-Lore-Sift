@@ -32,6 +32,57 @@ const verdictLabels: Record<string, string> = {
   read: "建议阅读原文",
 };
 
+function paragraphReference(numbers: number[]) {
+  const sorted = [...new Set(numbers)].sort((left, right) => left - right);
+  if (!sorted.length) return "原文证据";
+
+  const groups: Array<[number, number]> = [];
+  for (const number of sorted) {
+    const current = groups.at(-1);
+    if (current && number === current[1] + 1) {
+      current[1] = number;
+    } else {
+      groups.push([number, number]);
+    }
+  }
+
+  return groups
+    .map(([start, end]) => (start === end ? `P${start}` : `P${start}–P${end}`))
+    .join("、");
+}
+
+function selectSourceQuote(
+  paragraphs: string[],
+  claims: Array<{
+    type: "fact" | "author_view" | "inference";
+    confidence: "high" | "medium" | "low";
+    evidenceParagraphs: number[];
+  }>,
+  keyPoints: Array<{ evidenceParagraphs: number[] }>,
+) {
+  const prioritizedNumbers = [
+    ...claims
+      .filter(
+        (claim) => claim.type !== "inference" && claim.confidence !== "low",
+      )
+      .flatMap((claim) => claim.evidenceParagraphs),
+    ...keyPoints.flatMap((point) => point.evidenceParagraphs),
+  ];
+
+  for (const number of [...new Set(prioritizedNumbers)]) {
+    const paragraph = paragraphs[number - 1]?.trim();
+    if (paragraph && paragraph.length >= 24) {
+      return {
+        number,
+        text:
+          paragraph.length > 520 ? `${paragraph.slice(0, 519)}…` : paragraph,
+      };
+    }
+  }
+
+  return null;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -107,33 +158,50 @@ export default async function DistillResultPage({
     listSavedKnowledgeCardIndexes(session.ownerId, id),
   ]);
   const savedInsightIndexSet = new Set(savedInsightIndexes);
+  const sourceQuote = selectSourceQuote(
+    paragraphs,
+    analysis.claims,
+    analysis.keyPoints,
+  );
+  let nextSectionNumber = 3;
+  const cautionSectionNumber = analysis.cautions.length
+    ? String(nextSectionNumber++).padStart(2, "0")
+    : null;
+  const quoteSectionNumber = sourceQuote
+    ? String(nextSectionNumber++).padStart(2, "0")
+    : null;
+  const followUpSectionNumber = String(nextSectionNumber).padStart(2, "0");
 
   return (
     <main className="distillAgentResult">
       <article className="distillResultDocument">
-        <div className="distillDocumentTopbar">
-          <Link href="/distill">
-            <ArrowLeft aria-hidden="true" size={16} />
-            新建脱水
-          </Link>
-          <DistillProcessPanel
-            sourceType={document.sourceType}
-            paragraphCount={paragraphs.length}
-            compact
-          />
-        </div>
-
         <div className="distillDocumentInner">
           <header className="distillResultHero">
-            <div className="distillResultMeta">
-              <span>{document.sourceType === "url" ? "网页" : "粘贴正文"}</span>
-              <span>
-                {new Intl.DateTimeFormat("zh-CN", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                }).format(document.createdAt)}
-              </span>
+            <div className="distillResultMetaBar">
+              <div className="distillResultMeta">
+                <span>
+                  <FileText aria-hidden="true" size={16} />
+                  {document.sourceType === "url" ? "网页" : "粘贴正文"}
+                </span>
+                <span>
+                  {new Intl.DateTimeFormat("zh-CN", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  }).format(document.createdAt)}
+                </span>
+              </div>
+              <div className="distillResultUtilities">
+                <Link href="/distill">
+                  <ArrowLeft aria-hidden="true" size={15} />
+                  新建脱水
+                </Link>
+                <DistillProcessPanel
+                  sourceType={document.sourceType}
+                  paragraphCount={paragraphs.length}
+                  compact
+                />
+              </div>
             </div>
             <h1>{analysis.title}</h1>
             {document.sourceTitle && document.sourceTitle !== analysis.title ? (
@@ -144,43 +212,6 @@ export default async function DistillResultPage({
             <div className="distillVerdict">
               <strong>{verdictLabels[analysis.verdict] ?? "阅读建议"}</strong>
               <p>{analysis.verdictReason}</p>
-            </div>
-            <div className="distillResultActions">
-              <KnowledgeSaveButton
-                documentId={document.id}
-                initialSaved={Boolean(document.knowledgeEntryId)}
-              />
-              <DistillMarkdownButton
-                document={{
-                  id: document.id,
-                  title: analysis.title,
-                  sourceTitle: document.sourceTitle,
-                  sourceUrl: document.sourceUrl,
-                  sourceAuthor: document.sourceAuthor,
-                  verdict: analysis.verdict,
-                  verdictReason: analysis.verdictReason,
-                  estimatedReadingMinutes: analysis.estimatedReadingMinutes,
-                  summary: analysis.summary,
-                  keyPoints: analysis.keyPoints,
-                  claims: analysis.claims,
-                  transferableInsights: analysis.transferableInsights,
-                  cautions: analysis.cautions,
-                  followUpQuestions: analysis.followUpQuestions,
-                  createdAt: document.createdAt.toISOString(),
-                }}
-              />
-              {document.sourceUrl ? (
-                <a
-                  className="distillUtilityButton"
-                  href={document.sourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <ArrowSquareOut aria-hidden="true" size={17} />
-                  打开原文
-                </a>
-              ) : null}
-              <DistillDeleteButton documentId={document.id} />
             </div>
           </header>
 
@@ -195,9 +226,55 @@ export default async function DistillResultPage({
             </div>
             <div>
               <dt>可保存卡片</dt>
-              <dd>{analysis.transferableInsights.length} 张</dd>
+              <dd>
+                {analysis.transferableInsights.length ? (
+                  <a href="#distill-knowledge-cards">
+                    {analysis.transferableInsights.length} 张
+                  </a>
+                ) : (
+                  "0 张"
+                )}
+              </dd>
             </div>
           </dl>
+
+          <div className="distillResultActions">
+            <KnowledgeSaveButton
+              documentId={document.id}
+              initialSaved={Boolean(document.knowledgeEntryId)}
+            />
+            <DistillMarkdownButton
+              document={{
+                id: document.id,
+                title: analysis.title,
+                sourceTitle: document.sourceTitle,
+                sourceUrl: document.sourceUrl,
+                sourceAuthor: document.sourceAuthor,
+                verdict: analysis.verdict,
+                verdictReason: analysis.verdictReason,
+                estimatedReadingMinutes: analysis.estimatedReadingMinutes,
+                summary: analysis.summary,
+                keyPoints: analysis.keyPoints,
+                claims: analysis.claims,
+                transferableInsights: analysis.transferableInsights,
+                cautions: analysis.cautions,
+                followUpQuestions: analysis.followUpQuestions,
+                createdAt: document.createdAt.toISOString(),
+              }}
+            />
+            {document.sourceUrl ? (
+              <a
+                className="distillUtilityButton distillSourceLink"
+                href={document.sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <ArrowSquareOut aria-hidden="true" size={17} />
+                打开原文
+              </a>
+            ) : null}
+            <DistillDeleteButton documentId={document.id} />
+          </div>
 
           <div className="distillResultLayout">
             <div className="distillResultBody">
@@ -209,6 +286,26 @@ export default async function DistillResultPage({
                 </header>
                 <div className="distillModuleContent">
                   <p className="distillLeadSummary">{analysis.summary}</p>
+                  {analysis.keyPoints.some(
+                    (point) => point.evidenceParagraphs.length,
+                  ) ? (
+                    <nav
+                      className="distillEvidenceIndex"
+                      aria-label="导读证据索引"
+                    >
+                      {analysis.keyPoints.slice(0, 4).map((point, index) => (
+                        <a
+                          href={`#distill-author-point-${index + 1}`}
+                          key={`${point.title}-${index}`}
+                        >
+                          <span>
+                            {paragraphReference(point.evidenceParagraphs)}
+                          </span>
+                          {point.title}
+                        </a>
+                      ))}
+                    </nav>
+                  ) : null}
                 </div>
               </section>
 
@@ -221,57 +318,60 @@ export default async function DistillResultPage({
                 <div className="distillModuleContent">
                   <div className="distillKeyPoints">
                     {analysis.keyPoints.map((point, index) => (
-                      <article key={`${point.title}-${point.detail}`}>
+                      <article
+                        id={`distill-author-point-${index + 1}`}
+                        key={`${point.title}-${point.detail}`}
+                      >
                         <span>{String(index + 1).padStart(2, "0")}</span>
-                        <h3>{point.title}</h3>
-                        <p>{point.detail}</p>
+                        <div>
+                          <h3>{point.title}</h3>
+                          <p>{point.detail}</p>
+                        </div>
                       </article>
                     ))}
                   </div>
+                  {analysis.transferableInsights.length ? (
+                    <details
+                      className="distillKnowledgeDrawer"
+                      id="distill-knowledge-cards"
+                    >
+                      <summary>
+                        查看 {analysis.transferableInsights.length} 张可保存卡片
+                      </summary>
+                      <div className="distillTakeawayCards">
+                        {analysis.transferableInsights.map((insight, index) => {
+                          const firstSentence =
+                            insight.split(/[。！？!?；;]/, 1)[0] ||
+                            `知识 ${index + 1}`;
+                          const title =
+                            firstSentence.length > 42
+                              ? `${firstSentence.slice(0, 41)}…`
+                              : firstSentence;
+                          return (
+                            <article key={`${index}-${insight}`}>
+                              <span>{String(index + 1).padStart(2, "0")}</span>
+                              <h3>{title}</h3>
+                              <p>{insight}</p>
+                              <KnowledgeCardActions
+                                documentId={document.id}
+                                insightIndex={index}
+                                title={title}
+                                content={insight}
+                                initialSaved={savedInsightIndexSet.has(index)}
+                              />
+                            </article>
+                          );
+                        })}
+                      </div>
+                    </details>
+                  ) : null}
                 </div>
               </section>
 
-              {analysis.transferableInsights.length ? (
-                <section className="distillResultModule">
-                  <header className="distillModuleHeading">
-                    <span>03</span>
-                    <h2>干货提炼</h2>
-                    <p>可以带走和复用的知识</p>
-                  </header>
-                  <div className="distillModuleContent">
-                    <div className="distillTakeawayCards">
-                      {analysis.transferableInsights.map((insight, index) => {
-                        const firstSentence =
-                          insight.split(/[。！？!?；;]/, 1)[0] ||
-                          `知识 ${index + 1}`;
-                        const title =
-                          firstSentence.length > 42
-                            ? `${firstSentence.slice(0, 41)}…`
-                            : firstSentence;
-                        return (
-                          <article key={`${index}-${insight}`}>
-                            <span>{String(index + 1).padStart(2, "0")}</span>
-                            <h3>{title}</h3>
-                            <p>{insight}</p>
-                            <KnowledgeCardActions
-                              documentId={document.id}
-                              insightIndex={index}
-                              title={title}
-                              content={insight}
-                              initialSaved={savedInsightIndexSet.has(index)}
-                            />
-                          </article>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </section>
-              ) : null}
-
-              {analysis.cautions.length ? (
+              {analysis.cautions.length && cautionSectionNumber ? (
                 <section className="distillResultModule distillCautionModule">
                   <header className="distillModuleHeading">
-                    <span>04</span>
+                    <span>{cautionSectionNumber}</span>
                     <h2>谨慎判断</h2>
                     <p>证据还不足以支持的部分</p>
                   </header>
@@ -287,11 +387,28 @@ export default async function DistillResultPage({
                   </div>
                 </section>
               ) : null}
+
+              {sourceQuote && quoteSectionNumber ? (
+                <section className="distillResultModule distillQuoteModule">
+                  <header className="distillModuleHeading">
+                    <span>{quoteSectionNumber}</span>
+                    <h2>原文引用</h2>
+                    <p>保留作者原话，便于回溯</p>
+                  </header>
+                  <div className="distillModuleContent">
+                    <blockquote cite={document.sourceUrl ?? undefined}>
+                      <p>{sourceQuote.text}</p>
+                      <footer>P{sourceQuote.number}</footer>
+                    </blockquote>
+                  </div>
+                </section>
+              ) : null}
             </div>
           </div>
 
           <DistillFollowUp
             documentId={document.id}
+            sectionNumber={followUpSectionNumber}
             initialMessages={messages.map((message) => ({
               ...message,
               createdAt: message.createdAt.toISOString(),
