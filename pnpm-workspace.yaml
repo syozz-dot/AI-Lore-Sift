@@ -3,6 +3,10 @@ packages:
   - packages/*
   - jobs
 
+overrides:
+  postcss: ">=8.5.23"
+  sharp: ">=0.35.0"
+
 allowBuilds:
   esbuild: true
   sharp: true

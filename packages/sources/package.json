@@ -10,6 +10,6 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "fast-xml-parser": "^5.10.0"
+    "fast-xml-parser": "^5.10.1"
   }
 }
