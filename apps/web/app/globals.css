@@ -13,6 +13,9 @@
   --danger: #9a403b;
   --header-bg: rgba(242, 244, 242, 0.9);
   --skeleton: #dfe4e0;
+  --page: #f2f4f2;
+  --surface-elevated: #f8faf8;
+  --surface-soft: #e9ede9;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -31,6 +34,9 @@
     --danger: #e18780;
     --header-bg: rgba(17, 21, 18, 0.9);
     --skeleton: #202721;
+    --page: #0d110e;
+    --surface-elevated: #1a201b;
+    --surface-soft: #141915;
   }
 }
 
@@ -49,6 +55,9 @@
   --danger: #9a403b;
   --header-bg: rgba(242, 244, 242, 0.9);
   --skeleton: #dfe4e0;
+  --page: #f2f4f2;
+  --surface-elevated: #f8faf8;
+  --surface-soft: #e9ede9;
 }
 
 :root[data-theme="dark"] {
@@ -66,6 +75,9 @@
   --danger: #e18780;
   --header-bg: rgba(17, 21, 18, 0.9);
   --skeleton: #202721;
+  --page: #0d110e;
+  --surface-elevated: #1a201b;
+  --surface-soft: #141915;
 }
 
 * {
@@ -912,7 +924,7 @@ button {
 }
 .sourceRichText blockquote {
   padding-left: 18px;
-  border-left: 2px solid var(--accent);
+  border-left: 1px solid var(--accent);
   color: var(--ink-tertiary);
 }
 .sourceRichText pre {
@@ -8648,8 +8660,7 @@ button {
   padding: 42px 52px 52px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: var(--surface-elevated, #fff);
-  box-shadow: 0 12px 32px rgb(29 38 33 / 4%);
+  background: var(--surface-elevated);
 }
 
 .storyFactStrip {
@@ -8698,7 +8709,7 @@ button {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 4px;
-  background: var(--surface-soft, #eef1eb);
+  background: var(--surface-soft);
 }
 
 .storyEvidenceMedia img {
@@ -8894,7 +8905,8 @@ button {
 
 .storyContextRail nav a:first-of-type,
 .storyContextRail nav a:hover {
-  border-left: 2px solid var(--accent);
+  border-left-color: var(--accent);
+  background: color-mix(in srgb, var(--surface) 52%, transparent);
   color: var(--ink);
 }
 
@@ -8926,7 +8938,7 @@ button {
   display: block;
   border: 1px solid var(--line);
   border-radius: 9px;
-  background: var(--surface-elevated, #fff);
+  background: var(--surface-elevated);
   transition:
     border-color 160ms ease,
     transform 160ms ease;
