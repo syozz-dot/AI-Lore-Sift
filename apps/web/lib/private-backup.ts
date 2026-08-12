@@ -90,6 +90,8 @@ function isMemory(value: unknown): value is PrivateMemory {
     typeof memory.id === "string" &&
     typeof memory.statement === "string" &&
     ["manual", "favorite", "question"].includes(memory.source ?? "") &&
+    (memory.kind === undefined ||
+      ["preference", "context", "knowledge"].includes(memory.kind)) &&
     typeof memory.createdAt === "string" &&
     typeof memory.updatedAt === "string"
   );

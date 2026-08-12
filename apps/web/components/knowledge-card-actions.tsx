@@ -3,6 +3,8 @@
 import { BookmarkSimple, Check, Copy } from "@phosphor-icons/react";
 import { useState } from "react";
 
+import { PrivateMemoryCandidate } from "./private-memory-candidate";
+
 export function KnowledgeCardActions({
   documentId,
   insightIndex,
@@ -66,6 +68,7 @@ export function KnowledgeCardActions({
         <Copy aria-hidden="true" size={15} />
         {copied ? "已复制" : "复制 Markdown"}
       </button>
+      <PrivateMemoryCandidate compact source="favorite" statement={content} />
       {error ? <span role="alert">{error}</span> : null}
     </div>
   );

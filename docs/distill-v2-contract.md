@@ -32,6 +32,8 @@ then sediment**.
 - Personalization is off by default on every new Distill request.
 - The UI previews what categories will be sent and requires a per-request opt-in.
 - Only the user-authored profile and user-approved memories can be sent.
+- Favorites, knowledge cards, and follow-up answers are only candidate memories;
+  the user must edit, categorize, and confirm each one before local storage.
 - Generic analysis must remain source-only even when personalization is enabled.
 - No personalized insight is better than a forced or generic relationship.
 - Source text, private context, and generated content are untrusted input; they

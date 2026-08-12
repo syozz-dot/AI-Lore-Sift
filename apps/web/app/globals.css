@@ -3540,6 +3540,51 @@ button {
   line-height: 1.75;
 }
 
+.knowledgeSearch {
+  max-width: 760px;
+  min-height: 52px;
+  margin: 0 0 18px;
+  padding: 0 8px 0 16px;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink-tertiary);
+}
+
+.knowledgeSearch:focus-within {
+  border-color: var(--accent);
+}
+
+.knowledgeSearch input {
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+}
+
+.knowledgeSearch button {
+  min-height: 38px;
+  padding: 0 15px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--canvas);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.knowledgeSearchResult {
+  margin: 0 0 28px;
+  color: var(--ink-tertiary);
+  font-size: 11px;
+}
+
 .knowledgeCollection > article {
   min-height: 180px;
   padding: 30px 0;
@@ -3645,6 +3690,34 @@ button {
   border: 1px solid var(--line-strong);
   color: var(--accent);
   border-radius: 8px;
+}
+
+.distillTaskSearch {
+  height: 36px;
+  margin-top: 12px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink-tertiary);
+}
+
+.distillTaskSearch:focus-within {
+  border-color: var(--accent);
+}
+
+.distillTaskSearch input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 9px;
 }
 
 .distillTaskRail nav {
@@ -4703,6 +4776,130 @@ button {
   font-size: 9px;
 }
 
+.privateMemoryCandidate {
+  position: relative;
+  margin-top: 12px;
+}
+
+.privateMemoryCandidate.isCompact {
+  margin-top: 0;
+}
+
+.knowledgeCardActions .privateMemoryCandidate.isOpen {
+  width: 100%;
+}
+
+.privateMemoryCandidate > button,
+.privateMemorySaved {
+  min-height: 34px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.privateMemorySaved {
+  color: var(--accent);
+}
+
+.privateMemoryCandidateEditor {
+  width: min(100%, 620px);
+  padding: 13px;
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-elevated);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.privateMemoryCandidateEditor header,
+.privateMemoryCandidateEditor header span,
+.privateMemoryCandidateEditor footer,
+.privateMemoryCandidateEditor footer button {
+  display: flex;
+  align-items: center;
+}
+
+.privateMemoryCandidateEditor header,
+.privateMemoryCandidateEditor footer {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.privateMemoryCandidateEditor header span {
+  gap: 7px;
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.privateMemoryCandidateEditor header button {
+  padding: 3px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-tertiary);
+  cursor: pointer;
+}
+
+.privateMemoryCandidateEditor textarea {
+  min-height: 88px;
+  padding: 10px 11px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.privateMemoryCandidateEditor > label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-tertiary);
+  font-size: 9px;
+}
+
+.privateMemoryCandidateEditor select {
+  min-height: 34px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-secondary);
+  font: inherit;
+  font-size: 10px;
+}
+
+.privateMemoryCandidateEditor footer small {
+  color: var(--ink-tertiary);
+  font-size: 8px;
+}
+
+.privateMemoryCandidateEditor footer button {
+  min-height: 32px;
+  padding: 0 10px;
+  gap: 6px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--canvas);
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.privateMemoryCandidateEditor > p {
+  margin: 0;
+  color: var(--danger);
+  font-size: 9px;
+}
+
 .distillFollowUp {
   margin: 8px 48px 48px;
   padding: 34px;
@@ -4872,6 +5069,10 @@ button {
 
 .distillMessageList .isPending {
   color: var(--ink-tertiary);
+}
+
+.distillMessageList article.isAssistant > .privateMemoryCandidate {
+  margin-top: 14px;
 }
 
 .distillFollowUp form {
@@ -6584,6 +6785,37 @@ button {
   border-bottom: 1px solid var(--line-strong);
 }
 
+.favoritesSearch {
+  max-width: 540px;
+  min-height: 46px;
+  margin: 24px 0 10px;
+  padding: 0 14px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line-strong);
+  color: var(--ink-tertiary);
+  font-size: 10px;
+}
+
+.favoritesSearch input {
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+}
+
+.favoritesNoMatch {
+  margin: 0;
+  padding: 48px 0;
+  color: var(--ink-tertiary);
+  font-size: 12px;
+}
+
 .favoriteRow {
   min-height: 168px;
   padding: var(--space-6) 0;
@@ -6646,6 +6878,10 @@ button {
   line-height: 1.75;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.favoriteRowContent > .privateMemoryCandidate {
+  margin-top: 14px;
 }
 
 .favoriteRowActions {
@@ -9774,6 +10010,12 @@ button {
   color: var(--ink-tertiary);
   font-family: "JetBrains Mono Variable", monospace;
   font-size: 9px;
+}
+
+.privateMemoryList article > div span + span {
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
+  color: var(--accent);
 }
 
 .privateMemoryList article p {

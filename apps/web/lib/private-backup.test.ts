@@ -16,6 +16,7 @@ function sampleBackup() {
         id: "memory-1",
         statement: "优先保留能落地的产品与工程方法。",
         source: "manual" as const,
+        kind: "preference" as const,
         createdAt: "2026-08-13T00:00:00.000Z",
         updatedAt: "2026-08-13T00:00:00.000Z",
       },

@@ -51,6 +51,12 @@ const SOURCE_LABELS: Record<PrivateMemory["source"], string> = {
   question: "来自提问",
 };
 
+const KIND_LABELS: Record<NonNullable<PrivateMemory["kind"]>, string> = {
+  preference: "偏好与边界",
+  context: "当前事项",
+  knowledge: "可复用知识",
+};
+
 function downloadTextFile(contents: string, filename: string) {
   const url = URL.createObjectURL(
     new Blob([contents], { type: "application/json;charset=utf-8" }),
@@ -164,6 +170,7 @@ export function PrivateWorkspaceSettings() {
         id: crypto.randomUUID(),
         statement,
         source: "manual",
+        kind: "context",
         createdAt: now,
         updatedAt: now,
       };
@@ -407,7 +414,9 @@ export function PrivateWorkspaceSettings() {
               />
             </label>
             <div className="privateFormAction">
-              <p>本阶段只保存到 IndexedDB；脱水请求还不会自动读取这些内容。</p>
+              <p>
+                只保存到 IndexedDB；每次脱水默认关闭，只有你勾选后才会发送。
+              </p>
               <button type="submit" disabled={busy}>
                 保存画像
               </button>
@@ -447,6 +456,7 @@ export function PrivateWorkspaceSettings() {
                 <article key={memory.id}>
                   <div>
                     <span>{SOURCE_LABELS[memory.source]}</span>
+                    <span>{KIND_LABELS[memory.kind ?? "context"]}</span>
                     <time dateTime={memory.updatedAt}>
                       {new Date(memory.updatedAt).toLocaleDateString("zh-CN")}
                     </time>

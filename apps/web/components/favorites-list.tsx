@@ -14,6 +14,7 @@ import {
   type FavoriteStory,
 } from "../lib/favorites";
 import { formatScore } from "../lib/presentation";
+import { PrivateMemoryCandidate } from "./private-memory-candidate";
 
 function formatStoredDate(value: string | null) {
   if (!value) return "时间未知";
@@ -28,6 +29,7 @@ function formatStoredDate(value: string | null) {
 
 export function FavoritesList() {
   const [favorites, setFavorites] = useState<FavoriteStory[] | null>(null);
+  const [query, setQuery] = useState("");
 
   const syncFavorites = useCallback(() => {
     setFavorites(readFavorites(window.localStorage));
@@ -78,9 +80,30 @@ export function FavoritesList() {
     );
   }
 
+  const normalizedQuery = query.trim().toLocaleLowerCase("zh-CN");
+  const visibleFavorites = normalizedQuery
+    ? favorites.filter((story) =>
+        [story.title, story.originalTitle, story.summary, story.sourceName]
+          .filter(Boolean)
+          .some((value) =>
+            String(value).toLocaleLowerCase("zh-CN").includes(normalizedQuery),
+          ),
+      )
+    : favorites;
+
   return (
     <section className="favoritesCollection" aria-label="已收藏 Story">
-      {favorites.map((story, index) => (
+      <label className="favoritesSearch">
+        <span>搜索收藏</span>
+        <input
+          type="search"
+          value={query}
+          maxLength={120}
+          placeholder="标题、摘要或来源"
+          onChange={(event) => setQuery(event.target.value)}
+        />
+      </label>
+      {visibleFavorites.map((story, index) => (
         <article className="favoriteRow" key={story.slug}>
           <div className="favoriteRowIndex" aria-hidden="true">
             {String(index + 1).padStart(2, "0")}
@@ -95,6 +118,15 @@ export function FavoritesList() {
               <h2>{story.title}</h2>
               {story.summary ? <p>{story.summary}</p> : null}
             </Link>
+            <PrivateMemoryCandidate
+              compact
+              source="favorite"
+              statement={
+                story.summary
+                  ? `${story.title}：${story.summary}`
+                  : `我希望继续关注：${story.title}`
+              }
+            />
           </div>
           <div className="favoriteRowActions">
             <span className="favoriteRowScore">{formatScore(story.score)}</span>
@@ -109,6 +141,9 @@ export function FavoritesList() {
           </div>
         </article>
       ))}
+      {!visibleFavorites.length ? (
+        <p className="favoritesNoMatch">没有找到匹配的收藏内容。</p>
+      ) : null}
     </section>
   );
 }

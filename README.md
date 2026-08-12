@@ -104,6 +104,10 @@ being added to PostgreSQL Distill history.
 
 The Distill output contract and its versioned multi-format evaluation baseline
 are documented in [docs/distill-v2-contract.md](docs/distill-v2-contract.md).
+Distill history and the knowledge library support owner-scoped text search.
+Saved Stories, reusable knowledge cards, and follow-up answers can become local
+memory candidates only after the user opens, edits, categorizes, and confirms
+them; no behavior is silently written into the profile.
 
 Because this is a public repository, secrets must live only in deployment
 environment variables. Run `pnpm security:secrets` before pushing, and review

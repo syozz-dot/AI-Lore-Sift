@@ -1,6 +1,7 @@
 import {
   ChatCircleText,
   CheckCircle,
+  MagnifyingGlass,
   Plus,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
@@ -25,9 +26,11 @@ function formatTaskDate(value: Date) {
 export function DistillTaskList({
   documents,
   currentId,
+  searchQuery = "",
 }: {
   documents: DistillTask[];
   currentId?: string;
+  searchQuery?: string;
 }) {
   return (
     <aside className="distillTaskRail" aria-label="脱水任务">
@@ -40,6 +43,17 @@ export function DistillTaskList({
           <Plus aria-hidden="true" size={17} />
         </Link>
       </div>
+      <form className="distillTaskSearch" action="/distill" method="get">
+        <MagnifyingGlass aria-hidden="true" size={14} />
+        <input
+          name="q"
+          type="search"
+          maxLength={120}
+          defaultValue={searchQuery}
+          placeholder="搜索历史任务"
+          aria-label="搜索历史任务"
+        />
+      </form>
       <nav>
         {documents.map((document) => {
           const active = document.id === currentId;
@@ -69,7 +83,7 @@ export function DistillTaskList({
       {!documents.length ? (
         <div className="distillTaskRailEmpty">
           <ChatCircleText aria-hidden="true" size={20} />
-          <span>还没有历史任务</span>
+          <span>{searchQuery ? "没有匹配的历史任务" : "还没有历史任务"}</span>
         </div>
       ) : null}
     </aside>

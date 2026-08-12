@@ -22,6 +22,7 @@ export interface PrivateMemory {
   id: string;
   statement: string;
   source: "manual" | "favorite" | "question";
+  kind?: "preference" | "context" | "knowledge";
   createdAt: string;
   updatedAt: string;
 }
@@ -242,6 +243,21 @@ export async function readPrivateWorkspace(): Promise<PrivateWorkspaceSnapshot> 
         right.updatedAt.localeCompare(left.updatedAt),
       ),
     };
+  } finally {
+    database.close();
+  }
+}
+
+export async function hasPrivateMemory(id: string) {
+  const database = await openPrivateWorkspace();
+  try {
+    const transaction = database.transaction(MEMORY_STORE, "readonly");
+    const completion = transactionComplete(transaction);
+    const result = await requestResult(
+      transaction.objectStore(MEMORY_STORE).getKey(id),
+    );
+    await completion;
+    return result !== undefined;
   } finally {
     database.close();
   }

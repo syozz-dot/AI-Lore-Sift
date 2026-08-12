@@ -7,9 +7,13 @@ import {
   type NewDistillAnalysis,
   type NewDistillDocument,
 } from "@ai-news-navigator/database";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, or } from "drizzle-orm";
 
 import { getDatabaseConnection } from "./database";
+import {
+  normalizePrivateSearchQuery,
+  privateSearchPattern,
+} from "./distill-search";
 
 export async function createDistillDocument(input: NewDistillDocument) {
   const { db } = getDatabaseConnection();
@@ -55,8 +59,21 @@ export async function failDistillDocument(
     .where(eq(distillDocuments.id, documentId));
 }
 
-export async function listDistillDocuments(ownerId: string, limit = 18) {
+export async function listDistillDocuments(
+  ownerId: string,
+  limit = 18,
+  query = "",
+) {
   const { db } = getDatabaseConnection();
+  const normalizedQuery = normalizePrivateSearchQuery(query);
+  const pattern = privateSearchPattern(normalizedQuery);
+  const searchCondition = normalizedQuery
+    ? or(
+        ilike(distillDocuments.sourceTitle, pattern!),
+        ilike(distillAnalyses.title, pattern!),
+        ilike(distillAnalyses.summary, pattern!),
+      )
+    : undefined;
   return db
     .select({
       id: distillDocuments.id,
@@ -84,7 +101,11 @@ export async function listDistillDocuments(ownerId: string, limit = 18) {
         eq(knowledgeEntries.ownerId, ownerId),
       ),
     )
-    .where(eq(distillDocuments.ownerId, ownerId))
+    .where(
+      searchCondition
+        ? and(eq(distillDocuments.ownerId, ownerId), searchCondition)
+        : eq(distillDocuments.ownerId, ownerId),
+    )
     .orderBy(desc(distillDocuments.createdAt))
     .limit(limit);
 }
@@ -308,8 +329,21 @@ export async function deleteDistillDocument(ownerId: string, id: string) {
   return Boolean(deleted);
 }
 
-export async function listKnowledgeEntries(ownerId: string, limit = 40) {
+export async function listKnowledgeEntries(
+  ownerId: string,
+  limit = 40,
+  query = "",
+) {
   const { db } = getDatabaseConnection();
+  const normalizedQuery = normalizePrivateSearchQuery(query);
+  const pattern = privateSearchPattern(normalizedQuery);
+  const searchCondition = normalizedQuery
+    ? or(
+        ilike(knowledgeEntries.title, pattern!),
+        ilike(knowledgeEntries.summary, pattern!),
+        ilike(distillDocuments.sourceTitle, pattern!),
+      )
+    : undefined;
   return db
     .select({
       id: knowledgeEntries.id,
@@ -327,13 +361,31 @@ export async function listKnowledgeEntries(ownerId: string, limit = 40) {
       distillDocuments,
       eq(distillDocuments.id, knowledgeEntries.documentId),
     )
-    .where(eq(knowledgeEntries.ownerId, ownerId))
+    .where(
+      searchCondition
+        ? and(eq(knowledgeEntries.ownerId, ownerId), searchCondition)
+        : eq(knowledgeEntries.ownerId, ownerId),
+    )
     .orderBy(desc(knowledgeEntries.createdAt))
     .limit(limit);
 }
 
-export async function listKnowledgeCards(ownerId: string, limit = 60) {
+export async function listKnowledgeCards(
+  ownerId: string,
+  limit = 60,
+  query = "",
+) {
   const { db } = getDatabaseConnection();
+  const normalizedQuery = normalizePrivateSearchQuery(query);
+  const pattern = privateSearchPattern(normalizedQuery);
+  const searchCondition = normalizedQuery
+    ? or(
+        ilike(knowledgeCards.title, pattern!),
+        ilike(knowledgeCards.content, pattern!),
+        ilike(distillDocuments.sourceTitle, pattern!),
+        ilike(distillAnalyses.title, pattern!),
+      )
+    : undefined;
   return db
     .select({
       id: knowledgeCards.id,
@@ -356,7 +408,11 @@ export async function listKnowledgeCards(ownerId: string, limit = 60) {
       distillAnalyses,
       eq(distillAnalyses.documentId, knowledgeCards.documentId),
     )
-    .where(eq(knowledgeCards.ownerId, ownerId))
+    .where(
+      searchCondition
+        ? and(eq(knowledgeCards.ownerId, ownerId), searchCondition)
+        : eq(knowledgeCards.ownerId, ownerId),
+    )
     .orderBy(desc(knowledgeCards.createdAt))
     .limit(limit);
 }

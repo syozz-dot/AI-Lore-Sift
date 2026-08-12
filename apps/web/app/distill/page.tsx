@@ -6,6 +6,7 @@ import { DistillSubmitForm } from "../../components/distill-submit-form";
 import { DistillTaskList } from "../../components/distill-task-list";
 import { getDistillSession } from "../../lib/distill-auth";
 import { listDistillDocuments } from "../../lib/distill";
+import { normalizePrivateSearchQuery } from "../../lib/distill-search";
 
 export const dynamic = "force-dynamic";
 
@@ -15,16 +16,21 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, noarchive: true },
 };
 
-export default async function DistillPage() {
+export default async function DistillPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   const session = await getDistillSession();
   if (!session) redirect("/distill/access?next=/distill");
+  const query = normalizePrivateSearchQuery((await searchParams).q);
   const documents = process.env.DATABASE_URL
-    ? await listDistillDocuments(session.ownerId)
+    ? await listDistillDocuments(session.ownerId, query ? 60 : 18, query)
     : [];
 
   return (
     <main className="distillAgentWorkspace">
-      <DistillTaskList documents={documents} />
+      <DistillTaskList documents={documents} searchQuery={query} />
       <div className="distillAgentCanvas distillNewTaskCanvas">
         <header className="distillConversationHeader">
           <div>

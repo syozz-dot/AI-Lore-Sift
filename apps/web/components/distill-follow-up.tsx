@@ -10,6 +10,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 
 import { distillMessageBlocks } from "../lib/distill-message";
+import { PrivateMemoryCandidate } from "./private-memory-candidate";
 
 interface FollowUpMessage {
   id: string;
@@ -145,6 +146,12 @@ export function DistillFollowUp({
             >
               <small>{message.role === "user" ? "你" : "脱水助手"}</small>
               <DistillMessageBody content={message.content} />
+              {message.role !== "user" ? (
+                <PrivateMemoryCandidate
+                  source="question"
+                  statement={message.content}
+                />
+              ) : null}
             </article>
           ))}
           {pending ? (

@@ -59,7 +59,10 @@ export function DistillSubmitForm() {
       const selectedMemories =
         privateWorkspace?.memories
           .slice(0, 20)
-          .map((memory) => memory.statement) ?? [];
+          .map(
+            (memory) =>
+              `[${memory.kind === "knowledge" ? "可复用知识" : memory.kind === "preference" ? "偏好与边界" : "当前事项"}] ${memory.statement}`,
+          ) ?? [];
       const personalization =
         usePersonalization && privateWorkspace
           ? {

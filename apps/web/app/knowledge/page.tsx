@@ -1,9 +1,15 @@
-import { ArrowLeft, ArrowRight, Books } from "@phosphor-icons/react/dist/ssr";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Books,
+  MagnifyingGlass,
+} from "@phosphor-icons/react/dist/ssr";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getDistillSession } from "../../lib/distill-auth";
+import { normalizePrivateSearchQuery } from "../../lib/distill-search";
 import { listKnowledgeCards, listKnowledgeEntries } from "../../lib/distill";
 
 export const dynamic = "force-dynamic";
@@ -14,13 +20,18 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, noarchive: true },
 };
 
-export default async function KnowledgePage() {
+export default async function KnowledgePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   const session = await getDistillSession();
   if (!session) redirect("/distill/access?next=/knowledge");
+  const query = normalizePrivateSearchQuery((await searchParams).q);
   const [entries, cards] = process.env.DATABASE_URL
     ? await Promise.all([
-        listKnowledgeEntries(session.ownerId),
-        listKnowledgeCards(session.ownerId),
+        listKnowledgeEntries(session.ownerId, query ? 100 : 40, query),
+        listKnowledgeCards(session.ownerId, query ? 120 : 60, query),
       ])
     : [[], []];
 
@@ -40,6 +51,25 @@ export default async function KnowledgePage() {
           </span>
         </div>
       </header>
+
+      <form className="knowledgeSearch" action="/knowledge" method="get">
+        <MagnifyingGlass aria-hidden="true" size={18} />
+        <input
+          type="search"
+          name="q"
+          defaultValue={query}
+          maxLength={120}
+          placeholder="搜索标题、导读、知识卡片或来源"
+          aria-label="搜索私人知识库"
+        />
+        <button type="submit">搜索</button>
+      </form>
+
+      {query ? (
+        <p className="knowledgeSearchResult">
+          “{query}”找到 {cards.length} 张知识卡、{entries.length} 份完整文档
+        </p>
+      ) : null}
 
       {cards.length ? (
         <section
@@ -108,6 +138,13 @@ export default async function KnowledgePage() {
               </Link>
             </article>
           ))}
+        </section>
+      ) : !cards.length && query ? (
+        <section className="knowledgeEmpty">
+          <MagnifyingGlass aria-hidden="true" size={30} />
+          <h2>没有找到匹配内容</h2>
+          <p>试试标题中的产品名、技术词或你保存过的判断。</p>
+          <Link href="/knowledge">清除搜索</Link>
         </section>
       ) : !cards.length ? (
         <section className="knowledgeEmpty">
