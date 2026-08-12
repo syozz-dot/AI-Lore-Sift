@@ -9,6 +9,7 @@
   },
   "scripts": {
     "check": "pnpm -r check",
+    "security:audit": "pnpm audit --audit-level moderate",
     "security:secrets": "node scripts/check-tracked-secrets.mjs",
     "test": "vitest run",
     "test:integration": "vitest run --no-file-parallelism jobs/src/*.integration.test.ts",

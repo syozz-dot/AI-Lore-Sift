@@ -39,9 +39,9 @@ content.
 5. Keep database backups and logs under the same private-data policy as the live
    database. Do not log submitted text, generated answers, access keys, cookies,
    or authorization headers.
-6. Run `pnpm security:secrets` before each push. CI performs the same tracked-file
-   check. Enable GitHub secret scanning and push protection on the repository as
-   an additional control.
+6. Run `pnpm security:secrets` and `pnpm security:audit` before each push. CI
+   performs both checks. Enable GitHub secret scanning and push protection on
+   the repository as additional controls.
 
 If a secret was ever committed, deleting the file is insufficient: rotate the
 secret first, then purge the value from Git history and invalidate affected
