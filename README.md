@@ -95,6 +95,12 @@ The private workspace lives at `/distill`, and saved knowledge lives at
 using it. Platform video imports are intentionally adapter boundaries rather
 than public scraping endpoints in the first release.
 
+`/settings` contains the first local-first private workspace layer: a
+user-authored reading profile, user-approved memories, browser persistence
+status, and encrypted import/export. This phase does not yet feed the profile
+into model requests or migrate existing PostgreSQL Distill history; those
+boundaries are stated in the interface rather than implied.
+
 Because this is a public repository, secrets must live only in deployment
 environment variables. Run `pnpm security:secrets` before pushing, and review
 [docs/security-and-privacy.md](docs/security-and-privacy.md) before exposing the

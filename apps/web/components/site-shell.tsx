@@ -8,6 +8,7 @@ import {
   House,
   List,
   Newspaper,
+  SlidersHorizontal,
   Tag,
   X,
 } from "@phosphor-icons/react";
@@ -63,6 +64,7 @@ const workspaceItems: NavItem[] = [
 const personalItems: NavItem[] = [
   { href: "/favorites", label: "收藏", icon: BookmarkSimple },
   { href: "/knowledge", label: "知识库", icon: Books },
+  { href: "/settings", label: "私人设置", icon: SlidersHorizontal },
 ];
 
 function isRouteActive(pathname: string, href: string) {

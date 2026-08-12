@@ -20,7 +20,7 @@ interface FavoritesStorage {
   setItem(key: string, value: string): void;
 }
 
-function isFavoriteStory(value: unknown): value is FavoriteStory {
+export function isFavoriteStory(value: unknown): value is FavoriteStory {
   if (!value || typeof value !== "object") return false;
   const story = value as Partial<FavoriteStory>;
   return (

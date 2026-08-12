@@ -37,6 +37,7 @@ const nextConfig: NextConfig = {
     return [
       { source: "/distill/:path*", headers: privateWorkspaceHeaders },
       { source: "/knowledge", headers: privateWorkspaceHeaders },
+      { source: "/settings", headers: privateWorkspaceHeaders },
       { source: "/api/distill/:path*", headers: privateWorkspaceHeaders },
     ];
   },

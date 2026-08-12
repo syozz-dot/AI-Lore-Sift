@@ -9397,3 +9397,444 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+/* Local-first private workspace settings */
+.privateSettingsPage {
+  width: min(100% - 56px, 1240px);
+  margin: 0 auto;
+  padding: 64px 0 96px;
+}
+
+.privateSettingsIntro {
+  max-width: 850px;
+  padding-bottom: 44px;
+}
+
+.privateSettingsIntro > p:first-child {
+  margin: 0 0 14px;
+  color: var(--accent);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.privateSettingsIntro h1 {
+  margin: 0;
+  font-family: "Noto Serif SC Variable", serif;
+  font-size: clamp(36px, 4vw, 58px);
+  font-weight: 560;
+  letter-spacing: -0.045em;
+  line-height: 1.12;
+}
+
+.privateSettingsIntro > p:last-child {
+  max-width: 720px;
+  margin: 22px 0 0;
+  color: var(--ink-secondary);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.privateSettingsLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  align-items: start;
+  gap: 64px;
+  border-top: 1px solid var(--line-strong);
+}
+
+.privateSettingsMain {
+  min-width: 0;
+}
+
+.privateNotice {
+  margin: 22px 0 0;
+  padding: 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-secondary);
+  font-size: 13px;
+}
+
+.privateNotice.success {
+  color: var(--accent);
+}
+
+.privateNotice.error {
+  color: var(--danger);
+}
+
+.privateSettingsSection {
+  padding: 42px 0 52px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.privateSectionHeading,
+.privateSectionHeading > div,
+.privateRailHeading,
+.privateFormAction,
+.privateMemoryComposer,
+.privateStorageStatus {
+  display: flex;
+  align-items: center;
+}
+
+.privateSectionHeading {
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.privateSectionHeading > div {
+  gap: 13px;
+}
+
+.privateSectionHeading span {
+  color: var(--accent);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 10px;
+}
+
+.privateSectionHeading h2,
+.privateRailHeading h2 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.privateSectionHeading > p {
+  margin: 0;
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 10px;
+}
+
+.privateProfileForm {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 24px;
+}
+
+.privateProfileForm label,
+.privateBackupForm label {
+  display: grid;
+  gap: 9px;
+}
+
+.privateProfileForm label > span,
+.privateBackupForm label > span {
+  color: var(--ink-secondary);
+  font-size: 12px;
+  font-weight: 620;
+}
+
+.privateProfileForm textarea,
+.privateMemoryComposer textarea,
+.privateBackupForm input:not([type="checkbox"]) {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-elevated);
+  color: var(--ink);
+  font: inherit;
+  transition: border-color 160ms ease;
+}
+
+.privateProfileForm textarea {
+  min-height: 122px;
+  padding: 14px 15px;
+  resize: vertical;
+  line-height: 1.65;
+}
+
+.privateProfileForm textarea:focus,
+.privateMemoryComposer textarea:focus,
+.privateBackupForm input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.privateProfileForm textarea::placeholder,
+.privateMemoryComposer textarea::placeholder,
+.privateBackupForm input::placeholder {
+  color: var(--ink-tertiary);
+}
+
+.privateFormAction {
+  grid-column: 1 / -1;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 4px;
+}
+
+.privateFormAction p,
+.privateSectionLead {
+  margin: 0;
+  color: var(--ink-tertiary);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.privateProfileForm button,
+.privateMemoryComposer button,
+.privateBackupForm button,
+.privateImportConfirm button,
+.privateSecondaryButton {
+  min-height: 42px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--ink);
+  border-radius: 9px;
+  background: var(--ink);
+  color: var(--canvas);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.privateProfileForm button:disabled,
+.privateMemoryComposer button:disabled,
+.privateBackupForm button:disabled,
+.privateImportConfirm button:disabled,
+.privateSecondaryButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.privateSectionLead {
+  max-width: 660px;
+  margin-top: -14px;
+  margin-bottom: 22px;
+}
+
+.privateMemoryComposer {
+  align-items: stretch;
+  gap: 10px;
+}
+
+.privateMemoryComposer textarea {
+  min-height: 78px;
+  padding: 13px 14px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.privateMemoryComposer button {
+  flex: 0 0 auto;
+}
+
+.privateMemoryList {
+  margin-top: 24px;
+  display: grid;
+  gap: 0;
+}
+
+.privateMemoryList article {
+  position: relative;
+  padding: 20px 90px 20px 0;
+  border-top: 1px solid var(--line);
+}
+
+.privateMemoryList article > div {
+  display: flex;
+  gap: 10px;
+  color: var(--ink-tertiary);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 9px;
+}
+
+.privateMemoryList article p {
+  margin: 10px 0 0;
+  color: var(--ink-secondary);
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+.privateMemoryList article button {
+  position: absolute;
+  top: 19px;
+  right: 0;
+  padding: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-tertiary);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.privateMemoryList article button:hover {
+  color: var(--danger);
+}
+
+.privateEmptyState {
+  margin: 0;
+  padding: 24px 0;
+  border-top: 1px solid var(--line);
+  color: var(--ink-tertiary);
+  font-size: 13px;
+}
+
+.privateSettingsRail {
+  position: sticky;
+  top: 88px;
+  padding-top: 16px;
+}
+
+.privateSettingsRail > section {
+  padding: 26px 0 30px;
+  border-bottom: 1px solid var(--line);
+}
+
+.privateRailHeading {
+  gap: 9px;
+}
+
+.privateRailHeading h2 {
+  font-size: 16px;
+}
+
+.privateSettingsRail > section > p,
+.privateSecurityNote {
+  margin: 14px 0 0;
+  color: var(--ink-tertiary);
+  font-size: 11px;
+  line-height: 1.75;
+}
+
+.privateStorageStatus {
+  justify-content: space-between;
+  gap: 16px;
+  margin: 18px 0 12px;
+  color: var(--ink-tertiary);
+  font-size: 11px;
+}
+
+.privateStorageStatus strong {
+  color: var(--ink-secondary);
+  font-weight: 620;
+}
+
+.privateSettingsRail .privateSecondaryButton,
+.privateBackupForm .privateSecondaryButton {
+  border-color: var(--line-strong);
+  background: transparent;
+  color: var(--ink);
+}
+
+.privateBackupForm {
+  margin-top: 19px;
+  display: grid;
+  gap: 14px;
+}
+
+.privateBackupForm input:not([type="checkbox"]) {
+  min-height: 42px;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.privateBackupForm input[type="file"] {
+  padding: 8px;
+  color: var(--ink-tertiary);
+}
+
+.privateCheckbox {
+  display: flex !important;
+  grid-template-columns: none !important;
+  align-items: flex-start;
+  gap: 9px !important;
+}
+
+.privateCheckbox input {
+  margin: 3px 0 0;
+  accent-color: var(--accent);
+}
+
+.privateImportConfirm {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface-soft);
+}
+
+.privateImportConfirm p {
+  margin: 0 0 12px;
+  color: var(--ink-secondary);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.privateImportConfirm button {
+  width: 100%;
+  border-color: var(--danger);
+  background: var(--danger);
+  color: var(--accent-ink);
+}
+
+.privateSecurityNote {
+  padding: 22px 0 0;
+}
+
+@media (max-width: 980px) {
+  .privateSettingsLayout {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .privateSettingsRail {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 28px;
+  }
+
+  .privateSecurityNote {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 680px) {
+  .privateSettingsPage {
+    width: min(100% - 28px, 620px);
+    padding: 36px 0 64px;
+  }
+
+  .privateSettingsIntro {
+    padding-bottom: 32px;
+  }
+
+  .privateSettingsIntro h1 {
+    font-size: 34px;
+  }
+
+  .privateProfileForm,
+  .privateSettingsRail {
+    grid-template-columns: 1fr;
+  }
+
+  .privateFormAction,
+  .privateMemoryComposer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .privateFormAction button,
+  .privateMemoryComposer button {
+    width: 100%;
+  }
+
+  .privateSecurityNote {
+    grid-column: auto;
+  }
+}

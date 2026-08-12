@@ -18,6 +18,16 @@ open this workspace to multiple users until those records are migrated to the
 planned browser-local, per-user memory layer or a reviewed tenant-isolated
 server design.
 
+The first browser-local foundation is available under `/settings`. It stores the
+user-authored reading profile, explicitly approved memories, and versioned
+future Distill/knowledge records in IndexedDB. Existing favorites remain in
+localStorage for compatibility. The page can request persistent browser storage
+and can export all of this browser-local state as an AES-GCM encrypted backup;
+raw source text is excluded unless the user opts in. None of these mechanisms
+is a server backup, and local browser data remains readable by scripts running
+on the same origin. The current PostgreSQL Distill history is not migrated or
+deleted by this phase.
+
 Model providers receive the source text required for distillation and follow-up
 answers. Their retention and training policies remain an external privacy
 boundary; configure only providers whose terms are acceptable for the imported
