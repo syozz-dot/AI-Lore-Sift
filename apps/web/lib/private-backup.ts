@@ -118,15 +118,30 @@ function isPersonalizedInsight(value: unknown) {
     detail?: unknown;
     basis?: unknown;
     evidenceParagraphs?: unknown;
+    knowledgeReferences?: unknown;
   };
   return (
     typeof insight.title === "string" &&
     typeof insight.detail === "string" &&
-    ["profile", "memory", "both"].includes(String(insight.basis)) &&
+    ["profile", "memory", "knowledge", "both", "mixed"].includes(
+      String(insight.basis),
+    ) &&
     Array.isArray(insight.evidenceParagraphs) &&
     insight.evidenceParagraphs.every(
       (paragraph) => Number.isInteger(paragraph) && Number(paragraph) > 0,
-    )
+    ) &&
+    (insight.knowledgeReferences === undefined ||
+      (Array.isArray(insight.knowledgeReferences) &&
+        insight.knowledgeReferences.every((reference) => {
+          if (!reference || typeof reference !== "object") return false;
+          const item = reference as Record<string, unknown>;
+          return (
+            typeof item.id === "string" &&
+            (item.kind === "card" || item.kind === "document") &&
+            typeof item.title === "string" &&
+            typeof item.sourceDocumentId === "string"
+          );
+        })))
   );
 }
 

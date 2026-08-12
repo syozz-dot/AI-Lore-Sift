@@ -53,8 +53,14 @@ export interface PrivateDistillRecord {
 export interface PrivatePersonalizedInsight {
   title: string;
   detail: string;
-  basis: "profile" | "memory" | "both";
+  basis: "profile" | "memory" | "knowledge" | "both" | "mixed";
   evidenceParagraphs: number[];
+  knowledgeReferences?: Array<{
+    id: string;
+    kind: "card" | "document";
+    title: string;
+    sourceDocumentId: string;
+  }>;
 }
 
 export async function savePrivatePersonalizedInsights(

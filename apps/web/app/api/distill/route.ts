@@ -8,7 +8,9 @@ import {
   completeDistillDocument,
   createDistillDocument,
   failDistillDocument,
+  listDistillKnowledgeCandidates,
 } from "../../../lib/distill";
+import { rankRelevantDistillKnowledge } from "../../../lib/distill-retrieval";
 import { prepareDistillSource } from "../../../lib/distill-source";
 import {
   privateJson,
@@ -66,11 +68,31 @@ export async function POST(request: Request) {
       accessMode: "private",
       billableUnits: 0,
     });
+    const retrievedKnowledge = personalization?.retrieveKnowledge
+      ? await listDistillKnowledgeCandidates(session.ownerId)
+          .then((candidates) =>
+            rankRelevantDistillKnowledge({
+              sourceTitle: source.sourceTitle,
+              paragraphs: source.paragraphs,
+              privateContext: [
+                personalization.purpose,
+                personalization.directions,
+                personalization.currentContext,
+                personalization.preferredHelp,
+                ...personalization.memories,
+              ],
+              candidates,
+            }),
+          )
+          .catch(() => [])
+      : [];
     const generated = await generateDistillationResponse({
       sourceTitle: source.sourceTitle,
       sourceUrl: source.sourceUrl,
       paragraphs: source.paragraphs,
-      personalization,
+      personalization: personalization
+        ? { ...personalization, retrievedKnowledge }
+        : null,
     });
     const analysis = generated.persisted;
     await completeDistillDocument(documentId, {
@@ -127,6 +149,7 @@ function parsePersonalization(
     preferredHelp: text("preferredHelp", 2_000),
     boundaries: text("boundaries", 2_000),
     memories,
+    retrieveKnowledge: context.retrieveKnowledge === true,
   };
   return Object.values(result).some((item) =>
     Array.isArray(item) ? item.length : item,

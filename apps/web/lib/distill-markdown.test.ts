@@ -39,6 +39,14 @@ describe("distill markdown export", () => {
             detail: "先固定测试条件，再比较不同服务商。",
             basis: "profile",
             evidenceParagraphs: [2],
+            knowledgeReferences: [
+              {
+                id: "knowledge-1",
+                kind: "card",
+                title: "服务商测试需要固定变量",
+                sourceDocumentId: "document-history-1",
+              },
+            ],
           },
         ],
         createdAt: "2026-07-27T00:00:00.000Z",
@@ -50,5 +58,6 @@ describe("distill markdown export", () => {
     expect(markdown).toContain("P2、P4");
     expect(markdown).toContain("## 阅读边界");
     expect(markdown).toContain("## 与我的目标有关");
+    expect(markdown).toContain("关联历史：服务商测试需要固定变量");
   });
 });

@@ -96,6 +96,11 @@ export function buildDistillMarkdown(
             insight.detail,
             "",
             `依据：${insight.basis}；原文段落：${paragraphRefs(insight.evidenceParagraphs)}`,
+            ...(insight.knowledgeReferences?.length
+              ? [
+                  `关联历史：${insight.knowledgeReferences.map((reference) => reference.title).join("；")}`,
+                ]
+              : []),
             "",
           ]),
         ]

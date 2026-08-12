@@ -4356,6 +4356,37 @@ button {
   line-height: 1.8;
 }
 
+.distillPersonalInsights aside {
+  margin-top: 16px;
+  padding-top: 12px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.distillPersonalInsights aside strong {
+  color: var(--ink-tertiary);
+  font-size: 8px;
+  font-weight: 650;
+}
+
+.distillPersonalInsights aside div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.distillPersonalInsights aside a {
+  padding: 3px 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 8px;
+  line-height: 1.4;
+}
+
 .distillNoPersonalMatch {
   max-width: 660px;
   padding: 20px 0;

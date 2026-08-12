@@ -72,8 +72,11 @@ export function DistillSubmitForm() {
               preferredHelp: privateWorkspace.profile.preferredHelp,
               boundaries: privateWorkspace.profile.boundaries,
               memories: selectedMemories,
+              retrieveKnowledge: true,
             }
-          : null;
+          : usePersonalization
+            ? { memories: [], retrieveKnowledge: true }
+            : null;
       const response = await fetch("/api/distill", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -266,16 +269,16 @@ export function DistillSubmitForm() {
             <input
               type="checkbox"
               checked={usePersonalization}
-              disabled={submitting || !hasPrivateContext}
+              disabled={submitting}
               onChange={(event) => setUsePersonalization(event.target.checked)}
             />
             <SlidersHorizontal aria-hidden="true" size={15} />
             <span>
-              <strong>本次使用私人画像</strong>
+              <strong>本次使用私人上下文</strong>
               <small>
                 {hasPrivateContext
-                  ? `额外调用一次模型；发送画像字段与 ${Math.min(privateWorkspace?.memories.length ?? 0, 20)} 条确认记忆，仅生成“与你有关”部分`
-                  : "尚未设置画像；默认只分析原文"}
+                  ? `额外调用一次模型；使用画像、${Math.min(privateWorkspace?.memories.length ?? 0, 20)} 条确认记忆，并从已保存知识中召回最多 5 条，仅生成“与你有关”部分`
+                  : "从已保存知识中召回最多 5 条；尚未设置画像时不会推断你的身份"}
               </small>
             </span>
           </label>

@@ -13,9 +13,11 @@ then sediment**.
    article in direct language. Claims separate fact, author view, and cautious
    inference and retain paragraph evidence references.
 3. **Personal relevance**: `personalizedInsights` is optional and is generated
-   only after the user opts in for that request. Each item names its profile or
-   approved-memory basis and retains source paragraph references. It cannot
-   change the generic verdict or pretend private context is source evidence.
+   only after the user opts in for that request. Each item names its profile,
+   approved-memory, or retrieved-knowledge basis and retains source paragraph
+   references. Retrieved knowledge is owner-scoped, capped at five items, and
+   exposed as validated references. It cannot change the generic verdict or
+   pretend private context is source evidence.
    The server returns this field to the submitting browser but does not persist
    it; the browser stores it in the local private workspace. If the separate
    personalization call fails, the generic result remains available and the
@@ -31,7 +33,13 @@ then sediment**.
 
 - Personalization is off by default on every new Distill request.
 - The UI previews what categories will be sent and requires a per-request opt-in.
-- Only the user-authored profile and user-approved memories can be sent.
+- Only the user-authored profile, user-approved memories, and a maximum of five
+  relevant items from the user's explicitly saved knowledge can be sent.
+- Saved-knowledge retrieval is read-only, lexical, and owner-scoped. It runs
+  only for an opted-in request, adds no new server-side personal record, and
+  never changes the source-only verdict.
+- Models cite retrieved items by short-lived `K1`-style identifiers. The server
+  discards unknown identifiers and maps valid ones back to the saved document.
 - Favorites, knowledge cards, and follow-up answers are only candidate memories;
   the user must edit, categorize, and confirm each one before local storage.
 - Generic analysis must remain source-only even when personalization is enabled.

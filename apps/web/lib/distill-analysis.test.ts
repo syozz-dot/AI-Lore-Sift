@@ -163,8 +163,9 @@ describe("distill analysis generation", () => {
                         title: "可迁移到国际化需求",
                         detail:
                           "可以把语言变更写成触发条件，把同步更新语言包写成动作。",
-                        basis: "profile",
+                        basis: "mixed",
                         evidenceParagraphs: [1],
+                        knowledgeReferences: ["K1", "K404"],
                       },
                     ],
                   }),
@@ -188,10 +189,29 @@ describe("distill analysis generation", () => {
         preferredHelp: "给出可执行迁移",
         boundaries: "不把推测写成事实",
         memories: [],
+        retrieveKnowledge: true,
+        retrievedKnowledge: [
+          {
+            reference: "K1",
+            id: "card-1",
+            kind: "card",
+            title: "规则写成条件与动作",
+            content: "国际化验收规则应明确触发条件与对应动作。",
+            sourceDocumentId: "document-history-1",
+          },
+        ],
       },
     });
 
-    expect(result.personalizedInsights[0]?.basis).toBe("profile");
+    expect(result.personalizedInsights[0]?.basis).toBe("mixed");
+    expect(result.personalizedInsights[0]?.knowledgeReferences).toEqual([
+      {
+        id: "card-1",
+        kind: "card",
+        title: "规则写成条件与动作",
+        sourceDocumentId: "document-history-1",
+      },
+    ]);
     expect(result.personalizationError).toBeNull();
     expect(result.persisted).not.toHaveProperty("personalizedInsights");
     expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -212,6 +232,8 @@ describe("distill analysis generation", () => {
     expect(personalizedBody.messages.at(-1)?.content).toContain(
       "产品国际化需求",
     );
+    expect(personalizedBody.messages.at(-1)?.content).toContain("[K1]");
+    expect(personalizedBody.messages.at(-1)?.content).not.toContain("K404");
   });
 
   it("keeps the generic result when the optional personalization call fails", async () => {
@@ -262,6 +284,7 @@ describe("distill analysis generation", () => {
         preferredHelp: "",
         boundaries: "",
         memories: [],
+        retrieveKnowledge: true,
       },
     });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 import {
   readPrivatePersonalization,
@@ -12,6 +13,14 @@ function paragraphReference(numbers: number[]) {
     .sort((left, right) => left - right)
     .map((number) => `P${number}`)
     .join("、");
+}
+
+function basisLabel(insight: PrivatePersonalizedInsight) {
+  if (insight.basis === "knowledge") return "历史知识";
+  if (insight.basis === "mixed") return "画像 + 记忆 + 历史知识";
+  if (insight.basis === "both") return "画像 + 确认记忆";
+  if (insight.basis === "memory") return "确认记忆";
+  return "私人画像";
 }
 
 export function DistillPersonalizationSection({
@@ -67,16 +76,25 @@ export function DistillPersonalizationSection({
               <article key={`${insight.title}-${index}`}>
                 <div>
                   <span>{paragraphReference(insight.evidenceParagraphs)}</span>
-                  <small>
-                    {insight.basis === "both"
-                      ? "画像 + 确认记忆"
-                      : insight.basis === "memory"
-                        ? "确认记忆"
-                        : "私人画像"}
-                  </small>
+                  <small>{basisLabel(insight)}</small>
                 </div>
                 <h3>{insight.title}</h3>
                 <p>{insight.detail}</p>
+                {insight.knowledgeReferences?.length ? (
+                  <aside aria-label="引用的历史知识">
+                    <strong>关联历史</strong>
+                    <div>
+                      {insight.knowledgeReferences.map((reference) => (
+                        <Link
+                          key={`${reference.kind}-${reference.id}`}
+                          href={`/distill/${reference.sourceDocumentId}`}
+                        >
+                          {reference.title}
+                        </Link>
+                      ))}
+                    </div>
+                  </aside>
+                ) : null}
               </article>
             ))}
           </div>

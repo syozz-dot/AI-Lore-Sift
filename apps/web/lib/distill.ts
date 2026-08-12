@@ -14,6 +14,7 @@ import {
   normalizePrivateSearchQuery,
   privateSearchPattern,
 } from "./distill-search";
+import type { DistillKnowledgeCandidate } from "./distill-retrieval";
 
 export async function createDistillDocument(input: NewDistillDocument) {
   const { db } = getDatabaseConnection();
@@ -415,4 +416,29 @@ export async function listKnowledgeCards(
     )
     .orderBy(desc(knowledgeCards.createdAt))
     .limit(limit);
+}
+
+export async function listDistillKnowledgeCandidates(
+  ownerId: string,
+): Promise<DistillKnowledgeCandidate[]> {
+  const [cards, entries] = await Promise.all([
+    listKnowledgeCards(ownerId, 120),
+    listKnowledgeEntries(ownerId, 80),
+  ]);
+  return [
+    ...cards.map((card) => ({
+      id: card.id,
+      kind: "card" as const,
+      title: card.title,
+      content: card.content,
+      sourceDocumentId: card.documentId,
+    })),
+    ...entries.map((entry) => ({
+      id: entry.id,
+      kind: "document" as const,
+      title: entry.title,
+      content: entry.summary,
+      sourceDocumentId: entry.documentId,
+    })),
+  ];
 }
