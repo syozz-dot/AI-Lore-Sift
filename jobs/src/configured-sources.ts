@@ -8,32 +8,40 @@ import {
   createArxivAiAdapter,
   createArsTechnicaAiAdapter,
   createGoogleAiBlogAdapter,
+  createGoogleDeepMindBlogAdapter,
   createHackerNewsAiAdapter,
   createHuggingFaceDailyPapersAdapter,
   createHuggingFaceModelsAdapter,
   createOpenAiNewsAdapter,
+  createOllamaReleaseAdapter,
   createProductHuntAdapter,
   createTechCrunchAiAdapter,
   createTheDecoderAdapter,
   createVentureBeatAiAdapter,
+  createVllmReleaseAdapter,
   createWechat2RssAdapters,
   createWeChatCuratedAccountsAdapter,
   createXCuratedAccountsAdapter,
+  createYouTubeChannelAdapters,
   DEFAULT_WECHAT_MONITORED_ACCOUNTS,
   DEFAULT_X_MONITORED_ACCOUNTS,
   googleAiBlogSource,
+  googleDeepMindBlogSource,
   hackerNewsAiSource,
   huggingFaceDailyPapersSource,
   huggingFaceModelsSource,
   openAiNewsSource,
+  ollamaReleaseSource,
   productHuntSource,
   parseMonitoredAccounts,
   techCrunchAiSource,
   theDecoderSource,
   ventureBeatAiSource,
+  vllmReleaseSource,
   wechat2RssSources,
   weChatCuratedAccountsSource,
   xCuratedAccountsSource,
+  youtubeChannelSources,
   type SourceAdapter,
   type SourceDefinition,
 } from "@ai-news-navigator/sources";
@@ -45,6 +53,7 @@ export interface ConfiguredSource {
 
 export function createConfiguredSources(): ConfiguredSource[] {
   const wechat2RssAdapters = createWechat2RssAdapters();
+  const youtubeChannelAdapters = createYouTubeChannelAdapters();
   const configured: ConfiguredSource[] = [
     {
       definition: openAiNewsSource,
@@ -71,6 +80,10 @@ export function createConfiguredSources(): ConfiguredSource[] {
       adapter: createGoogleAiBlogAdapter(),
     },
     {
+      definition: googleDeepMindBlogSource,
+      adapter: createGoogleDeepMindBlogAdapter(),
+    },
+    {
       definition: huggingFaceDailyPapersSource,
       adapter: createHuggingFaceDailyPapersAdapter(),
     },
@@ -95,12 +108,24 @@ export function createConfiguredSources(): ConfiguredSource[] {
       adapter: createTheDecoderAdapter(),
     },
     {
+      definition: ollamaReleaseSource,
+      adapter: createOllamaReleaseAdapter(),
+    },
+    {
+      definition: vllmReleaseSource,
+      adapter: createVllmReleaseAdapter(),
+    },
+    {
       definition: aiHotSocialDiscoverySource,
       adapter: createAiHotSocialDiscoveryAdapter(),
     },
     ...wechat2RssSources.map((definition, index) => ({
       definition,
       adapter: wechat2RssAdapters[index]!,
+    })),
+    ...youtubeChannelSources.map((definition, index) => ({
+      definition,
+      adapter: youtubeChannelAdapters[index]!,
     })),
   ];
 

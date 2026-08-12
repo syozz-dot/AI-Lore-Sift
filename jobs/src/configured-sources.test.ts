@@ -30,12 +30,15 @@ describe("configured sources", () => {
       "hugging-face-models",
       "anthropic-news",
       "google-ai-blog",
+      "google-deepmind-blog",
       "hugging-face-daily-papers",
       "hacker-news-ai",
       "techcrunch-ai",
       "ars-technica-ai",
       "venturebeat-ai",
       "the-decoder",
+      "github-ollama-ollama-releases",
+      "github-vllm-project-vllm-releases",
       "aihot-social-discovery",
       "wechat-jiqizhixin",
       "wechat-paperweekly",
@@ -43,6 +46,11 @@ describe("configured sources", () => {
       "wechat-qbitai",
       "wechat-geekpark",
       "wechat-chaping",
+      "youtube-openai",
+      "youtube-anthropic",
+      "youtube-google-deepmind",
+      "youtube-hugging-face",
+      "youtube-nvidia-developer",
     ]);
   });
 

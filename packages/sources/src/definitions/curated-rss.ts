@@ -40,6 +40,20 @@ export const googleAiBlogSource = {
   fetchIntervalMinutes: 60,
 } satisfies SourceDefinition;
 
+export const googleDeepMindBlogSource = {
+  key: "google-deepmind-blog",
+  name: "Google DeepMind Blog",
+  type: "official_blog",
+  reliability: "primary",
+  connectorKey: "rss:google-deepmind-blog",
+  homepageUrl: "https://deepmind.google/discover/blog/",
+  feedUrl: "https://deepmind.google/blog/rss.xml",
+  language: "en",
+  isFirstParty: true,
+  allowFullText: false,
+  fetchIntervalMinutes: 60,
+} satisfies SourceDefinition;
+
 export const hackerNewsAiSource = {
   key: "hacker-news-ai",
   name: "Hacker News AI",
@@ -113,6 +127,13 @@ export const theDecoderSource = {
 export function createGoogleAiBlogAdapter(fetchImpl?: typeof fetch) {
   return createCuratedRssAdapter(
     { definition: googleAiBlogSource, contentType: "news" },
+    fetchImpl,
+  );
+}
+
+export function createGoogleDeepMindBlogAdapter(fetchImpl?: typeof fetch) {
+  return createCuratedRssAdapter(
+    { definition: googleDeepMindBlogSource, contentType: "news" },
     fetchImpl,
   );
 }

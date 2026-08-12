@@ -224,10 +224,12 @@ function mediaFromHtml(value: string | undefined): SourceMediaAsset[] {
 
 function mediaFromEntry(entry: XmlRecord): SourceMediaAsset[] {
   const assets: SourceMediaAsset[] = [];
+  const mediaGroup = isRecord(entry.group) ? entry.group : undefined;
   const candidates = [
     ...asArray(entry.enclosure),
     ...asArray(entry.thumbnail),
     ...asArray(entry.content),
+    ...asArray(mediaGroup?.thumbnail),
   ];
 
   for (const candidate of candidates) {
@@ -386,7 +388,10 @@ export class RssSourceAdapter implements SourceAdapter {
         continue;
       }
 
-      const summary = textValue(entry.description ?? entry.summary);
+      const mediaGroup = isRecord(entry.group) ? entry.group : undefined;
+      const summary = textValue(
+        entry.description ?? entry.summary ?? mediaGroup?.description,
+      );
       const fullContent = textValue(entry.encoded ?? entry.content);
       const categories = categoryValues(entry.category);
       const externalId = textValue(entry.guid ?? entry.id);

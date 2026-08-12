@@ -4,11 +4,13 @@ import {
   arsTechnicaAiSource,
   createArsTechnicaAiAdapter,
   createGoogleAiBlogAdapter,
+  createGoogleDeepMindBlogAdapter,
   createHackerNewsAiAdapter,
   createTechCrunchAiAdapter,
   createTheDecoderAdapter,
   createVentureBeatAiAdapter,
   googleAiBlogSource,
+  googleDeepMindBlogSource,
   hackerNewsAiSource,
   techCrunchAiSource,
   theDecoderSource,
@@ -20,6 +22,7 @@ describe("curated RSS sources", () => {
     const fetchImpl = vi.fn<typeof fetch>();
     const pairs = [
       [googleAiBlogSource, createGoogleAiBlogAdapter(fetchImpl)],
+      [googleDeepMindBlogSource, createGoogleDeepMindBlogAdapter(fetchImpl)],
       [hackerNewsAiSource, createHackerNewsAiAdapter(fetchImpl)],
       [techCrunchAiSource, createTechCrunchAiAdapter(fetchImpl)],
       [arsTechnicaAiSource, createArsTechnicaAiAdapter(fetchImpl)],

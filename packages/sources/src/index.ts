@@ -20,16 +20,23 @@ export {
   arsTechnicaAiSource,
   createArsTechnicaAiAdapter,
   createGoogleAiBlogAdapter,
+  createGoogleDeepMindBlogAdapter,
   createHackerNewsAiAdapter,
   createTechCrunchAiAdapter,
   createTheDecoderAdapter,
   createVentureBeatAiAdapter,
   googleAiBlogSource,
+  googleDeepMindBlogSource,
   hackerNewsAiSource,
   techCrunchAiSource,
   theDecoderSource,
   ventureBeatAiSource,
 } from "./definitions/curated-rss.js";
+export {
+  createYouTubeChannelAdapters,
+  youtubeChannelConfigs,
+  youtubeChannelSources,
+} from "./definitions/youtube-channels.js";
 export {
   DEFAULT_WECHAT_MONITORED_ACCOUNTS,
   DEFAULT_X_MONITORED_ACCOUNTS,
