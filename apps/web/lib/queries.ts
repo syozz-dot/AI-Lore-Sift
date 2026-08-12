@@ -402,14 +402,14 @@ export const getStoryFeed = cache(
             and(where, eq(primaryItems.contentType, "product")),
             [desc(stories.lastPublishedAt), relevanceSort],
           ),
-          selectCandidates(
-            and(where, eq(primaryItems.contentType, "model")),
-            [relevanceSort, desc(stories.lastPublishedAt)],
-          ),
-          selectCandidates(
-            and(where, eq(primaryItems.contentType, "paper")),
-            [relevanceSort, desc(stories.lastPublishedAt)],
-          ),
+          selectCandidates(and(where, eq(primaryItems.contentType, "model")), [
+            relevanceSort,
+            desc(stories.lastPublishedAt),
+          ]),
+          selectCandidates(and(where, eq(primaryItems.contentType, "paper")), [
+            relevanceSort,
+            desc(stories.lastPublishedAt),
+          ]),
         ]
       : [selectCandidates(where, sortOrder)];
 
