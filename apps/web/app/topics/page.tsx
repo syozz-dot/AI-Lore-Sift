@@ -1,7 +1,4 @@
-import {
-  ArrowRight,
-  MagnifyingGlass,
-} from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
 import { CURATED_TOPICS } from "@ai-news-navigator/intelligence";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -48,7 +45,10 @@ export default async function TopicsPage({
   const foundationTopics = visibleTopics.filter(
     (topic) => topic.group === "foundation",
   );
-  const totalRelations = topicItems.reduce((sum, topic) => sum + topic.total, 0);
+  const totalRelations = topicItems.reduce(
+    (sum, topic) => sum + topic.total,
+    0,
+  );
   const recentRelations = topicItems.reduce(
     (sum, topic) => sum + topic.recentCount,
     0,
@@ -66,7 +66,10 @@ export default async function TopicsPage({
             不追逐每天变化的标签。用稳定主题，把新闻、论文、产品与模型放回同一条演进脉络。
           </p>
         </div>
-        <dl className="topicsIndexStats" title="同一 Story 可以进入多个相关主题">
+        <dl
+          className="topicsIndexStats"
+          title="同一 Story 可以进入多个相关主题"
+        >
           <div>
             <dt>主题关联</dt>
             <dd>{totalRelations}</dd>
@@ -148,11 +151,7 @@ export default async function TopicsPage({
   );
 }
 
-function TopicDirectionRow({
-  topic,
-}: {
-  topic: TopicIndexItem;
-}) {
+function TopicDirectionRow({ topic }: { topic: TopicIndexItem }) {
   const latestTitle = topic.latestStory
     ? (topic.latestStory.translatedTitle ?? topic.latestStory.title)
     : "等待第一条相关 Story";

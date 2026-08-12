@@ -177,9 +177,7 @@ export function SiteShell({
           aria-hidden={true}
           size={20}
           weight={
-            item.href === "/favorites" && favoriteCount > 0
-              ? "fill"
-              : "regular"
+            item.href === "/favorites" && favoriteCount > 0 ? "fill" : "regular"
           }
         />
         {item.href === "/favorites" && favoriteCount > 0 ? (

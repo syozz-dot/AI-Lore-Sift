@@ -95,9 +95,7 @@ describe("distill source preparation", () => {
       "https://mp.weixin.qq.com/s/test-article",
     );
 
-    expect(source.sourceUrl).toBe(
-      "https://mp.weixin.qq.com/s/test-article",
-    );
+    expect(source.sourceUrl).toBe("https://mp.weixin.qq.com/s/test-article");
     expect(source.sourceTitle).toBe("如何把一篇长文变成可复用知识");
     expect(source.sourceAuthor).toBe("测试公众号");
     expect(source.rawText).toContain("保留证据");

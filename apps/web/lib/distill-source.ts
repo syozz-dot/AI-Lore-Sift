@@ -220,9 +220,7 @@ async function fetchReaderDocument(inputUrl: string) {
     redirect: "error",
     headers: {
       Accept: "application/json",
-      ...(authorization
-        ? { Authorization: `Bearer ${authorization}` }
-        : {}),
+      ...(authorization ? { Authorization: `Bearer ${authorization}` } : {}),
     },
     signal: AbortSignal.timeout(22_000),
   });
@@ -232,8 +230,7 @@ async function fetchReaderDocument(inputUrl: string) {
   }
 
   const body = await readLimitedText(response);
-  const contentType =
-    response.headers.get("content-type")?.toLowerCase() ?? "";
+  const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
   if (!contentType.includes("application/json")) {
     return {
       title: null,
@@ -372,9 +369,7 @@ function looksLikeWechatChallenge(html: string, rawText: string) {
   return (
     (!html.includes('id="js_content"') &&
       !html.includes("rich_media_content")) ||
-    challengeSignals.some((signal) =>
-      normalized.includes(signal.toLowerCase()),
-    )
+    challengeSignals.some((signal) => normalized.includes(signal.toLowerCase()))
   );
 }
 
@@ -437,8 +432,9 @@ export async function prepareDistillSource(
       });
     } catch {
       try {
-        const { html, finalUrl, contentType } =
-          await fetchPublicHtml(sourceUrl.toString());
+        const { html, finalUrl, contentType } = await fetchPublicHtml(
+          sourceUrl.toString(),
+        );
         const rawText = contentType.includes("text/plain")
           ? html.slice(0, MAX_SOURCE_CHARACTERS).trim()
           : extractReadableText(html);
