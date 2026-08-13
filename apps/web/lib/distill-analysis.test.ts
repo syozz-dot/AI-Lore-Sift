@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+  generateDistillFollowUp,
   generateDistillation,
   generateDistillationResponse,
   normalizeDistillFollowUp,
@@ -24,6 +25,49 @@ describe("distill analysis generation", () => {
         "直接答案。  \n\n  1. 第一条说明。 \n 2. 第二条说明。",
       ),
     ).toBe("直接答案。\n\n1. 第一条说明。\n2. 第二条说明。");
+  });
+
+  it("treats the source as an evidence anchor rather than a knowledge ceiling", async () => {
+    process.env.DEEPSEEK_API_KEY = "test-key";
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          choices: [
+            {
+              finish_reason: "stop",
+              message: {
+                content:
+                  "不能直接判定哪种数据更好，但可以从覆盖度、真实性和对抗强度设计对照实验。\n\n1. 原文只提出了方向。\n2. 延伸来看，应控制模型、训练预算与评测集。",
+              },
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const answer = await generateDistillFollowUp({
+      sourceTitle: "对抗数据平台",
+      rawText: "平台计划基于失败模式构建对抗训练数据集。",
+      summary: "材料介绍了一个对抗数据平台。",
+      keyPoints: [],
+      messages: [],
+      question: "它会优于人工构造数据吗？",
+    });
+
+    expect(answer).toContain("设计对照实验");
+    const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body)) as {
+      max_tokens: number;
+      messages: Array<{ role: string; content: string }>;
+    };
+    expect(body.max_tokens).toBe(1_300);
+    expect(body.messages[0]?.content).toContain("不是回答的知识上限");
+    expect(body.messages[0]?.content).toContain("延伸分析");
+    expect(body.messages[0]?.content).toContain("外部核验");
+    expect(body.messages[0]?.content).not.toContain(
+      "回答必须以用户提供的原文和已有分析为依据",
+    );
   });
 
   it("retries with a compact response when the first output is truncated", async () => {

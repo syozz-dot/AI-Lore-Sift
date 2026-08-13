@@ -26,8 +26,11 @@ then sediment**.
    standalone, conditional, reusable knowledge cards. Returning zero is a valid
    and preferred outcome when the source has no portable knowledge.
 5. **Reading boundary**: `cautions` exposes missing evidence, unsupported
-   generalization, and unverified conclusions. `followUpQuestions` must be
-   answerable from the current source rather than imply live external research.
+   generalization, and unverified conclusions. `followUpQuestions` start from
+   the source but may explore mechanisms, comparisons, applications, or
+   counterexamples using general knowledge. Follow-up answers must distinguish
+   source-backed statements, reasoned extensions, and claims that still require
+   external or real-time verification.
 
 ## Privacy and evidence rules
 

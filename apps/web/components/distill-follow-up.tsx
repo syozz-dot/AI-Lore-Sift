@@ -110,12 +110,12 @@ export function DistillFollowUp({
           <span>{sectionNumber}</span>
           <div>
             <h2 id="follow-up-title">继续追问</h2>
-            <p>基于这篇材料展开</p>
+            <p>从这篇材料出发展开</p>
           </div>
         </div>
         <span>
           <Sparkle aria-hidden="true" size={14} />
-          仅基于当前材料
+          原文为锚点，可延伸
         </span>
       </header>
 
@@ -157,7 +157,7 @@ export function DistillFollowUp({
           {pending ? (
             <article className="isAssistant isPending">
               <small>脱水助手</small>
-              <p>正在回到原文核对并组织回答…</p>
+              <p>正在结合原文与通用知识组织回答…</p>
             </article>
           ) : null}
         </div>
@@ -169,7 +169,7 @@ export function DistillFollowUp({
           id="distill-follow-up"
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
-          placeholder="追问原文、方法、结论，或让助手结合你的场景继续拆解"
+          placeholder="追问机制、对比、应用或反例，也可以让助手结合你的场景继续推演"
           rows={2}
           maxLength={2_000}
         />
@@ -185,7 +185,7 @@ export function DistillFollowUp({
         </button>
       </form>
       <p className="distillFollowUpBoundary">
-        回答只使用当前原文和已生成分析；材料不足时会明确说明。
+        回答会区分原文结论、延伸分析与待核验信息；不会假装已进行实时检索。
       </p>
       {error ? (
         <p className="distillFollowUpError" role="alert">
