@@ -9793,48 +9793,93 @@ button {
 
 /* Local-first private workspace settings */
 .privateSettingsPage {
-  width: min(100% - 56px, 1240px);
+  width: min(100% - 64px, 1280px);
   margin: 0 auto;
-  padding: 64px 0 96px;
+  padding: 54px 0 84px;
 }
 
 .privateSettingsIntro {
-  max-width: 850px;
-  padding-bottom: 44px;
+  padding-bottom: 28px;
 }
 
-.privateSettingsIntro > p:first-child {
-  margin: 0 0 14px;
+.privateSettingsKicker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.privateSettingsKicker p,
+.privateSettingsKicker span {
+  margin: 0;
   color: var(--accent);
   font-family: "JetBrains Mono Variable", monospace;
   font-size: 11px;
-  letter-spacing: 0.12em;
+  font-weight: 600;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
+}
+
+.privateSettingsKicker span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-tertiary);
+  letter-spacing: 0.05em;
 }
 
 .privateSettingsIntro h1 {
   margin: 0;
   font-family: "Noto Serif SC Variable", serif;
-  font-size: clamp(36px, 4vw, 58px);
+  font-size: clamp(36px, 4vw, 48px);
   font-weight: 560;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.035em;
   line-height: 1.12;
 }
 
 .privateSettingsIntro > p:last-child {
-  max-width: 720px;
-  margin: 22px 0 0;
+  max-width: 780px;
+  margin: 12px 0 0;
   color: var(--ink-secondary);
-  font-size: 16px;
-  line-height: 1.8;
+  font-size: 15px;
+  line-height: 1.7;
 }
 
 .privateSettingsLayout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 330px;
-  align-items: start;
-  gap: 64px;
-  border-top: 1px solid var(--line-strong);
+  display: block;
+}
+
+.privateSettingsSummary {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--ink-secondary);
+}
+
+.privateSettingsSummary span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 620;
+}
+
+.privateSettingsSummary span + span {
+  padding-left: 30px;
+  border-left: 1px solid var(--line-strong);
+}
+
+.privateSettingsSummary svg {
+  color: var(--accent);
+}
+
+.privateSettingsSummary strong {
+  color: var(--ink);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 11px;
 }
 
 .privateSettingsMain {
@@ -9861,7 +9906,7 @@ button {
 }
 
 .privateSettingsSection {
-  padding: 42px 0 52px;
+  padding: 54px 0 58px;
   border-bottom: 1px solid var(--line-strong);
 }
 
@@ -9878,7 +9923,7 @@ button {
 .privateSectionHeading {
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .privateSectionHeading > div {
@@ -9894,7 +9939,7 @@ button {
 .privateSectionHeading h2,
 .privateRailHeading h2 {
   margin: 0;
-  font-size: 21px;
+  font-size: 22px;
   font-weight: 650;
   letter-spacing: -0.025em;
 }
@@ -9908,8 +9953,12 @@ button {
 
 .privateProfileForm {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 28px 24px;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  padding: 36px 38px;
+  border: 1px solid var(--line-strong);
+  border-radius: 22px;
+  background: var(--surface-elevated);
 }
 
 .privateProfileForm label,
@@ -9920,8 +9969,8 @@ button {
 
 .privateProfileForm label > span,
 .privateBackupForm label > span {
-  color: var(--ink-secondary);
-  font-size: 12px;
+  color: var(--ink);
+  font-size: 13px;
   font-weight: 620;
 }
 
@@ -9930,18 +9979,18 @@ button {
 .privateBackupForm input:not([type="checkbox"]) {
   width: 100%;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface-elevated);
+  border-radius: 12px;
+  background: var(--canvas);
   color: var(--ink);
   font: inherit;
   transition: border-color 160ms ease;
 }
 
 .privateProfileForm textarea {
-  min-height: 122px;
-  padding: 14px 15px;
+  min-height: 102px;
+  padding: 16px 18px;
   resize: vertical;
-  line-height: 1.65;
+  line-height: 1.7;
 }
 
 .privateProfileForm textarea:focus,
@@ -9958,10 +10007,11 @@ button {
 }
 
 .privateFormAction {
-  grid-column: 1 / -1;
   justify-content: space-between;
   gap: 20px;
-  padding-top: 4px;
+  margin-top: 2px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
 }
 
 .privateFormAction p,
@@ -9977,16 +10027,16 @@ button {
 .privateBackupForm button,
 .privateImportConfirm button,
 .privateSecondaryButton {
-  min-height: 42px;
-  padding: 0 16px;
+  min-height: 44px;
+  padding: 0 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  border: 1px solid var(--ink);
-  border-radius: 9px;
-  background: var(--ink);
-  color: var(--canvas);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-ink);
   font-size: 12px;
   font-weight: 650;
   cursor: pointer;
@@ -10002,7 +10052,7 @@ button {
 }
 
 .privateSectionLead {
-  max-width: 660px;
+  max-width: 760px;
   margin-top: -14px;
   margin-bottom: 22px;
 }
@@ -10013,85 +10063,125 @@ button {
 }
 
 .privateMemoryComposer textarea {
-  min-height: 78px;
-  padding: 13px 14px;
-  resize: vertical;
-  line-height: 1.6;
+  min-height: 52px;
+  height: 52px;
+  padding: 14px 16px;
+  resize: none;
+  line-height: 1.45;
 }
 
 .privateMemoryComposer button {
-  flex: 0 0 auto;
+  min-width: 152px;
+  flex: 0 0 152px;
 }
 
 .privateMemoryList {
   margin-top: 24px;
   display: grid;
   gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 20px;
+  background: var(--surface-elevated);
 }
 
 .privateMemoryList article {
   position: relative;
-  padding: 20px 90px 20px 0;
+  min-height: 74px;
+  padding: 22px 112px 22px 58px;
+  display: flex;
+  align-items: center;
+}
+
+.privateMemoryList article + article {
   border-top: 1px solid var(--line);
 }
 
-.privateMemoryList article > div {
+.privateMemoryDot {
+  position: absolute;
+  left: 30px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.privateMemoryActions {
+  position: absolute;
+  top: 50%;
+  right: 24px;
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
+  transform: translateY(-50%);
+}
+
+.privateMemoryActions time {
   color: var(--ink-tertiary);
   font-family: "JetBrains Mono Variable", monospace;
-  font-size: 9px;
+  font-size: 10px;
+  letter-spacing: 0.05em;
 }
 
-.privateMemoryList article > div span + span {
-  padding-left: 10px;
-  border-left: 1px solid var(--line);
-  color: var(--accent);
-}
-
-.privateMemoryList article p {
-  margin: 10px 0 0;
-  color: var(--ink-secondary);
-  line-height: 1.75;
-  overflow-wrap: anywhere;
-}
-
-.privateMemoryList article button {
-  position: absolute;
-  top: 19px;
-  right: 0;
-  padding: 5px;
-  display: inline-flex;
+.privateMemoryActions button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
   border: 0;
   background: transparent;
   color: var(--ink-tertiary);
-  font-size: 11px;
+  font-size: 0;
   cursor: pointer;
+  opacity: 0;
+  transition:
+    color 160ms ease,
+    opacity 160ms ease;
 }
 
-.privateMemoryList article button:hover {
+.privateMemoryList article p {
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: 14px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.privateMemoryList article:hover .privateMemoryActions button,
+.privateMemoryActions button:focus-visible {
+  opacity: 1;
+}
+
+.privateMemoryActions button:hover {
   color: var(--danger);
 }
 
 .privateEmptyState {
   margin: 0;
-  padding: 24px 0;
-  border-top: 1px solid var(--line);
+  padding: 28px 30px;
   color: var(--ink-tertiary);
   font-size: 13px;
 }
 
+.privateDataSection {
+  border-bottom: 0;
+}
+
 .privateSettingsRail {
-  position: sticky;
-  top: 88px;
-  padding-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
 }
 
 .privateSettingsRail > section {
-  padding: 26px 0 30px;
-  border-bottom: 1px solid var(--line);
+  min-width: 0;
+  min-height: 270px;
+  padding: 30px 32px;
+  border: 1px solid var(--line-strong);
+  border-radius: 20px;
+  background: var(--surface-elevated);
 }
 
 .privateRailHeading {
@@ -10099,28 +10189,75 @@ button {
 }
 
 .privateRailHeading h2 {
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .privateSettingsRail > section > p,
 .privateSecurityNote {
   margin: 14px 0 0;
   color: var(--ink-tertiary);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.75;
 }
 
 .privateStorageStatus {
   justify-content: space-between;
   gap: 16px;
-  margin: 18px 0 12px;
+  margin: 20px 0 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--surface-soft);
   color: var(--ink-tertiary);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .privateStorageStatus strong {
   color: var(--ink-secondary);
   font-weight: 620;
+}
+
+.privatePersistenceButton {
+  width: 100%;
+  min-height: 38px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  background: transparent;
+  color: var(--ink-tertiary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 620;
+  cursor: pointer;
+}
+
+.privatePersistenceButton i {
+  width: 36px;
+  height: 22px;
+  padding: 3px;
+  display: block;
+  border-radius: 999px;
+  background: var(--line-strong);
+}
+
+.privatePersistenceButton i::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  display: block;
+  border-radius: 50%;
+  background: var(--ink-tertiary);
+  transition: transform 160ms ease;
+}
+
+.privatePersistenceButton[aria-pressed="true"] i {
+  background: var(--accent);
+}
+
+.privatePersistenceButton[aria-pressed="true"] i::after {
+  background: var(--accent-ink);
+  transform: translateX(14px);
 }
 
 .privateSettingsRail .privateSecondaryButton,
@@ -10133,12 +10270,12 @@ button {
 .privateBackupForm {
   margin-top: 19px;
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .privateBackupForm input:not([type="checkbox"]) {
   min-height: 42px;
-  padding: 8px 10px;
+  padding: 8px 12px;
   font-size: 12px;
 }
 
@@ -10182,31 +10319,45 @@ button {
 }
 
 .privateSecurityNote {
-  padding: 22px 0 0;
+  padding: 0;
+}
+
+.privateSettingsBack {
+  width: fit-content;
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-tertiary);
+  font-size: 12px;
+}
+
+.privateSettingsBack:hover {
+  color: var(--accent);
+}
+
+.srOnly {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 @media (max-width: 980px) {
-  .privateSettingsLayout {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-
   .privateSettingsRail {
-    position: static;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0 28px;
-  }
-
-  .privateSecurityNote {
-    grid-column: 1 / -1;
+    gap: 18px;
   }
 }
 
 @media (max-width: 680px) {
   .privateSettingsPage {
     width: min(100% - 28px, 620px);
-    padding: 36px 0 64px;
+    padding: 30px 0 54px;
   }
 
   .privateSettingsIntro {
@@ -10217,9 +10368,32 @@ button {
     font-size: 34px;
   }
 
-  .privateProfileForm,
   .privateSettingsRail {
     grid-template-columns: 1fr;
+  }
+
+  .privateSettingsSummary {
+    min-height: 58px;
+  }
+
+  .privateSettingsSection {
+    padding: 42px 0 46px;
+  }
+
+  .privateProfileForm {
+    gap: 21px;
+    padding: 26px 20px;
+    border-radius: 16px;
+  }
+
+  .privateSettingsRail > section,
+  .privateMemoryList {
+    border-radius: 16px;
+  }
+
+  .privateSettingsRail > section {
+    min-height: 0;
+    padding: 26px 22px;
   }
 
   .privateFormAction,
@@ -10233,7 +10407,23 @@ button {
     width: 100%;
   }
 
-  .privateSecurityNote {
-    grid-column: auto;
+  .privateMemoryComposer button {
+    flex-basis: auto;
+  }
+
+  .privateMemoryList article {
+    padding: 18px 70px 18px 42px;
+  }
+
+  .privateMemoryDot {
+    left: 20px;
+  }
+
+  .privateMemoryActions {
+    right: 14px;
+  }
+
+  .privateMemoryActions button {
+    opacity: 1;
   }
 }

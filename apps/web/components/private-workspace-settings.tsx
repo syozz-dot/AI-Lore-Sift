@@ -1,15 +1,19 @@
 "use client";
 
 import {
-  ArrowClockwise,
+  ArrowLeft,
+  Brain,
   CheckCircle,
+  Database,
   DownloadSimple,
   HardDrives,
   LockKey,
   Plus,
+  ShieldCheck,
   Trash,
   UploadSimple,
 } from "@phosphor-icons/react";
+import Link from "next/link";
 import {
   type ChangeEvent,
   type FormEvent,
@@ -72,6 +76,11 @@ function persistenceLabel(status: StoragePersistence) {
   if (status === "granted") return "浏览器已尽量保留";
   if (status === "unsupported") return "当前浏览器不支持申请";
   return "仍可能被浏览器清理";
+}
+
+function compactDate(value: string) {
+  const date = new Date(value);
+  return `${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
 }
 
 export function PrivateWorkspaceSettings() {
@@ -336,6 +345,17 @@ export function PrivateWorkspaceSettings() {
 
   return (
     <div className="privateSettingsLayout">
+      <div className="privateSettingsSummary" aria-label="私人工作区概览">
+        <span>
+          <Database aria-hidden="true" size={19} />
+          画像 <strong>{completedProfileFields}/5</strong>
+        </span>
+        <span>
+          <Brain aria-hidden="true" size={19} />
+          记忆 <strong>{snapshot?.memories.length ?? 0}</strong>
+        </span>
+      </div>
+
       <div className="privateSettingsMain">
         {notice ? (
           <div className={`privateNotice ${notice.kind}`} role="status">
@@ -418,6 +438,7 @@ export function PrivateWorkspaceSettings() {
                 只保存到 IndexedDB；每次脱水默认关闭，只有你勾选后才会发送。
               </p>
               <button type="submit" disabled={busy}>
+                <CheckCircle aria-hidden="true" size={17} />
                 保存画像
               </button>
             </div>
@@ -443,7 +464,7 @@ export function PrivateWorkspaceSettings() {
               value={memoryDraft}
               maxLength={600}
               onChange={(event) => setMemoryDraft(event.target.value)}
-              placeholder="先手动添加一条，例如：我更关注能落地的产品与工程做法，不需要泛泛趋势判断。"
+              placeholder="手动添加一条，例如：我更关注能落地的产品与工程做法。"
             />
             <button type="submit" disabled={busy || !memoryDraft.trim()}>
               <Plus aria-hidden="true" size={17} />
@@ -454,23 +475,26 @@ export function PrivateWorkspaceSettings() {
             {snapshot?.memories.length ? (
               snapshot.memories.map((memory) => (
                 <article key={memory.id}>
-                  <div>
-                    <span>{SOURCE_LABELS[memory.source]}</span>
-                    <span>{KIND_LABELS[memory.kind ?? "context"]}</span>
-                    <time dateTime={memory.updatedAt}>
-                      {new Date(memory.updatedAt).toLocaleDateString("zh-CN")}
-                    </time>
-                  </div>
+                  <span
+                    className="privateMemoryDot"
+                    title={`${SOURCE_LABELS[memory.source]} · ${KIND_LABELS[memory.kind ?? "context"]}`}
+                    aria-hidden="true"
+                  />
                   <p>{memory.statement}</p>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => handleMemoryDelete(memory.id)}
-                    aria-label={`撤回记忆：${memory.statement}`}
-                  >
-                    <Trash aria-hidden="true" size={16} />
-                    撤回
-                  </button>
+                  <div className="privateMemoryActions">
+                    <time dateTime={memory.updatedAt}>
+                      {compactDate(memory.updatedAt)}
+                    </time>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => handleMemoryDelete(memory.id)}
+                      aria-label={`撤回记忆：${memory.statement}`}
+                    >
+                      <Trash aria-hidden="true" size={16} />
+                      撤回
+                    </button>
+                  </div>
                 </article>
               ))
             ) : (
@@ -482,134 +506,163 @@ export function PrivateWorkspaceSettings() {
         </section>
       </div>
 
-      <aside className="privateSettingsRail">
-        <section>
-          <div className="privateRailHeading">
-            <HardDrives aria-hidden="true" size={20} />
-            <h2>本机保存</h2>
+      <section
+        className="privateSettingsSection privateDataSection"
+        aria-labelledby="local-data-title"
+      >
+        <div className="privateSectionHeading">
+          <div>
+            <span>03</span>
+            <h2 id="local-data-title">本机数据与备份</h2>
           </div>
-          <p>
-            画像、确认记忆和后续迁入的脱水记录会保存在这个浏览器。它不是云端账号，也不是可靠备份。
-          </p>
-          <div className="privateStorageStatus">
-            <span>保留状态</span>
-            <strong>{persistenceLabel(persistence)}</strong>
-          </div>
-          <button
-            type="button"
-            className="privateSecondaryButton"
-            onClick={handlePersistenceRequest}
-            disabled={busy || persistence === "granted"}
-          >
-            <ArrowClockwise aria-hidden="true" size={16} />
-            申请尽量保留
-          </button>
-        </section>
+        </div>
 
-        <section>
-          <div className="privateRailHeading">
-            <LockKey aria-hidden="true" size={20} />
-            <h2>加密导出</h2>
-          </div>
-          <p>
-            备份在浏览器中使用 AES-GCM
-            加密后下载，不上传到本站。密码遗失无法恢复。
-          </p>
-          <form className="privateBackupForm" onSubmit={handleExport}>
-            <label>
-              <span>备份密码</span>
-              <input
-                type="password"
-                autoComplete="new-password"
-                minLength={12}
-                required
-                value={exportPassphrase}
-                onChange={(event) => setExportPassphrase(event.target.value)}
-              />
-            </label>
-            <label>
-              <span>再次输入</span>
-              <input
-                type="password"
-                autoComplete="new-password"
-                minLength={12}
-                required
-                value={exportConfirmation}
-                onChange={(event) => setExportConfirmation(event.target.value)}
-              />
-            </label>
-            <label className="privateCheckbox">
-              <input
-                type="checkbox"
-                checked={includeRawText}
-                onChange={(event) => setIncludeRawText(event.target.checked)}
-              />
-              <span>备份脱水原文（默认不包含）</span>
-            </label>
-            <button type="submit" disabled={busy || !snapshot}>
-              <DownloadSimple aria-hidden="true" size={17} />
-              生成加密备份
-            </button>
-          </form>
-        </section>
-
-        <section>
-          <div className="privateRailHeading">
-            <UploadSimple aria-hidden="true" size={20} />
-            <h2>从备份恢复</h2>
-          </div>
-          <p>先解密核对数量，再明确确认覆盖。文件只在当前页面内读取。</p>
-          <form className="privateBackupForm" onSubmit={handleImportInspect}>
-            <label>
-              <span>备份文件</span>
-              <input
-                type="file"
-                accept=".annbackup,application/json"
-                onChange={handleImportFile}
-              />
-            </label>
-            <label>
-              <span>备份密码</span>
-              <input
-                type="password"
-                autoComplete="current-password"
-                required
-                value={importPassphrase}
-                onChange={(event) => setImportPassphrase(event.target.value)}
-              />
-            </label>
-            <button
-              type="submit"
-              className="privateSecondaryButton"
-              disabled={busy}
-            >
-              <UploadSimple aria-hidden="true" size={17} />
-              解密并检查
-            </button>
-          </form>
-          {pendingImport ? (
-            <div className="privateImportConfirm">
-              <p>
-                将导入 {pendingImport.memories.length} 条记忆、
-                {pendingImport.favorites.length} 条收藏、
-                {pendingImport.distillRecords.length} 份脱水记录和{" "}
-                {pendingImport.knowledgeCards.length} 张知识卡。
-              </p>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={handleImportConfirm}
-              >
-                确认覆盖当前本机数据
-              </button>
+        <div className="privateSettingsRail">
+          <section>
+            <div className="privateRailHeading">
+              <HardDrives aria-hidden="true" size={20} />
+              <h2>本机保存</h2>
             </div>
-          ) : null}
-        </section>
+            <p>
+              画像、确认记忆和后续迁入的脱水记录会保存在这个浏览器。它不是云端账号，也不是可靠备份。
+            </p>
+            <div className="privateStorageStatus">
+              <span>保留状态</span>
+              <strong>{persistenceLabel(persistence)}</strong>
+            </div>
+            <button
+              type="button"
+              className="privatePersistenceButton"
+              onClick={handlePersistenceRequest}
+              disabled={busy || persistence === "granted"}
+              aria-pressed={persistence === "granted"}
+            >
+              <span>申请尽量保留</span>
+              <i aria-hidden="true" />
+            </button>
+          </section>
 
-        <p className="privateSecurityNote">
-          提醒：本机存储不是端到端加密；同源页面脚本可读取。不要在不受信任设备使用，敏感内容仍需自行判断是否提交给模型提供方。
-        </p>
-      </aside>
+          <section>
+            <div className="privateRailHeading">
+              <ShieldCheck aria-hidden="true" size={20} />
+              <h2>安全提示</h2>
+            </div>
+            <p>
+              本机存储不是端到端加密；同源页面脚本可读取。不要在不受信任设备使用，敏感内容仍需自行判断是否提交给模型提供方。
+            </p>
+          </section>
+
+          <section>
+            <div className="privateRailHeading">
+              <LockKey aria-hidden="true" size={20} />
+              <h2>加密导出</h2>
+            </div>
+            <p>
+              备份在浏览器中使用 AES-GCM
+              加密后下载，不上传到本站。密码遗失无法恢复。
+            </p>
+            <form className="privateBackupForm" onSubmit={handleExport}>
+              <label>
+                <span className="srOnly">备份密码</span>
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={12}
+                  required
+                  value={exportPassphrase}
+                  onChange={(event) => setExportPassphrase(event.target.value)}
+                  placeholder="备份密码（≥12 位）"
+                />
+              </label>
+              <label>
+                <span className="srOnly">再次输入备份密码</span>
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={12}
+                  required
+                  value={exportConfirmation}
+                  onChange={(event) =>
+                    setExportConfirmation(event.target.value)
+                  }
+                  placeholder="再次输入"
+                />
+              </label>
+              <label className="privateCheckbox">
+                <input
+                  type="checkbox"
+                  checked={includeRawText}
+                  onChange={(event) => setIncludeRawText(event.target.checked)}
+                />
+                <span>备份脱水原文（默认不包含）</span>
+              </label>
+              <button type="submit" disabled={busy || !snapshot}>
+                <DownloadSimple aria-hidden="true" size={17} />
+                生成加密备份
+              </button>
+            </form>
+          </section>
+
+          <section>
+            <div className="privateRailHeading">
+              <UploadSimple aria-hidden="true" size={20} />
+              <h2>从备份恢复</h2>
+            </div>
+            <p>先解密核对数量，再明确确认覆盖。文件只在当前页面内读取。</p>
+            <form className="privateBackupForm" onSubmit={handleImportInspect}>
+              <label>
+                <span>备份文件</span>
+                <input
+                  type="file"
+                  accept=".annbackup,application/json"
+                  onChange={handleImportFile}
+                />
+              </label>
+              <label>
+                <span className="srOnly">备份密码</span>
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={importPassphrase}
+                  onChange={(event) => setImportPassphrase(event.target.value)}
+                  placeholder="备份密码"
+                />
+              </label>
+              <button
+                type="submit"
+                className="privateSecondaryButton"
+                disabled={busy}
+              >
+                <UploadSimple aria-hidden="true" size={17} />
+                解密并检查
+              </button>
+            </form>
+            {pendingImport ? (
+              <div className="privateImportConfirm">
+                <p>
+                  将导入 {pendingImport.memories.length} 条记忆、
+                  {pendingImport.favorites.length} 条收藏、
+                  {pendingImport.distillRecords.length} 份脱水记录和{" "}
+                  {pendingImport.knowledgeCards.length} 张知识卡。
+                </p>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={handleImportConfirm}
+                >
+                  确认覆盖当前本机数据
+                </button>
+              </div>
+            ) : null}
+          </section>
+        </div>
+      </section>
+
+      <Link className="privateSettingsBack" href="/">
+        <ArrowLeft aria-hidden="true" size={17} />
+        返回情报流
+      </Link>
     </div>
   );
 }
