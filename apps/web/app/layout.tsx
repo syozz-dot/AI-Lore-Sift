@@ -8,10 +8,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "AI News Navigator",
-    template: "%s | AI News Navigator",
+    default: "AILore Sift",
+    template: "%s | AILore Sift",
   },
-  description: "把分散的 AI 新闻整理成可验证、可判断、可行动的 Story。",
+  description: "筛出值得关注的 AI 信息，整理成可验证、可判断、可沉淀的知识。",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   ),
@@ -26,7 +26,7 @@ export default function RootLayout({
         <SiteShell
           footer={
             <footer className="siteFooter">
-              <span>AI News Navigator</span>
+              <span>AILore Sift</span>
               <span>事实、判断与机会，保持边界清晰。</span>
             </footer>
           }

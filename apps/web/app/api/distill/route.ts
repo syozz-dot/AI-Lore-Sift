@@ -11,12 +11,12 @@ import {
   listDistillKnowledgeCandidates,
 } from "../../../lib/distill";
 import { rankRelevantDistillKnowledge } from "../../../lib/distill-retrieval";
+import { parseDistillPersonalization } from "../../../lib/distill-request";
 import { prepareDistillSource } from "../../../lib/distill-source";
 import {
   privateJson,
   rejectUntrustedPrivateMutation,
 } from "../../../lib/private-request";
-import type { DistillPersonalizationContext } from "../../../lib/distill-analysis";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     return privateJson({ error: "单次输入最多 10 万字符。" }, { status: 413 });
   }
 
-  const personalization = parsePersonalization(body?.personalization);
+  const personalization = parseDistillPersonalization(body?.personalization);
 
   let documentId: string | null = null;
   try {
@@ -124,36 +124,4 @@ export async function POST(request: Request) {
     if (documentId) await failDistillDocument(documentId, message);
     return privateJson({ error: message }, { status: 422 });
   }
-}
-
-function parsePersonalization(
-  value: unknown,
-): DistillPersonalizationContext | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const context = value as Record<string, unknown>;
-  const text = (field: string, limit: number) =>
-    typeof context[field] === "string"
-      ? context[field].trim().slice(0, limit)
-      : "";
-  const memories = Array.isArray(context.memories)
-    ? context.memories
-        .filter((item): item is string => typeof item === "string")
-        .map((item) => item.trim().slice(0, 600))
-        .filter(Boolean)
-        .slice(0, 20)
-    : [];
-  const result = {
-    purpose: text("purpose", 2_000),
-    directions: text("directions", 2_000),
-    currentContext: text("currentContext", 2_000),
-    preferredHelp: text("preferredHelp", 2_000),
-    boundaries: text("boundaries", 2_000),
-    memories,
-    retrieveKnowledge: context.retrieveKnowledge === true,
-  };
-  return Object.values(result).some((item) =>
-    Array.isArray(item) ? item.length : item,
-  )
-    ? result
-    : null;
 }

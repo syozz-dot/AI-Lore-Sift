@@ -111,7 +111,7 @@ WeChat collection is intentionally split into two services:
 
 1. A stateful, always-on We-MP-RSS-compatible collector maintains QR login,
    account subscriptions, and article retrieval.
-2. AI News Navigator consumes the private RSS endpoint through
+2. AILore Sift consumes the private RSS endpoint through
    `WECHAT_RSS_URL`.
 
 The collector should subscribe only to reviewed accounts. The optional

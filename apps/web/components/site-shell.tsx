@@ -199,10 +199,10 @@ export function SiteShell({
           <Link
             className="distillGlobalBrand"
             href="/"
-            aria-label="AI News Navigator 首页"
+            aria-label="AILore Sift 首页"
             title="返回情报流"
           >
-            N
+            A
           </Link>
           <nav>
             <div>{contentItems.map(renderDistillNavItem)}</div>
@@ -235,11 +235,11 @@ export function SiteShell({
             <List aria-hidden="true" size={20} />
           )}
         </button>
-        <Link className="brand" href="/" aria-label="AI News Navigator 首页">
+        <Link className="brand" href="/" aria-label="AILore Sift 首页">
           <span className="brandMark" aria-hidden="true">
-            N
+            A
           </span>
-          <span className="brandName">AI News Navigator</span>
+          <span className="brandName">AILore Sift</span>
         </Link>
         <div className="headerActions">
           <ThemeToggle />

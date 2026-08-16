@@ -1,6 +1,7 @@
 export const PRIVATE_WORKSPACE_DATABASE = "ann-private-workspace";
 export const PRIVATE_WORKSPACE_VERSION = 2;
 export const PRIVATE_PROFILE_ID = "primary";
+export const PRIVATE_DISTILL_SESSION_PREFIX = "ann-local-distill:";
 
 const PROFILE_STORE = "profile";
 const MEMORY_STORE = "memories";
@@ -46,6 +47,7 @@ export interface PrivateDistillRecord {
   personalizedInsights?: PrivatePersonalizedInsight[];
   personalizationRequested?: boolean;
   personalizationError?: string | null;
+  savedToKnowledge?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -98,6 +100,110 @@ export async function savePrivatePersonalizedInsights(
       updatedAt: new Date().toISOString(),
     });
     await completion;
+  } finally {
+    database.close();
+  }
+}
+
+export async function savePrivateDistillRecord(record: PrivateDistillRecord) {
+  const database = await openPrivateWorkspace();
+  try {
+    const transaction = database.transaction(DISTILL_STORE, "readwrite");
+    transaction.objectStore(DISTILL_STORE).put(record);
+    await transactionComplete(transaction);
+  } finally {
+    database.close();
+  }
+}
+
+export async function readPrivateDistillRecord(documentId: string) {
+  const database = await openPrivateWorkspace();
+  try {
+    const transaction = database.transaction(DISTILL_STORE, "readonly");
+    const completion = transactionComplete(transaction);
+    const record = await requestResult(
+      transaction.objectStore(DISTILL_STORE).get(documentId) as IDBRequest<
+        PrivateDistillRecord | undefined
+      >,
+    );
+    await completion;
+    return record ?? null;
+  } finally {
+    database.close();
+  }
+}
+
+export async function updatePrivateDistillRecord(
+  documentId: string,
+  update: (record: PrivateDistillRecord) => PrivateDistillRecord,
+) {
+  const database = await openPrivateWorkspace();
+  try {
+    const transaction = database.transaction(DISTILL_STORE, "readwrite");
+    const completion = transactionComplete(transaction);
+    const store = transaction.objectStore(DISTILL_STORE);
+    const record = await requestResult(
+      store.get(documentId) as IDBRequest<PrivateDistillRecord | undefined>,
+    );
+    if (!record) throw new Error("本机脱水记录不存在。");
+    const next = update(record);
+    store.put(next);
+    await completion;
+    return next;
+  } finally {
+    database.close();
+  }
+}
+
+export async function deletePrivateDistillRecord(documentId: string) {
+  const database = await openPrivateWorkspace();
+  try {
+    const transaction = database.transaction(
+      [DISTILL_STORE, KNOWLEDGE_STORE],
+      "readwrite",
+    );
+    transaction.objectStore(DISTILL_STORE).delete(documentId);
+    const knowledgeStore = transaction.objectStore(KNOWLEDGE_STORE);
+    const cards = await requestResult(
+      knowledgeStore.getAll() as IDBRequest<PrivateKnowledgeCard[]>,
+    );
+    for (const card of cards) {
+      if (card.sourceDocumentId === documentId) knowledgeStore.delete(card.id);
+    }
+    await transactionComplete(transaction);
+  } finally {
+    database.close();
+  }
+}
+
+export async function setPrivateDistillKnowledgeSaved(
+  documentId: string,
+  saved: boolean,
+) {
+  return updatePrivateDistillRecord(documentId, (record) => ({
+    ...record,
+    savedToKnowledge: saved,
+    updatedAt: new Date().toISOString(),
+  }));
+}
+
+export async function savePrivateKnowledgeCard(card: PrivateKnowledgeCard) {
+  const database = await openPrivateWorkspace();
+  try {
+    const transaction = database.transaction(KNOWLEDGE_STORE, "readwrite");
+    transaction.objectStore(KNOWLEDGE_STORE).put(card);
+    await transactionComplete(transaction);
+  } finally {
+    database.close();
+  }
+}
+
+export async function deletePrivateKnowledgeCard(id: string) {
+  const database = await openPrivateWorkspace();
+  try {
+    const transaction = database.transaction(KNOWLEDGE_STORE, "readwrite");
+    transaction.objectStore(KNOWLEDGE_STORE).delete(id);
+    await transactionComplete(transaction);
   } finally {
     database.close();
   }

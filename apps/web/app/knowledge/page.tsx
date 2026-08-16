@@ -6,9 +6,9 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { getDistillSession } from "../../lib/distill-auth";
+import { LocalKnowledgePage } from "../../components/local-knowledge-page";
 import { normalizePrivateSearchQuery } from "../../lib/distill-search";
 import { listKnowledgeCards, listKnowledgeEntries } from "../../lib/distill";
 
@@ -26,8 +26,8 @@ export default async function KnowledgePage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const session = await getDistillSession();
-  if (!session) redirect("/distill/access?next=/knowledge");
   const query = normalizePrivateSearchQuery((await searchParams).q);
+  if (!session) return <LocalKnowledgePage query={query} />;
   const [entries, cards] = process.env.DATABASE_URL
     ? await Promise.all([
         listKnowledgeEntries(session.ownerId, query ? 100 : 40, query),

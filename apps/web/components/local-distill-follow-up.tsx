@@ -9,54 +9,37 @@ import {
 import { useState } from "react";
 import type { FormEvent } from "react";
 
-import { distillMessageBlocks } from "../lib/distill-message";
+import type { LocalDistillAnalysis } from "../lib/distill-local";
+import {
+  PRIVATE_DISTILL_SESSION_PREFIX,
+  updatePrivateDistillRecord,
+  type PrivateDistillMessage,
+  type PrivateDistillRecord,
+} from "../lib/private-workspace";
+import { DistillMessageBody } from "./distill-follow-up";
 import { PrivateMemoryCandidate } from "./private-memory-candidate";
 
-interface FollowUpMessage {
-  id: string;
-  role: string;
-  content: string;
-  createdAt: string;
-}
-
-export function DistillMessageBody({ content }: { content: string }) {
-  return (
-    <div className="distillMessageBody">
-      {distillMessageBlocks(content).map((block, index) =>
-        block.kind === "list" && Array.isArray(block.content) ? (
-          <ol key={`list-${index}`}>
-            {block.content.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ol>
-        ) : (
-          <p key={`paragraph-${index}`}>{String(block.content)}</p>
-        ),
-      )}
-    </div>
-  );
-}
-
-export function DistillFollowUp({
-  documentId,
+export function LocalDistillFollowUp({
+  document,
+  analysis,
   sectionNumber,
-  initialMessages,
-  suggestedQuestions,
+  initialRemaining,
 }: {
-  documentId: string;
+  document: PrivateDistillRecord;
+  analysis: LocalDistillAnalysis;
   sectionNumber: string;
-  initialMessages: FollowUpMessage[];
-  suggestedQuestions: string[];
+  initialRemaining: number;
 }) {
-  const [messages, setMessages] = useState(initialMessages);
+  const [messages, setMessages] = useState(document.messages);
   const [question, setQuestion] = useState("");
   const [pending, setPending] = useState(false);
+  const [remaining, setRemaining] = useState(initialRemaining);
   const [error, setError] = useState<string | null>(null);
 
   async function ask(value: string) {
     const normalized = value.trim();
     if (!normalized || pending) return;
-    const optimistic: FollowUpMessage = {
+    const optimistic: PrivateDistillMessage = {
       id: `optimistic-${Date.now()}`,
       role: "user",
       content: normalized,
@@ -67,27 +50,47 @@ export function DistillFollowUp({
     setPending(true);
     setError(null);
     try {
-      const response = await fetch(`/api/distill/${documentId}/messages`, {
+      const response = await fetch("/api/distill/preview/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: normalized }),
+        body: JSON.stringify({
+          question: normalized,
+          sourceTitle: document.sourceTitle,
+          rawText: document.rawText,
+          summary: analysis.summary,
+          keyPoints: analysis.keyPoints,
+          messages,
+        }),
       });
       const body = (await response.json()) as {
-        messages?: Array<{
-          id: string;
-          role: string;
-          content: string;
-          createdAt: string;
-        }>;
+        messages?: PrivateDistillMessage[];
+        remaining?: number;
         error?: string;
       };
       if (!response.ok || !body.messages?.length) {
         throw new Error(body.error || "这次追问没有成功。");
       }
-      setMessages((current) => [
-        ...current.filter((message) => message.id !== optimistic.id),
-        ...body.messages!,
-      ]);
+      const nextMessages = [
+        ...messages.filter((message) => message.id !== optimistic.id),
+        ...body.messages,
+      ];
+      setMessages(nextMessages);
+      setRemaining(
+        typeof body.remaining === "number" ? body.remaining : remaining,
+      );
+      const updatedAt = new Date().toISOString();
+      try {
+        await updatePrivateDistillRecord(document.id, (record) => ({
+          ...record,
+          messages: nextMessages,
+          updatedAt,
+        }));
+      } catch {
+        window.sessionStorage.setItem(
+          `${PRIVATE_DISTILL_SESSION_PREFIX}${document.id}`,
+          JSON.stringify({ ...document, messages: nextMessages, updatedAt }),
+        );
+      }
     } catch (askError) {
       setMessages((current) =>
         current.filter((message) => message.id !== optimistic.id),
@@ -104,30 +107,33 @@ export function DistillFollowUp({
   }
 
   return (
-    <section className="distillFollowUp" aria-labelledby="follow-up-title">
+    <section
+      className="distillFollowUp"
+      aria-labelledby="local-follow-up-title"
+    >
       <header>
         <div className="distillFollowUpTitle">
           <span>{sectionNumber}</span>
           <div>
-            <h2 id="follow-up-title">继续追问</h2>
+            <h2 id="local-follow-up-title">继续追问</h2>
             <p>从这篇材料出发展开</p>
           </div>
         </div>
         <span>
           <Sparkle aria-hidden="true" size={14} />
-          原文为锚点，可延伸
+          {`还可追问 ${remaining} 次`}
         </span>
       </header>
 
       <div className="distillSuggestedQuestions">
         <p>你可能还想问</p>
         <div>
-          {suggestedQuestions.map((suggestion) => (
+          {analysis.followUpQuestions.map((suggestion) => (
             <button
               key={suggestion}
               type="button"
               onClick={() => void ask(suggestion)}
-              disabled={pending}
+              disabled={pending || remaining === 0}
             >
               <ChatCircleDots aria-hidden="true" size={18} />
               <strong>{suggestion}</strong>
@@ -146,7 +152,7 @@ export function DistillFollowUp({
             >
               <small>{message.role === "user" ? "你" : "脱水助手"}</small>
               <DistillMessageBody content={message.content} />
-              {message.role !== "user" ? (
+              {message.role === "assistant" ? (
                 <PrivateMemoryCandidate
                   source="question"
                   statement={message.content}
@@ -164,18 +170,19 @@ export function DistillFollowUp({
       ) : null}
 
       <form onSubmit={submit}>
-        <label htmlFor="distill-follow-up">继续追问</label>
+        <label htmlFor="local-distill-follow-up">继续追问</label>
         <textarea
-          id="distill-follow-up"
+          id="local-distill-follow-up"
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
-          placeholder="追问机制、对比、应用或反例，也可以让助手结合你的场景继续推演"
+          placeholder="追问机制、对比、应用或反例，也可以结合你的场景继续推演"
           rows={2}
           maxLength={2_000}
+          disabled={remaining === 0}
         />
         <button
           type="submit"
-          disabled={pending || !question.trim()}
+          disabled={pending || remaining === 0 || !question.trim()}
           className={pending ? "isPending" : undefined}
           aria-busy={pending}
           aria-label="发送追问"
@@ -185,7 +192,7 @@ export function DistillFollowUp({
         </button>
       </form>
       <p className="distillFollowUpBoundary">
-        回答会区分原文结论、延伸分析与待核验信息；不会假装已进行实时检索。
+        追问不会保存在服务器；回答只写入当前浏览器，并区分原文、延伸分析与待核验信息。
       </p>
       {error ? (
         <p className="distillFollowUpError" role="alert">

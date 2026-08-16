@@ -1618,6 +1618,19 @@ button {
   background: var(--canvas);
 }
 
+.distillStandaloneShell .distillAgentWorkspace.isGuest,
+.distillStandaloneShell .distillAgentWorkspace.withoutTaskRail {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.distillStandaloneShell .distillAgentWorkspace.isGuest .distillNewTaskCanvas,
+.distillStandaloneShell
+  .distillAgentWorkspace.withoutTaskRail
+  .distillNewTaskCanvas {
+  width: min(calc(100% - 80px), 1120px);
+  margin-inline: auto;
+}
+
 .distillStandaloneShell .distillTaskRail {
   padding: 28px 30px;
   border-right-color: var(--line);
@@ -1731,6 +1744,45 @@ button {
 
 .distillStandaloneShell .distillConversationHeader > span {
   font-size: 13px;
+}
+
+.distillStandaloneShell .distillConversationHeader > span a {
+  color: inherit;
+}
+
+.distillStandaloneShell .distillConversationHeader > span a:hover {
+  color: var(--accent);
+}
+
+.distillTurnstile {
+  padding: 12px 18px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.distillTurnstile small,
+.distillGuestProtectionError {
+  color: var(--ink-tertiary);
+  font-size: 10px;
+}
+
+.distillGuestResultLink {
+  margin-top: 18px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid currentColor;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.distillGuestProtectionError {
+  margin: 0;
+  padding: 12px 18px 0;
+  border-top: 1px solid var(--line);
+  color: var(--danger);
 }
 
 .distillStandaloneShell .distillNewConversation {
@@ -2530,6 +2582,18 @@ button {
   .distillStandaloneShell .distillNewTaskCanvas {
     padding-right: 22px;
     padding-left: 22px;
+  }
+
+  .distillStandaloneShell .distillAgentWorkspace.isGuest .distillNewTaskCanvas,
+  .distillStandaloneShell
+    .distillAgentWorkspace.withoutTaskRail
+    .distillNewTaskCanvas {
+    width: 100%;
+  }
+
+  .distillTurnstile {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .distillStandaloneShell .distillAgentResult {

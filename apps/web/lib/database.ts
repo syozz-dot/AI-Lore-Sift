@@ -9,6 +9,13 @@ export function getDatabaseConnection() {
     );
   }
 
+  if (process.env.DATABASE_DRIVER === "neon-serverless") {
+    // Workers cannot safely reuse WebSocket-backed I/O across requests.
+    return createDatabase(process.env.DATABASE_URL, {
+      driver: "neon-serverless",
+    });
+  }
+
   connection ??= createDatabase(process.env.DATABASE_URL);
   return connection;
 }

@@ -1,6 +1,6 @@
 # Contributing
 
-AI News Navigator is early-stage. Contributions should preserve the distinction between source facts and AI interpretation.
+AILore Sift is early-stage. Contributions should preserve the distinction between source facts and AI interpretation.
 
 ## Development checks
 

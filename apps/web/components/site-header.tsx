@@ -14,11 +14,11 @@ export function SiteHeader() {
   return (
     <header className="siteHeader">
       <div className="headerInner">
-        <Link className="brand" href="/" aria-label="AI News Navigator 首页">
+        <Link className="brand" href="/" aria-label="AILore Sift 首页">
           <span className="brandMark" aria-hidden="true">
-            N
+            A
           </span>
-          <span className="brandName">AI News Navigator</span>
+          <span className="brandName">AILore Sift</span>
         </Link>
         <div className="headerActions">
           <Link

@@ -14,7 +14,7 @@ The primary users are AI product managers and founders, especially people withou
 
 ## Product Purpose
 
-AI News Navigator removes informational water from AI news, papers, product launches, and software releases. It helps users move through a two-stage workflow: quickly find the developments that matter, then understand their product and business implications without having to decode academic language first.
+AILore Sift removes informational water from AI news, papers, product launches, and software releases. It helps users move through a two-stage workflow: quickly find the developments that matter, then understand their product and business implications without having to decode academic language first.
 
 Success means a user can understand the day's most important AI developments and their product impact within ten minutes.
 
@@ -26,7 +26,7 @@ result as reusable knowledge.
 
 ## Positioning
 
-AI News Navigator does not stop at what happened; it explains why it matters.
+AILore Sift does not stop at what happened; it explains why it matters.
 
 ## Brand Personality
 

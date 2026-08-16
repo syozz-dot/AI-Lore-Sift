@@ -1,5 +1,5 @@
 ---
-name: AI News Navigator
+name: AILore Sift
 description: Distilled AI intelligence for product judgment.
 colors:
   brand-pine: "#0B3D2E"
@@ -94,13 +94,13 @@ components:
     padding: "24px 0"
 ---
 
-# Design System: AI News Navigator
+# Design System: AILore Sift
 
 ## Overview
 
 **Creative North Star: "The Editor's Signal Desk"**
 
-AI News Navigator should feel like the desk of an editor who has already removed the noise before the reader arrives. It combines the authority and pacing of an independent technology publication with the precision of a product tool: a compact daily briefing, one clearly framed focus, and a dense but calm Story queue.
+AILore Sift should feel like the desk of an editor who has already removed the noise before the reader arrives. It combines the authority and pacing of an independent technology publication with the precision of a product tool: a compact daily briefing, one clearly framed focus, and a dense but calm Story queue.
 
 The visual system is flat, two-tone, and structural. Deep pine anchors navigation and product identity; mineral blue is reserved for the single daily focus. Cool neutral surfaces, strong typography, and fine rules organize everything else. It explicitly rejects information waterfalls, academic-database density, and generic AI-summary cards without evidence.
 

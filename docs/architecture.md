@@ -2,7 +2,7 @@
 
 ## Boundary
 
-AI News Navigator V2 begins with a modular monolith. The public product, database, source connectors, ingestion jobs, and intelligence modules share one repository while keeping explicit package boundaries.
+AILore Sift V2 begins with a modular monolith. The public product, database, source connectors, ingestion jobs, and intelligence modules share one repository while keeping explicit package boundaries.
 
 The first milestone does not introduce queues or microservices. Those are deployment choices that can be added after source volume or processing latency proves they are needed.
 

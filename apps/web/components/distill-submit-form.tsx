@@ -12,17 +12,33 @@ import {
   WarningCircle,
 } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
 
 import {
+  PRIVATE_DISTILL_SESSION_PREFIX,
   readPrivateWorkspace,
+  savePrivateDistillRecord,
   savePrivatePersonalizedInsights,
+  type PrivateDistillRecord,
   type PrivatePersonalizedInsight,
   type PrivateWorkspaceSnapshot,
 } from "../lib/private-workspace";
+import { TurnstileWidget } from "./turnstile-widget";
 
-export function DistillSubmitForm() {
+export function DistillSubmitForm({
+  mode = "owner",
+  guestUsed = false,
+  turnstileSiteKey = "",
+  turnstileRequired = false,
+  guestProtectionError = null,
+}: {
+  mode?: "owner" | "guest";
+  guestUsed?: boolean;
+  turnstileSiteKey?: string;
+  turnstileRequired?: boolean;
+  guestProtectionError?: string | null;
+}) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [input, setInput] = useState("");
@@ -32,6 +48,10 @@ export function DistillSubmitForm() {
   const [privateWorkspace, setPrivateWorkspace] =
     useState<PrivateWorkspaceSnapshot | null>(null);
   const [usePersonalization, setUsePersonalization] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const handleTurnstileToken = useCallback((token: string) => {
+    setTurnstileToken(token);
+  }, []);
 
   useEffect(() => {
     readPrivateWorkspace()
@@ -77,38 +97,70 @@ export function DistillSubmitForm() {
           : usePersonalization
             ? { memories: [], retrieveKnowledge: true }
             : null;
-      const response = await fetch("/api/distill", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input, personalization }),
-      });
+      const response = await fetch(
+        mode === "guest" ? "/api/distill/preview" : "/api/distill",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            input,
+            personalization,
+            turnstileToken,
+            localKnowledge:
+              mode === "guest"
+                ? (privateWorkspace?.knowledgeCards ?? []).map((card) => ({
+                    id: card.id,
+                    title: card.title,
+                    content: card.content,
+                    sourceDocumentId:
+                      card.sourceDocumentId ?? `local-card-${card.id}`,
+                  }))
+                : undefined,
+          }),
+        },
+      );
       const body = (await response.json()) as {
         id?: string;
+        document?: PrivateDistillRecord;
         error?: string;
         personalizedInsights?: PrivatePersonalizedInsight[];
         personalizationError?: string | null;
       };
-      if (!response.ok || !body.id) {
+      const documentId = body.document?.id ?? body.id;
+      if (!response.ok || !documentId) {
         throw new Error(body.error || "脱水任务没有成功创建。");
+      }
+      if (mode === "guest" && body.document) {
+        try {
+          await savePrivateDistillRecord(body.document);
+        } catch {
+          window.sessionStorage.setItem(
+            `${PRIVATE_DISTILL_SESSION_PREFIX}${documentId}`,
+            JSON.stringify(body.document),
+          );
+        }
+        router.push(`/distill?local=${encodeURIComponent(documentId)}`);
+        router.refresh();
+        return;
       }
       if (usePersonalization) {
         try {
           await savePrivatePersonalizedInsights(
-            body.id,
+            documentId,
             body.personalizedInsights ?? [],
             body.personalizationError ?? null,
           );
           window.sessionStorage.removeItem(
-            `ann-personalization-status:${body.id}`,
+            `ann-personalization-status:${documentId}`,
           );
         } catch {
           window.sessionStorage.setItem(
-            `ann-personalization-status:${body.id}`,
+            `ann-personalization-status:${documentId}`,
             "本机未能保存个性化结果；通用脱水仍可正常阅读。",
           );
         }
       }
-      router.push(`/distill/${body.id}`);
+      router.push(`/distill/${documentId}`);
       router.refresh();
     } catch (submitError) {
       setError(
@@ -141,6 +193,9 @@ export function DistillSubmitForm() {
       privateWorkspace.profile.currentContext.trim() ||
       privateWorkspace.profile.preferredHelp.trim() ||
       privateWorkspace.profile.boundaries.trim()),
+  );
+  const latestLocalDocument = privateWorkspace?.distillRecords.find(
+    (record) => typeof record.analysis.title === "string",
   );
   const steps = [
     {
@@ -229,11 +284,23 @@ export function DistillSubmitForm() {
             <div className="distillAssistantMark" aria-hidden="true">
               <Sparkle size={22} />
             </div>
-            <p>一次只处理一份材料</p>
-            <h2>今天想读懂什么？</h2>
+            <p>
+              {mode === "guest" ? "公开体验 · 仅一次" : "一次只处理一份材料"}
+            </p>
+            <h2>{guestUsed ? "这次体验已完成" : "今天想读懂什么？"}</h2>
             <span>
-              粘贴网页链接或正文。我会先判断值不值得读，再把真正有用的部分整理成可追问、可保存的知识文档。
+              {guestUsed
+                ? "匿名体验额度已使用。你的结果、画像和知识卡只保存在当前浏览器；站点所有者仍可进入私人工作区。"
+                : "粘贴网页链接或正文。我会先判断值不值得读，再把真正有用的部分整理成可追问、可保存的知识文档。"}
             </span>
+            {guestUsed && latestLocalDocument ? (
+              <a
+                className="distillGuestResultLink"
+                href={`/distill?local=${encodeURIComponent(latestLocalDocument.id)}`}
+              >
+                查看当前浏览器里的脱水结果
+              </a>
+            ) : null}
             <div
               className="distillConversationPrompts"
               aria-label="适合处理的内容"
@@ -261,7 +328,7 @@ export function DistillSubmitForm() {
           rows={4}
           minLength={8}
           maxLength={100_000}
-          disabled={submitting}
+          disabled={submitting || guestUsed}
           required
         />
         <div className="distillPersonalizationConsent">
@@ -269,7 +336,7 @@ export function DistillSubmitForm() {
             <input
               type="checkbox"
               checked={usePersonalization}
-              disabled={submitting}
+              disabled={submitting || guestUsed}
               onChange={(event) => setUsePersonalization(event.target.checked)}
             />
             <SlidersHorizontal aria-hidden="true" size={15} />
@@ -284,6 +351,20 @@ export function DistillSubmitForm() {
           </label>
           <a href="/settings">查看与编辑</a>
         </div>
+        {mode === "guest" &&
+        turnstileRequired &&
+        turnstileSiteKey &&
+        !guestUsed ? (
+          <TurnstileWidget
+            siteKey={turnstileSiteKey}
+            onToken={handleTurnstileToken}
+          />
+        ) : null}
+        {mode === "guest" && guestProtectionError ? (
+          <p className="distillGuestProtectionError" role="alert">
+            {guestProtectionError} 暂时不能发起请求。
+          </p>
+        ) : null}
         <footer>
           <div aria-label="当前支持的输入">
             <span>
@@ -296,7 +377,16 @@ export function DistillSubmitForm() {
             </span>
           </div>
           <small>Enter 发送 · Shift + Enter 换行</small>
-          <button type="submit" disabled={submitting || !input.trim()}>
+          <button
+            type="submit"
+            disabled={
+              submitting ||
+              guestUsed ||
+              !input.trim() ||
+              Boolean(guestProtectionError) ||
+              (mode === "guest" && turnstileRequired && !turnstileToken)
+            }
+          >
             <ArrowUp aria-hidden="true" size={17} weight="bold" />
             <span>{submitting ? "处理中" : "发送"}</span>
           </button>

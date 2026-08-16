@@ -105,7 +105,7 @@ export default async function DailyPage({
       <div className="reportLayout">
         <aside className="reportArchive" aria-label="简报归档">
           <div className="reportArchiveHeader">
-            <span>AI NEWS NAVIGATOR</span>
+            <span>AILORE SIFT</span>
             <strong>情报简报</strong>
           </div>
           <nav className="reportTypeTabs" aria-label="简报类型">
@@ -164,7 +164,7 @@ function ReportArticle({ issue }: { issue: ReportIssue }) {
     <article className="dailyIssueShell">
       <header className="dailyIssueHeader">
         <div className="dailyIssueEyebrow">
-          <span>AI NEWS NAVIGATOR</span>
+          <span>AILORE SIFT</span>
           <span>
             {issue.type.toUpperCase()} · {issue.periodKey.replaceAll("-", ".")}
           </span>

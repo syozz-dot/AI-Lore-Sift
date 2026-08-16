@@ -6,6 +6,10 @@
   "scripts": {
     "dev": "next dev --webpack",
     "build": "node scripts/prepare-database.mjs && next build --webpack",
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "cf:deploy:staging": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "start": "next start",
     "check": "tsc --noEmit"
   },
@@ -26,9 +30,11 @@
     "sanitize-html": "^2.17.6"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "1.20.2",
     "@types/node": "^26.1.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "wrangler": "4.123.0"
   }
 }

@@ -4,7 +4,7 @@ import { FavoritesList } from "../../components/favorites-list";
 
 export const metadata: Metadata = {
   title: "我的收藏",
-  description: "保存在当前浏览器中的 AI News Navigator Story。",
+  description: "保存在当前浏览器中的 AILore Sift Story。",
 };
 
 export default function FavoritesPage() {

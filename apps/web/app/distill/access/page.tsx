@@ -10,7 +10,7 @@ import {
 
 export const metadata: Metadata = {
   title: "私人脱水工作区",
-  description: "AI News Navigator 私人脱水工作区访问验证。",
+  description: "AILore Sift 私人脱水工作区访问验证。",
   robots: { index: false, follow: false, noarchive: true },
 };
 

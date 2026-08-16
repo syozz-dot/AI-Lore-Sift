@@ -1,6 +1,6 @@
-# AI News Navigator
+# AILore Sift
 
-AI News Navigator is an open-source AI industry intelligence product for product managers, founders, and researchers.
+AILore Sift is an open-source AI industry intelligence product for product managers, founders, and researchers.
 
 It is designed to answer three questions:
 
@@ -8,12 +8,12 @@ It is designed to answer three questions:
 2. Why does it matter?
 3. What product or business opportunity could follow?
 
-The single-owner Distill workspace adds a user-directed knowledge flow: paste a web
-page or long text, receive a reading verdict and evidence-anchored Chinese
-distillation, then save the result to the knowledge library. Access is private,
-but the current implementation stores source text, analysis, follow-up messages,
-and saved knowledge in PostgreSQL. It must not be presented as a zero-storage or
-multi-user privacy system.
+Distill adds a user-directed knowledge flow: paste a web page or long text,
+receive a reading verdict and evidence-anchored Chinese distillation, then save
+the result to the knowledge library. Public visitors receive one browser-local
+preview; the preview API returns the result without writing source text,
+analysis, follow-up messages, or knowledge to PostgreSQL. The site owner keeps a
+separate unlimited private workspace whose records are stored under one owner ID.
 
 ## Project status
 
@@ -84,23 +84,30 @@ WeChat coverage. Official X API collection and a private We-MP-RSS-compatible
 WeChat feed remain optional. See [docs/sources.md](docs/sources.md) for source
 policy, rich-media handling, attribution, and adapter behavior.
 
-Scheduling is database-driven with exponential failure backoff and per-source leases. See [docs/operations.md](docs/operations.md) for commands, health semantics, and the deployment boundary.
+Scheduling is database-driven with exponential failure backoff and per-source leases. See [docs/operations.md](docs/operations.md) for commands, health semantics, and the deployment boundary. The reproducible Cloudflare Workers deployment checklist is in [docs/cloudflare-staging.md](docs/cloudflare-staging.md).
 
 Relevant items are grouped with a conservative, versioned clustering baseline. See [docs/intelligence.md](docs/intelligence.md) for scoring signals, merge guards, and current limitations.
 
 The web app reads only persisted PostgreSQL data. It does not inject sample news when the database is missing or empty. The Story feed is available at `/`, Story details at `/stories/[slug]`, and JSON endpoints under `/api/stories` and `/api/health/sources`.
 
-The private workspace lives at `/distill`, and saved knowledge lives at
-`/knowledge`. Configure `DISTILL_ACCESS_KEY` and `DISTILL_SESSION_SECRET` before
-using it. Platform video imports are intentionally adapter boundaries rather
-than public scraping endpoints in the first release.
+The public preview and private owner workspace share `/distill`, and saved
+knowledge lives at `/knowledge`. Configure `DISTILL_SESSION_SECRET` and set
+`DISTILL_GUEST_PROTECTION_MODE` explicitly before enabling the production public
+preview. `rate-limit` avoids a client-side challenge dependency and must be
+paired with a platform WAF rate limit; `turnstile` additionally requires
+`NEXT_PUBLIC_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY`. Configure
+`DISTILL_ACCESS_KEY` for the owner's unlimited workspace. Platform video imports
+are intentionally adapter boundaries rather than public scraping endpoints in
+the first release.
 
 `/settings` contains the first local-first private workspace layer: a
 user-authored reading profile, user-approved memories, browser persistence
 status, and encrypted import/export. Distill can use that context only after a
 per-request opt-in. Generic analysis remains source-only; the separate personal
 relevance result returns to and stays in the submitting browser rather than
-being added to PostgreSQL Distill history.
+being added to PostgreSQL Distill history. Public preview results, follow-up
+messages, and saved knowledge also stay in IndexedDB; clearing site data removes
+them unless the user exported an encrypted backup.
 
 The Distill output contract and its versioned multi-format evaluation baseline
 are documented in [docs/distill-v2-contract.md](docs/distill-v2-contract.md).

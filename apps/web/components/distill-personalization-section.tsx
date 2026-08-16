@@ -25,16 +25,25 @@ function basisLabel(insight: PrivatePersonalizedInsight) {
 
 export function DistillPersonalizationSection({
   documentId,
+  local = false,
+  initialPersonalization = null,
 }: {
   documentId: string;
+  local?: boolean;
+  initialPersonalization?: {
+    requested: boolean;
+    insights: PrivatePersonalizedInsight[];
+    error: string | null;
+  } | null;
 }) {
   const [personalization, setPersonalization] = useState<{
     requested: boolean;
     insights: PrivatePersonalizedInsight[];
     error: string | null;
-  } | null>(null);
+  } | null>(initialPersonalization);
 
   useEffect(() => {
+    if (initialPersonalization) return;
     const fallbackError = window.sessionStorage.getItem(
       `ann-personalization-status:${documentId}`,
     );
@@ -53,7 +62,7 @@ export function DistillPersonalizationSection({
           error: fallbackError,
         }),
       );
-  }, [documentId]);
+  }, [documentId, initialPersonalization]);
 
   if (!personalization?.requested) return null;
 
@@ -87,7 +96,11 @@ export function DistillPersonalizationSection({
                       {insight.knowledgeReferences.map((reference) => (
                         <Link
                           key={`${reference.kind}-${reference.id}`}
-                          href={`/distill/${reference.sourceDocumentId}`}
+                          href={
+                            local
+                              ? `/distill?local=${encodeURIComponent(reference.sourceDocumentId)}`
+                              : `/distill/${reference.sourceDocumentId}`
+                          }
                         >
                           {reference.title}
                         </Link>
