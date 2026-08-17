@@ -41,6 +41,60 @@ describe("distill source preparation", () => {
     expect(paragraphs.join(" ")).toContain("补充方法和结果");
   });
 
+  it("keeps ordinary external pages on the bounded HTML fetch path", async () => {
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(
+          `<html><head><title>外部网页测试</title></head><body><main>
+          <p>第一段介绍外部网页的背景和需要解决的问题，并解释为什么现有方案无法满足真实使用场景，确保正文信息足够完整。</p>
+          <p>第二段说明具体做法、关键步骤与执行过程中需要保留的证据，同时列出输入、处理和输出之间可以复核的关系。</p>
+          <p>第三段补充适用边界、潜在风险和后续可以继续验证的方向，避免读者把尚未确认的推断直接当成事实。</p>
+        </main></body></html>`,
+          {
+            status: 200,
+            headers: { "content-type": "text/html; charset=utf-8" },
+          },
+        ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const source = await prepareDistillSource("https://example.com/article");
+
+    expect(source.sourceTitle).toBe("外部网页测试");
+    expect(source.sourceUrl).toBe("https://example.com/article");
+    expect(source.rawText).toContain("具体做法");
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it("allows a trusted internal resolver to bypass public self-fetching", async () => {
+    const fetchMock = vi.fn();
+    const resolveInternalUrl = vi.fn(async (url: URL) => ({
+      sourceType: "url" as const,
+      sourceUrl: url.toString(),
+      sourceTitle: "站内 Story",
+      sourceAuthor: "AILore Sift",
+      rawText:
+        "站内 Story 已直接从数据层读取，避免 Cloudflare Worker 通过公开域名再次请求自身。".repeat(
+          4,
+        ),
+      paragraphs: [
+        "站内 Story 已直接从数据层读取，避免 Cloudflare Worker 通过公开域名再次请求自身。".repeat(
+          4,
+        ),
+      ],
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const source = await prepareDistillSource(
+      "https://ailoresift.com/stories/example-story",
+      { resolveInternalUrl },
+    );
+
+    expect(source.sourceTitle).toBe("站内 Story");
+    expect(resolveInternalUrl).toHaveBeenCalledOnce();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("parses both nested and flat reader responses", () => {
     expect(
       parseReaderDocument({

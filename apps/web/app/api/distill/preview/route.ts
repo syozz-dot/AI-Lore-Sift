@@ -15,6 +15,7 @@ import {
   parseDistillPersonalization,
   parseLocalKnowledge,
 } from "../../../../lib/distill-request";
+import { resolveInternalStorySource } from "../../../../lib/distill-internal-source";
 import { prepareDistillSource } from "../../../../lib/distill-source";
 import {
   privateJson,
@@ -82,7 +83,9 @@ export async function POST(request: Request) {
   }
 
   try {
-    const source = await prepareDistillSource(input);
+    const source = await prepareDistillSource(input, {
+      resolveInternalUrl: resolveInternalStorySource,
+    });
     const personalization = attachLocalKnowledge({
       personalization: parseDistillPersonalization(body?.personalization),
       localKnowledge: parseLocalKnowledge(body?.localKnowledge),

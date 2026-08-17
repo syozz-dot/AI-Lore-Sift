@@ -12,6 +12,7 @@ import {
 } from "../../../lib/distill";
 import { rankRelevantDistillKnowledge } from "../../../lib/distill-retrieval";
 import { parseDistillPersonalization } from "../../../lib/distill-request";
+import { resolveInternalStorySource } from "../../../lib/distill-internal-source";
 import { prepareDistillSource } from "../../../lib/distill-source";
 import {
   privateJson,
@@ -55,7 +56,9 @@ export async function POST(request: Request) {
 
   let documentId: string | null = null;
   try {
-    const source = await prepareDistillSource(input);
+    const source = await prepareDistillSource(input, {
+      resolveInternalUrl: resolveInternalStorySource,
+    });
     documentId = await createDistillDocument({
       ownerId: session.ownerId,
       sourceType: source.sourceType,

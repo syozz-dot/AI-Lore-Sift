@@ -19,6 +19,10 @@ export interface PreparedDistillSource {
   paragraphs: string[];
 }
 
+export interface PrepareDistillSourceOptions {
+  resolveInternalUrl?: (url: URL) => Promise<PreparedDistillSource | null>;
+}
+
 function isPrivateIpv4(address: string) {
   const parts = address.split(".").map(Number);
   if (parts.length !== 4 || parts.some((part) => !Number.isFinite(part)))
@@ -398,6 +402,7 @@ function finalizeUrlSource(options: {
 
 export async function prepareDistillSource(
   input: string,
+  options: PrepareDistillSourceOptions = {},
 ): Promise<PreparedDistillSource> {
   const normalizedInput = input.trim();
   if (normalizedInput.length < 30 && !looksLikeSingleUrl(normalizedInput)) {
@@ -419,6 +424,8 @@ export async function prepareDistillSource(
   }
 
   const sourceUrl = new URL(normalizedInput);
+  const internalSource = await options.resolveInternalUrl?.(sourceUrl);
+  if (internalSource) return internalSource;
   await assertPublicUrl(sourceUrl);
 
   if (isWechatArticleUrl(sourceUrl)) {
