@@ -2,21 +2,26 @@ import type { StoryFeedItem } from "./queries";
 
 type FeedBucket = "news" | "product" | "model" | "paper";
 
+export type RankableFeedItem = Pick<
+  StoryFeedItem,
+  "id" | "contentType" | "lastPublishedAt" | "categoryScore"
+>;
+
 const FEED_BUCKET_ORDER: FeedBucket[] = ["news", "product", "model", "paper"];
 
-function feedBucket(story: StoryFeedItem): FeedBucket {
+function feedBucket(story: RankableFeedItem): FeedBucket {
   if (story.contentType === "product") return "product";
   if (story.contentType === "model") return "model";
   if (story.contentType === "paper") return "paper";
   return "news";
 }
 
-function publishedAt(story: StoryFeedItem) {
+function publishedAt(story: RankableFeedItem) {
   return story.lastPublishedAt?.getTime() ?? 0;
 }
 
-export function balanceStoryFeed(items: StoryFeedItem[]): StoryFeedItem[] {
-  const buckets = new Map<FeedBucket, StoryFeedItem[]>(
+export function balanceRankedFeed<T extends RankableFeedItem>(items: T[]): T[] {
+  const buckets = new Map<FeedBucket, T[]>(
     FEED_BUCKET_ORDER.map((bucket) => [bucket, []]),
   );
 
@@ -30,7 +35,7 @@ export function balanceStoryFeed(items: StoryFeedItem[]): StoryFeedItem[] {
     );
   }
 
-  const balanced: StoryFeedItem[] = [];
+  const balanced: T[] = [];
   let added = true;
   while (added) {
     added = false;
@@ -42,4 +47,8 @@ export function balanceStoryFeed(items: StoryFeedItem[]): StoryFeedItem[] {
     }
   }
   return balanced;
+}
+
+export function balanceStoryFeed(items: StoryFeedItem[]): StoryFeedItem[] {
+  return balanceRankedFeed(items);
 }

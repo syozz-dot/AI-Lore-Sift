@@ -24,6 +24,7 @@
     "DISTILL_OWNER_ID": "personal-owner",
     "DISTILL_GUEST_PROTECTION_MODE": "rate-limit",
     "DISTILL_GUEST_DAILY_MODEL_LIMIT": "200",
+    "PUBLIC_API_REQUESTS_PER_MINUTE": "180",
     "DATABASE_DRIVER": "neon-serverless",
     "DEEPSEEK_MODEL": "deepseek-v4-flash",
   },

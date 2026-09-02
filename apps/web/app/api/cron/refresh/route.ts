@@ -44,7 +44,7 @@ export async function GET(request: Request) {
 
   try {
     const searchParams = new URL(request.url).searchParams;
-    const shouldAnalyze = searchParams.get("analyze") !== "0";
+    const shouldAnalyze = searchParams.get("analyze") === "1";
     const { db } = getDatabaseConnection();
     const ingestion = await runDueSourceIngestion({ db, logger });
     const processing = await runStoryProcessing({ db, logger });
@@ -57,8 +57,12 @@ export async function GET(request: Request) {
           }),
         })
       : { skipped: true };
-    const topics = await runTopicClassification({ db, logger });
-    const reports = await runScheduledReportGeneration({ db, logger });
+    const topics = shouldAnalyze
+      ? await runTopicClassification({ db, logger })
+      : { skipped: true };
+    const reports = shouldAnalyze
+      ? await runScheduledReportGeneration({ db, logger })
+      : { skipped: true };
     return NextResponse.json({
       ingestion,
       processing,

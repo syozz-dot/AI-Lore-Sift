@@ -9,6 +9,7 @@ import {
   storyTopics,
   topics,
   type ReportSnapshotContent,
+  type ReportSnapshotStory,
 } from "@ai-news-navigator/database";
 import {
   CURATED_TOPICS,
@@ -34,7 +35,8 @@ import { alias } from "drizzle-orm/pg-core";
 import { cache } from "react";
 
 import { getDatabaseConnection } from "./database";
-import { balanceStoryFeed } from "./feed-ranking";
+import { balanceRankedFeed } from "./feed-ranking";
+import { cachePublicData } from "./public-data-cache";
 import { normalizeSearchQuery, storySearchTerms } from "./search";
 
 export type ContentType = typeof items.$inferSelect.contentType;
@@ -159,6 +161,36 @@ const publicStoryStatuses: StoryStatus[] = [
   "corrected",
 ];
 
+type FeedCandidate = {
+  id: string;
+  contentType: ContentType | null;
+  lastPublishedAt: Date | null;
+  independentSourceCount: number;
+  relevanceScore: number | null;
+  overallScore: number | null;
+  sourceReliability: typeof sources.$inferSelect.reliability | null;
+  sourceIsFirstParty: boolean | null;
+};
+
+function rankFeedCandidates(candidates: FeedCandidate[]): FeedCandidate[] {
+  const now = new Date();
+  const scored = candidates.map((candidate) => {
+    const categoryScore = candidate.contentType
+      ? scoreStoryWithinCategory({
+          contentType: candidate.contentType,
+          relevanceScore: candidate.overallScore ?? candidate.relevanceScore,
+          publishedAt: candidate.lastPublishedAt,
+          independentSourceCount: candidate.independentSourceCount,
+          sourceReliability: candidate.sourceReliability,
+          isFirstParty: candidate.sourceIsFirstParty,
+          now,
+        })
+      : 0;
+    return { ...candidate, categoryScore };
+  });
+  return balanceRankedFeed(scored);
+}
+
 async function hydrateFeedRows(
   baseRows: Array<{
     id: string;
@@ -193,7 +225,7 @@ async function hydrateFeedRows(
     itemIds.length === 0
       ? []
       : db
-          .select({
+          .selectDistinctOn([itemAssessments.itemId], {
             itemId: itemAssessments.itemId,
             matchedSignals: itemAssessments.matchedSignals,
             reasons: itemAssessments.reasons,
@@ -201,9 +233,9 @@ async function hydrateFeedRows(
           })
           .from(itemAssessments)
           .where(inArray(itemAssessments.itemId, itemIds))
-          .orderBy(desc(itemAssessments.createdAt)),
+          .orderBy(itemAssessments.itemId, desc(itemAssessments.createdAt)),
     db
-      .select({
+      .selectDistinctOn([storyAnalyses.storyId], {
         storyId: storyAnalyses.storyId,
         translatedTitle: storyAnalyses.translatedTitle,
         factualSummary: storyAnalyses.factualSummary,
@@ -212,7 +244,7 @@ async function hydrateFeedRows(
       })
       .from(storyAnalyses)
       .where(inArray(storyAnalyses.storyId, storyIds))
-      .orderBy(desc(storyAnalyses.createdAt)),
+      .orderBy(storyAnalyses.storyId, desc(storyAnalyses.createdAt)),
     db
       .select({ storyId: storyTopics.storyId, name: topics.name })
       .from(storyTopics)
@@ -276,6 +308,189 @@ async function hydrateFeedRows(
   });
 }
 
+async function loadStoryFeed(
+  contentType?: ContentType,
+  limit = 30,
+  rawSearchQuery?: string,
+  topicSlug?: string,
+  offset = 0,
+) {
+  const searchQuery = normalizeSearchQuery(rawSearchQuery);
+  const { db } = getDatabaseConnection();
+  const primaryItems = alias(items, "primary_items");
+  const topicMatches = topicSlug
+    ? db
+        .select({ storyId: storyTopics.storyId })
+        .from(storyTopics)
+        .innerJoin(topics, eq(storyTopics.topicId, topics.id))
+        .where(eq(topics.slug, topicSlug))
+    : undefined;
+  const contentWhere = contentType
+    ? and(
+        inArray(stories.status, publicStoryStatuses),
+        eq(primaryItems.contentType, contentType),
+      )
+    : and(
+        inArray(stories.status, publicStoryStatuses),
+        ne(primaryItems.contentType, "release"),
+      );
+  const baseWhere = topicMatches
+    ? and(contentWhere, inArray(stories.id, topicMatches))
+    : contentWhere;
+  const searchConditions = searchQuery
+    ? storySearchTerms(searchQuery).map((term) => {
+        const pattern = `%${term}%`;
+        const analysisMatches = db
+          .select({ storyId: storyAnalyses.storyId })
+          .from(storyAnalyses)
+          .where(
+            or(
+              ilike(storyAnalyses.translatedTitle, pattern),
+              ilike(storyAnalyses.factualSummary, pattern),
+              ilike(storyAnalyses.whyItMatters, pattern),
+            ),
+          );
+        const topicMatches = db
+          .select({ storyId: storyTopics.storyId })
+          .from(storyTopics)
+          .innerJoin(topics, eq(storyTopics.topicId, topics.id))
+          .where(ilike(topics.name, pattern));
+
+        return or(
+          ilike(stories.title, pattern),
+          ilike(stories.factualSummary, pattern),
+          ilike(primaryItems.title, pattern),
+          ilike(primaryItems.originalTitle, pattern),
+          ilike(primaryItems.excerpt, pattern),
+          ilike(sources.name, pattern),
+          inArray(stories.id, analysisMatches),
+          inArray(stories.id, topicMatches),
+        );
+      })
+    : [];
+  const where = and(baseWhere, ...searchConditions);
+  const relevanceSort = desc(
+    sql`coalesce(${stories.overallScore}, ${stories.relevanceScore}, 0)`,
+  );
+  const balanceCategories = contentType === undefined;
+  const freshnessFirst =
+    balanceCategories ||
+    contentType === "news" ||
+    contentType === "product" ||
+    contentType === "post" ||
+    contentType === "release" ||
+    contentType === "other";
+  const sortOrder = freshnessFirst
+    ? [desc(stories.lastPublishedAt), relevanceSort]
+    : [relevanceSort, desc(stories.lastPublishedAt)];
+  const candidateLimit = balanceCategories
+    ? Math.max(40, offset + limit)
+    : Math.max(120, (offset + limit) * 6);
+  const feedSelection = {
+    id: stories.id,
+    slug: stories.slug,
+    status: stories.status,
+    title: stories.title,
+    factualSummary: stories.factualSummary,
+    firstPublishedAt: stories.firstPublishedAt,
+    lastPublishedAt: stories.lastPublishedAt,
+    independentSourceCount: stories.independentSourceCount,
+    relevanceScore: stories.relevanceScore,
+    overallScore: stories.overallScore,
+    confidence: stories.confidence,
+    primaryItemId: stories.primaryItemId,
+    excerpt: primaryItems.excerpt,
+    originalUrl: primaryItems.originalUrl,
+    contentType: primaryItems.contentType,
+    sourceName: sources.name,
+    sourceSlug: sources.slug,
+    sourceReliability: sources.reliability,
+    sourceIsFirstParty: sources.isFirstParty,
+  };
+  const candidateSelection = {
+    id: stories.id,
+    contentType: primaryItems.contentType,
+    lastPublishedAt: stories.lastPublishedAt,
+    independentSourceCount: stories.independentSourceCount,
+    relevanceScore: stories.relevanceScore,
+    overallScore: stories.overallScore,
+    sourceReliability: sources.reliability,
+    sourceIsFirstParty: sources.isFirstParty,
+  };
+  const selectCandidates = (
+    candidateWhere: ReturnType<typeof and>,
+    order: typeof sortOrder,
+  ) =>
+    db
+      .select(candidateSelection)
+      .from(stories)
+      .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
+      .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
+      .where(candidateWhere)
+      .orderBy(...order)
+      .limit(candidateLimit)
+      .offset(0);
+  const candidateQueries = balanceCategories
+    ? [
+        selectCandidates(
+          and(
+            where,
+            inArray(primaryItems.contentType, ["news", "post", "other"]),
+          ),
+          [desc(stories.lastPublishedAt), relevanceSort],
+        ),
+        selectCandidates(and(where, eq(primaryItems.contentType, "product")), [
+          desc(stories.lastPublishedAt),
+          relevanceSort,
+        ]),
+        selectCandidates(and(where, eq(primaryItems.contentType, "model")), [
+          relevanceSort,
+          desc(stories.lastPublishedAt),
+        ]),
+        selectCandidates(and(where, eq(primaryItems.contentType, "paper")), [
+          relevanceSort,
+          desc(stories.lastPublishedAt),
+        ]),
+      ]
+    : [selectCandidates(where, sortOrder)];
+
+  const [candidateGroups, totals] = await Promise.all([
+    Promise.all(candidateQueries),
+    db
+      .select({
+        count: count(),
+      })
+      .from(stories)
+      .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
+      .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
+      .where(where)
+      .limit(1),
+  ]);
+
+  const selectedIds = rankFeedCandidates(candidateGroups.flat())
+    .slice(offset, offset + limit)
+    .map((candidate) => candidate.id);
+  const selectedRows = selectedIds.length
+    ? await db
+        .select(feedSelection)
+        .from(stories)
+        .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
+        .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
+        .where(inArray(stories.id, selectedIds))
+        .limit(selectedIds.length)
+    : [];
+  const selectedById = new Map(selectedRows.map((row) => [row.id, row]));
+  const baseRows = selectedIds.flatMap((id) => {
+    const row = selectedById.get(id);
+    return row ? [row] : [];
+  });
+  const hydrated = await hydrateFeedRows(baseRows);
+  return {
+    items: hydrated,
+    total: Number(totals[0]?.count ?? 0),
+  };
+}
+
 export const getStoryFeed = cache(
   async (
     contentType?: ContentType,
@@ -284,155 +499,18 @@ export const getStoryFeed = cache(
     topicSlug?: string,
     offset = 0,
   ) => {
-    const { db } = getDatabaseConnection();
-    const primaryItems = alias(items, "primary_items");
-    const topicMatches = topicSlug
-      ? db
-          .select({ storyId: storyTopics.storyId })
-          .from(storyTopics)
-          .innerJoin(topics, eq(storyTopics.topicId, topics.id))
-          .where(eq(topics.slug, topicSlug))
-      : undefined;
-    const contentWhere = contentType
-      ? and(
-          inArray(stories.status, publicStoryStatuses),
-          eq(primaryItems.contentType, contentType),
-        )
-      : and(
-          inArray(stories.status, publicStoryStatuses),
-          ne(primaryItems.contentType, "release"),
-        );
-    const baseWhere = topicMatches
-      ? and(contentWhere, inArray(stories.id, topicMatches))
-      : contentWhere;
     const searchQuery = normalizeSearchQuery(rawSearchQuery);
-    const searchConditions = searchQuery
-      ? storySearchTerms(searchQuery).map((term) => {
-          const pattern = `%${term}%`;
-          const analysisMatches = db
-            .select({ storyId: storyAnalyses.storyId })
-            .from(storyAnalyses)
-            .where(
-              or(
-                ilike(storyAnalyses.translatedTitle, pattern),
-                ilike(storyAnalyses.factualSummary, pattern),
-                ilike(storyAnalyses.whyItMatters, pattern),
-              ),
-            );
-          const topicMatches = db
-            .select({ storyId: storyTopics.storyId })
-            .from(storyTopics)
-            .innerJoin(topics, eq(storyTopics.topicId, topics.id))
-            .where(ilike(topics.name, pattern));
-
-          return or(
-            ilike(stories.title, pattern),
-            ilike(stories.factualSummary, pattern),
-            ilike(primaryItems.title, pattern),
-            ilike(primaryItems.originalTitle, pattern),
-            ilike(primaryItems.excerpt, pattern),
-            ilike(sources.name, pattern),
-            inArray(stories.id, analysisMatches),
-            inArray(stories.id, topicMatches),
-          );
-        })
-      : [];
-    const where = and(baseWhere, ...searchConditions);
-    const relevanceSort = desc(
-      sql`coalesce(${stories.overallScore}, ${stories.relevanceScore}, 0)`,
-    );
-    const balanceCategories = contentType === undefined;
-    const freshnessFirst =
-      balanceCategories ||
-      contentType === "news" ||
-      contentType === "product" ||
-      contentType === "post" ||
-      contentType === "release" ||
-      contentType === "other";
-    const sortOrder = freshnessFirst
-      ? [desc(stories.lastPublishedAt), relevanceSort]
-      : [relevanceSort, desc(stories.lastPublishedAt)];
-    const candidateLimit = balanceCategories
-      ? Math.max(40, offset + limit)
-      : Math.max(120, (offset + limit) * 6);
-    const feedSelection = {
-      id: stories.id,
-      slug: stories.slug,
-      status: stories.status,
-      title: stories.title,
-      factualSummary: stories.factualSummary,
-      firstPublishedAt: stories.firstPublishedAt,
-      lastPublishedAt: stories.lastPublishedAt,
-      independentSourceCount: stories.independentSourceCount,
-      relevanceScore: stories.relevanceScore,
-      overallScore: stories.overallScore,
-      confidence: stories.confidence,
-      primaryItemId: stories.primaryItemId,
-      excerpt: primaryItems.excerpt,
-      originalUrl: primaryItems.originalUrl,
-      contentType: primaryItems.contentType,
-      sourceName: sources.name,
-      sourceSlug: sources.slug,
-      sourceReliability: sources.reliability,
-      sourceIsFirstParty: sources.isFirstParty,
-    };
-    const selectCandidates = (
-      candidateWhere: ReturnType<typeof and>,
-      order: typeof sortOrder,
-    ) =>
-      db
-        .select(feedSelection)
-        .from(stories)
-        .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
-        .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
-        .where(candidateWhere)
-        .orderBy(...order)
-        .limit(candidateLimit)
-        .offset(0);
-    const candidateQueries = balanceCategories
-      ? [
-          selectCandidates(
-            and(
-              where,
-              inArray(primaryItems.contentType, ["news", "post", "other"]),
-            ),
-            [desc(stories.lastPublishedAt), relevanceSort],
-          ),
-          selectCandidates(
-            and(where, eq(primaryItems.contentType, "product")),
-            [desc(stories.lastPublishedAt), relevanceSort],
-          ),
-          selectCandidates(and(where, eq(primaryItems.contentType, "model")), [
-            relevanceSort,
-            desc(stories.lastPublishedAt),
-          ]),
-          selectCandidates(and(where, eq(primaryItems.contentType, "paper")), [
-            relevanceSort,
-            desc(stories.lastPublishedAt),
-          ]),
-        ]
-      : [selectCandidates(where, sortOrder)];
-
-    const [candidateGroups, totals] = await Promise.all([
-      Promise.all(candidateQueries),
-      db
-        .select({
-          count: count(),
-        })
-        .from(stories)
-        .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
-        .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
-        .where(where)
-        .limit(1),
+    const cacheKey = JSON.stringify([
+      "story-feed",
+      contentType ?? "all",
+      limit,
+      searchQuery ?? "",
+      topicSlug ?? "",
+      offset,
     ]);
-
-    const baseRows = candidateGroups.flat();
-    const hydrated = await hydrateFeedRows(baseRows);
-    const ranked = balanceStoryFeed(hydrated);
-    return {
-      items: ranked.slice(offset, offset + limit),
-      total: Number(totals[0]?.count ?? 0),
-    };
+    return cachePublicData(cacheKey, () =>
+      loadStoryFeed(contentType, limit, searchQuery, topicSlug, offset),
+    );
   },
 );
 
@@ -527,121 +605,170 @@ export const getTopicIndex = cache(async (): Promise<TopicIndexItem[]> => {
   }));
 });
 
-const dailyContentTypes: ContentType[] = ["news", "paper", "product", "model"];
-
 function isCalendarDate(value: string | undefined): value is string {
   return Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value));
 }
 
-function estimateChineseReadingMinutes(itemsToRead: StoryFeedItem[]): number {
-  if (itemsToRead.length === 0) return 0;
-  const characters = itemsToRead.reduce((total, item) => {
-    const copy = [
-      item.translatedTitle ?? item.title,
-      item.factualSummary ?? "",
-      item.whyItMatters ?? "",
-    ].join("");
-    return total + copy.replace(/\s/g, "").length;
-  }, 0);
-  return Math.max(1, Math.ceil(characters / 450));
+function reportStoryToFeedItem(story: ReportSnapshotStory): StoryFeedItem {
+  const publishedAt = story.publishedAt ? new Date(story.publishedAt) : null;
+  const normalizedScore = story.score > 1 ? story.score / 100 : story.score;
+  return {
+    id: story.id,
+    slug: story.slug,
+    status: "confirmed",
+    title: story.title,
+    translatedTitle: story.title,
+    factualSummary: story.summary,
+    firstPublishedAt: publishedAt,
+    lastPublishedAt: publishedAt,
+    independentSourceCount: 1,
+    relevanceScore: normalizedScore,
+    categoryScore: null,
+    overallScore: normalizedScore,
+    confidence: null,
+    primaryItemId: null,
+    excerpt: null,
+    originalUrl: null,
+    contentType: story.contentType,
+    sourceName: story.sourceName,
+    sourceSlug: null,
+    matchedSignals: [],
+    assessmentReasons: [],
+    whyItMatters: story.whyItMatters,
+    hasAnalysis: true,
+    topics: [],
+  };
 }
 
-export const getDailyIssue = cache(
-  async (requestedDate?: string): Promise<DailyIssue> => {
+function interleaveDailyStories(content: ReportSnapshotContent) {
+  const queues = new Map(
+    content.sections.map((section) => [section.type, [...section.stories]]),
+  );
+  const ordered: ReportSnapshotStory[] = [];
+  let added = true;
+  while (added) {
+    added = false;
+    for (const type of ["news", "product", "model", "paper"] as const) {
+      const next = queues.get(type)?.shift();
+      if (!next) continue;
+      ordered.push(next);
+      added = true;
+    }
+  }
+  return ordered;
+}
+
+async function loadHydratedFeedStory(storyId: string) {
+  const { db } = getDatabaseConnection();
+  const primaryItems = alias(items, "daily_focus_primary_items");
+  const [base] = await db
+    .select({
+      id: stories.id,
+      slug: stories.slug,
+      status: stories.status,
+      title: stories.title,
+      factualSummary: stories.factualSummary,
+      firstPublishedAt: stories.firstPublishedAt,
+      lastPublishedAt: stories.lastPublishedAt,
+      independentSourceCount: stories.independentSourceCount,
+      relevanceScore: stories.relevanceScore,
+      overallScore: stories.overallScore,
+      confidence: stories.confidence,
+      primaryItemId: stories.primaryItemId,
+      excerpt: primaryItems.excerpt,
+      originalUrl: primaryItems.originalUrl,
+      contentType: primaryItems.contentType,
+      sourceName: sources.name,
+      sourceSlug: sources.slug,
+      sourceReliability: sources.reliability,
+      sourceIsFirstParty: sources.isFirstParty,
+    })
+    .from(stories)
+    .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
+    .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
+    .where(
+      and(
+        eq(stories.id, storyId),
+        inArray(stories.status, publicStoryStatuses),
+      ),
+    )
+    .limit(1);
+  if (!base) return null;
+  const [hydrated] = await hydrateFeedRows([base]);
+  return hydrated ?? null;
+}
+
+export const getDailyIssue = cache(async (requestedDate?: string) => {
+  const cacheKey = `daily-issue:${requestedDate ?? "latest"}`;
+  return cachePublicData(cacheKey, async (): Promise<DailyIssue> => {
     const { db } = getDatabaseConnection();
-    const primaryItems = alias(items, "daily_primary_items");
-    const dateExpression = sql<string>`to_char(timezone('Asia/Shanghai', ${stories.createdAt}), 'YYYY-MM-DD')`;
-    const publicDailyStories = and(
-      inArray(stories.status, publicStoryStatuses),
-      inArray(primaryItems.contentType, dailyContentTypes),
-    );
-
-    const dateRows = await db
-      .selectDistinct({ date: dateExpression })
-      .from(stories)
-      .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
-      .where(publicDailyStories)
-      .orderBy(desc(dateExpression));
-    const availableDates = dateRows.map((row) => row.date);
-    const issueDate = isCalendarDate(requestedDate)
-      ? requestedDate
-      : (availableDates[0] ??
-        new Intl.DateTimeFormat("en-CA", {
-          timeZone: "Asia/Shanghai",
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }).format(new Date()));
-
-    const baseRows = await db
+    const archive = await db
+      .select({ periodKey: reports.periodKey })
+      .from(reports)
+      .where(eq(reports.type, "daily"))
+      .orderBy(desc(reports.periodStart));
+    const availableDates = archive.map((row) => row.periodKey);
+    const fallbackDate = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Shanghai",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+    const issueDate =
+      isCalendarDate(requestedDate) && availableDates.includes(requestedDate)
+        ? requestedDate
+        : (availableDates[0] ?? fallbackDate);
+    const [report] = await db
       .select({
-        id: stories.id,
-        slug: stories.slug,
-        status: stories.status,
-        title: stories.title,
-        factualSummary: stories.factualSummary,
-        firstPublishedAt: stories.firstPublishedAt,
-        lastPublishedAt: stories.lastPublishedAt,
-        independentSourceCount: stories.independentSourceCount,
-        relevanceScore: stories.relevanceScore,
-        overallScore: stories.overallScore,
-        confidence: stories.confidence,
-        primaryItemId: stories.primaryItemId,
-        excerpt: primaryItems.excerpt,
-        originalUrl: primaryItems.originalUrl,
-        contentType: primaryItems.contentType,
-        sourceName: sources.name,
-        sourceSlug: sources.slug,
-        sourceReliability: sources.reliability,
-        sourceIsFirstParty: sources.isFirstParty,
+        content: reports.content,
+        readingMinutes: reports.readingMinutes,
       })
-      .from(stories)
-      .leftJoin(primaryItems, eq(stories.primaryItemId, primaryItems.id))
-      .leftJoin(sources, eq(primaryItems.sourceId, sources.id))
-      .where(and(publicDailyStories, eq(dateExpression, issueDate)))
-      .orderBy(
-        desc(
-          sql`coalesce(${stories.overallScore}, ${stories.relevanceScore}, 0)`,
-        ),
-        desc(stories.lastPublishedAt),
-      )
-      .limit(80);
+      .from(reports)
+      .where(and(eq(reports.type, "daily"), eq(reports.periodKey, issueDate)))
+      .limit(1);
+    const currentIndex = availableDates.indexOf(issueDate);
+    if (!report) {
+      return {
+        issueDate,
+        items: [],
+        counts: { news: 0, paper: 0, product: 0, model: 0 },
+        total: 0,
+        readingMinutes: 0,
+        previousDate: null,
+        nextDate: null,
+      };
+    }
 
-    const hydrated = balanceStoryFeed(await hydrateFeedRows(baseRows));
     const counts: DailyIssue["counts"] = {
       news: 0,
       paper: 0,
       product: 0,
       model: 0,
     };
-    const perType = new Map<ContentType, number>();
-    const dailyItems = hydrated.filter((item) => {
-      if (!item.hasAnalysis || !item.factualSummary || !item.contentType)
-        return false;
-      const selected = perType.get(item.contentType) ?? 0;
-      if (selected >= 5) return false;
-      perType.set(item.contentType, selected + 1);
-      counts[item.contentType as keyof DailyIssue["counts"]] += 1;
-      return true;
-    });
-
-    const currentIndex = availableDates.indexOf(issueDate);
-    const previousDate =
-      currentIndex >= 0 ? (availableDates[currentIndex + 1] ?? null) : null;
-    const nextDate =
-      currentIndex > 0 ? (availableDates[currentIndex - 1] ?? null) : null;
+    for (const section of report.content.sections) {
+      counts[section.type] = section.stories.length;
+    }
+    const dailyItems = interleaveDailyStories(report.content).map(
+      reportStoryToFeedItem,
+    );
+    const focusStory = dailyItems[0]
+      ? await loadHydratedFeedStory(dailyItems[0].id)
+      : null;
+    if (focusStory) dailyItems[0] = focusStory;
 
     return {
       issueDate,
       items: dailyItems,
       counts,
       total: dailyItems.length,
-      readingMinutes: estimateChineseReadingMinutes(dailyItems),
-      previousDate,
-      nextDate,
+      readingMinutes: report.readingMinutes,
+      previousDate:
+        currentIndex >= 0 ? (availableDates[currentIndex + 1] ?? null) : null,
+      nextDate:
+        currentIndex > 0 ? (availableDates[currentIndex - 1] ?? null) : null,
     };
-  },
-);
+  });
+});
 
 export const getReportArchive = cache(
   async (): Promise<ReportArchiveItem[]> => {

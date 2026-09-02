@@ -2,6 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 
 import {
   createConfiguredStoryAnalyzer,
+  runScheduledReportGeneration,
   runStoryAnalysis,
   runTopicClassification,
   type StoryAnalysisContentType,
@@ -78,7 +79,8 @@ export async function GET(request: Request) {
       ...(contentType ? { contentType } : {}),
     });
     const topics = await runTopicClassification({ db, logger });
-    return NextResponse.json({ analysis, topics });
+    const reports = await runScheduledReportGeneration({ db, logger });
+    return NextResponse.json({ analysis, topics, reports });
   } catch (error) {
     logger.error("Scheduled Story analysis failed", {
       error: error instanceof Error ? error.message : String(error),

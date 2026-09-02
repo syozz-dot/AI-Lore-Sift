@@ -17,6 +17,13 @@ const privateWorkspaceHeaders = [
   },
 ];
 
+const publicContentHeaders = [
+  {
+    key: "Cache-Control",
+    value: "public, max-age=300, stale-while-revalidate=600",
+  },
+];
+
 const nextConfig: NextConfig = {
   transpilePackages: [
     "@ai-news-navigator/database",
@@ -35,6 +42,11 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      { source: "/", headers: publicContentHeaders },
+      { source: "/stories/:path*", headers: publicContentHeaders },
+      { source: "/daily", headers: publicContentHeaders },
+      { source: "/topics", headers: publicContentHeaders },
+      { source: "/topics/:path*", headers: publicContentHeaders },
       { source: "/distill/:path*", headers: privateWorkspaceHeaders },
       { source: "/knowledge", headers: privateWorkspaceHeaders },
       { source: "/settings", headers: privateWorkspaceHeaders },

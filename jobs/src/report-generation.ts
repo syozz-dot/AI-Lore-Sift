@@ -265,7 +265,7 @@ async function loadReportSections(
               : null,
             sourceName: row.sourceName ?? "未知信源",
             contentType: type,
-            score: Math.round(Number(row.score)),
+            score: Math.round(Number(row.score) * 100),
             publishedAt: row.publishedAt?.toISOString() ?? null,
           };
         });

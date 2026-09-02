@@ -72,11 +72,14 @@ Cloudflare:
    window. Raw IP addresses and submitted content are not stored.
 3. A per-process daily circuit breaker caps anonymous model calls. This is only
    an emergency brake; Worker isolates do not share an exact counter.
-4. Add Cloudflare WAF rate-limiting rules for POST requests to
+4. Public Story JSON responses use the Cloudflare Cache API when available and
+   a privacy-preserving per-isolate request ceiling. This protects PostgreSQL
+   from simple scraping bursts without affecting normal browsing.
+5. Add Cloudflare WAF rate-limiting rules for POST requests to
    `/api/distill/preview`, `/api/distill/preview/messages`, and
    `/api/distill/session`. Start conservatively, observe legitimate shared-IP
    traffic, then tighten. Do not include request bodies in logging or rule keys.
-5. Configure a hard provider spend limit and alert. This is the final cost
+6. Configure a hard provider spend limit and alert. This is the final cost
    boundary if cookies, fingerprints, or distributed edge counters are bypassed.
 
 Do not describe either the browser cookie or Cloudflare's eventually consistent
